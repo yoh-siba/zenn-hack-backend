@@ -12,10 +12,10 @@ def request_words_api(word: str) -> WordData:
     Returns:
         WordData: 単語の情報
     """
-    url = f"https://wordsapiv1.p.mashape.com/words/{word}"
+    url = f"https://wordsapiv1.p.rapidapi.com/words/{word}"
     headers = {
-        "X-Mashape-Key": WORDS_API_KEY,
-        "X-Mashape-Host": "wordsapiv1.p.mashape.com"
+            "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
+            "X-RapidAPI-Key": WORDS_API_KEY,
     }
     
     response = requests.get(url, headers=headers)
