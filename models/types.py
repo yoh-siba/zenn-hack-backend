@@ -1,8 +1,15 @@
 from typing import List, Dict, Any, TypedDict, Optional
+from enum import Enum
+
+class PartOfSpeech(str, Enum):
+    NOUN = "noun"
+    VERB = "verb"
+    ADVERB = "adverb"
+    ADJECTIVE = "adjective"
 
 class WordResult(TypedDict):
     definition: str
-    partOfSpeech: str
+    partOfSpeech: PartOfSpeech
     synonyms: List[str]
     typeOf: List[str]
     hasTypes: Optional[List[str]]
@@ -23,15 +30,19 @@ class WordData(TypedDict):
     pronunciation: Pronunciation
     frequency: float
 
-class Definition(TypedDict):
+class DefAndExample(TypedDict):
+    part_of_speech: PartOfSpeech
     definition: str
     example: str
 
 class Translation(TypedDict):
-    part_of_speech: str
+    part_of_speech: PartOfSpeech
     meaning: str
     example_en: str
     example_ja: str
 
-Definitions = List[Definition]
+class WordInstance(TypedDict):
+    word: str
+    defs_and_examples: List[DefAndExample]
+
 Translations = List[Translation] 
