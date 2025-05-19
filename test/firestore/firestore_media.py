@@ -1,0 +1,137 @@
+from datetime import datetime
+import time
+from src.schemas.media_schema import MediaSchema
+from src.services.firestore.firestore_media import create_media_doc, update_media_doc, read_media_doc, read_media_docs
+
+def test_firestore_media_functions():
+    try:
+        # テスト用のメディアデータを作成
+        test_media = [
+            MediaSchema(
+                mediaId="media_001",
+                flashcardId="flash_001",
+                meaningId="meaning_001",
+                mediaUrls=["https://example.com/media1.jpg"],
+                generationType="image",
+                templateId="template_001",
+                userPrompt="テスト用プロンプト1",
+                generatedPrompt="生成されたプロンプト1",
+                inputMediaUrls=["https://example.com/input1.jpg"],
+                promptTokens=100,
+                completionTokens=50,
+                totalTokens=150,
+                createdBy="user_001",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            MediaSchema(
+                mediaId="media_002",
+                flashcardId="flash_002",
+                meaningId="meaning_002",
+                mediaUrls=["https://example.com/media2.jpg"],
+                generationType="image",
+                templateId="template_002",
+                userPrompt="テスト用プロンプト2",
+                generatedPrompt="生成されたプロンプト2",
+                inputMediaUrls=["https://example.com/input2.jpg"],
+                promptTokens=120,
+                completionTokens=60,
+                totalTokens=180,
+                createdBy="user_001",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            ),
+            MediaSchema(
+                mediaId="media_003",
+                flashcardId="flash_003",
+                meaningId="meaning_003",
+                mediaUrls=["https://example.com/media3.jpg"],
+                generationType="image",
+                templateId="template_003",
+                userPrompt="テスト用プロンプト3",
+                generatedPrompt="生成されたプロンプト3",
+                inputMediaUrls=["https://example.com/input3.jpg"],
+                promptTokens=90,
+                completionTokens=45,
+                totalTokens=135,
+                createdBy="user_001",
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+        ]
+        media_ids = []
+        print("\n=== テスト開始 ===")
+        
+        # 1. 複数のデータの作成
+        print("\n1. 複数のデータの作成")
+        try:
+            for test_media_item in test_media:
+                is_success, error, created_media_id = create_media_doc(test_media_item)
+                if not is_success:
+                    raise Exception(error)
+                media_ids.append(created_media_id)
+                print(f"作成したデータ: {test_media_item.to_dict()}")
+                print(f"生成されたmedia_id: {created_media_id}")
+            # Firestoreの同期を待つ
+            time.sleep(2)
+        except Exception as e:
+            print(f"データ作成中にエラーが発生しました: {str(e)}")
+            raise
+
+        # 2. 複数データの一括読み取り
+        print("\n2. 複数データの一括読み取り")
+        try:
+            read_results, error = read_media_docs(media_ids)
+            if error:
+                raise Exception(error)
+            if read_results:
+                print(f"読み取ったデータ数: {len(read_results)}")
+                for media in read_results:
+                    print(f"読み取ったデータ: {media.to_dict()}")
+            else:
+                print("データが見つかりませんでした")
+        except Exception as e:
+            print(f"データ読み取り中にエラーが発生しました: {str(e)}")
+            raise
+
+        # 3. 最初のデータの更新
+        print("\n3. 最初のデータの更新")
+        try:
+            test_media[0].userPrompt = "更新されたプロンプト1"
+            test_media[0].generatedPrompt = "更新された生成プロンプト1"
+            test_media[0].updated_at = datetime.now()
+            is_success, error = update_media_doc(media_ids[0], test_media[0])
+            if not is_success:
+                raise Exception(error)
+            print(f"更新したデータ: {test_media[0].to_dict()}")
+            # Firestoreの同期を待つ
+            time.sleep(2)
+        except Exception as e:
+            print(f"データ更新中にエラーが発生しました: {str(e)}")
+            raise
+
+        # 4. 更新後の全データの一括読み取り
+        print("\n4. 更新後の全データの一括読み取り")
+        try:
+            updated_results, error = read_media_docs(media_ids)
+            if error:
+                raise Exception(error)
+            if updated_results:
+                print(f"更新後のデータ数: {len(updated_results)}")
+                for media in updated_results:
+                    print(f"更新後のデータ: {media.to_dict()}")
+            else:
+                print("更新後のデータが見つかりませんでした")
+        except Exception as e:
+            print(f"更新後のデータ読み取り中にエラーが発生しました: {str(e)}")
+            raise
+
+        print("\n=== テスト成功 ===")
+
+    except Exception as e:
+        print(f"\n=== テスト失敗 ===")
+        print(f"エラーが発生しました: {str(e)}")
+        raise
+
+if __name__ == "__main__":
+    test_firestore_media_functions() 
