@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from services.word_service import request_words_api
-from services.translation_service import translate_and_prioritize
-from services.firestore_service import save_to_firestore
-from models.types import Definitions
+from src.services.word_service import request_words_api
+from src.services.translation_service import translate_text
+from src.services.firestore_service import save_word_to_firestore
+from src.schemas.word_schema import WordSchema
 
 app = FastAPI()
 
@@ -11,34 +11,17 @@ async def root():
     return {"message": "Hello World"}
 
 @app.get("/word/{word}")
-async def process_word(word: str):
+async def get_word(word: str):
     try:
-        # 単語の検索
+        # Words APIから単語情報を取得
         word_data = request_words_api(word)
         
-        # 定義と例文のペアを作成
-        definitions = []
-        for result in word_data.get('results', []):
-            if 'definition' in result and 'examples' in result and result['examples']:
-                definitions.append({
-                    'definition': result['definition'],
-                    'example': result['examples'][0]
-                })
-        
-        # 翻訳と優先順位付け
-        translations = translate_and_prioritize(definitions)
+        # 翻訳を実行
+        translated_data = translate_text(word_data)
         
         # Firestoreに保存
-        save_to_firestore(translations, word)
+        save_word_to_firestore(translated_data)
         
-        return {
-            "status": "success",
-            "word": word,
-            "translations": translations
-        }
-        
+        return translated_data
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        return {"error": str(e)}

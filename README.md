@@ -4,25 +4,25 @@
 
 ## 環境構築
 
-### 1. Python 仮想環境の作成と有効化
+### 1. Poetry のインストール
 
 ```bash
-# 仮想環境の作成
-python -m venv venv
+# Windowsの場合（PowerShell）:
+(Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
 
-# 仮想環境の有効化
-# Windows の場合:
-.\venv\Scripts\activate
-
-# macOS/Linux の場合:
-source venv/bin/activate
+# macOSの場合:
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-### 2. 必要なパッケージのインストール
+### 2. プロジェクトのセットアップ
 
 ```bash
 # 依存パッケージのインストール
-pip install -r requirements.txt
+poetry install
+
+# 仮想環境の作成と有効化
+poetry env use python
+poetry env activate
 ```
 
 ### 3. 環境変数の設定
@@ -40,7 +40,8 @@ GOOGLE_APPLICATION_CREDENTIALS=path_to_your_firestore_credentials.json
 ### API サーバーの起動
 
 ```bash
-uvicorn main:app --reload
+# 仮想環境内で実行
+poetry run uvicorn main:app --reload
 ```
 
 ### テストの実行
@@ -49,10 +50,10 @@ Words API のテストを実行する場合：
 
 ```bash
 # デフォルトの単語（example）でテスト
-python test/test_words_api.py
+poetry run python test/test_words_api.py
 
 # 特定の単語でテスト
-python test/test_words_api.py run
+poetry run python test/test_words_api.py run
 ```
 
 ## プロジェクト構造
@@ -70,7 +71,8 @@ python test/test_words_api.py run
 ├── test/
 │   └── test_words_api.py    # Words APIテスト
 ├── main.py              # FastAPIアプリケーション
-├── requirements.txt     # 依存パッケージ
+├── pyproject.toml       # Poetry設定ファイル
+├── poetry.lock         # 依存関係のロックファイル
 └── README.md           # このファイル
 ```
 

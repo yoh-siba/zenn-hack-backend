@@ -1,14 +1,7 @@
 import sys
-import os
 import json
-from pathlib import Path
-
-# プロジェクトのルートディレクトリをPythonパスに追加
-project_root = str(Path(__file__).parent.parent)
-sys.path.append(project_root)
-
-from services.word_service import request_words_api
-from models.types import WordData
+from src.services.word_service import request_words_api
+from src.models.types import WordData
 
 def test_words_api(word: str) -> None:
     """
