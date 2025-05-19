@@ -1,7 +1,6 @@
 import sys
 import json
 from src.services.word_service import request_words_api
-from src.models.types import WordData
 
 def test_words_api(word: str) -> None:
     """

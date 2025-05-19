@@ -1,8 +1,8 @@
 import requests
 from config.settings import WORDS_API_KEY
-from models.types import WordData
+from models.types import WordsAPIInstance
 
-def request_words_api(word: str) -> WordData:
+def request_words_api(word: str) -> WordsAPIInstance:
     """
     Words APIを使用して単語の情報を取得する
     

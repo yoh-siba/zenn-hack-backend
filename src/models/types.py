@@ -23,7 +23,7 @@ class Syllables(TypedDict):
 class Pronunciation(TypedDict):
     all: str
 
-class WordData(TypedDict):
+class WordsAPIInstance(TypedDict):
     word: str
     results: List[WordResult]
     syllables: Syllables

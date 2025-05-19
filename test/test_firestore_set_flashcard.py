@@ -1,7 +1,7 @@
 from src.config.settings import db
 from src.schemas.words_schema import WordsSchema, MeaningSchema
 
-def test_firestore_word() -> None:
+def test_firestore_flashcard() -> None:
     """
     Words APIのテストを実行する
     
@@ -34,4 +34,4 @@ def test_firestore_word() -> None:
 
 
 if __name__ == "__main__":
-    test_firestore_word()
+    test_firestore_flashcard()
