@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from src.services.word_service import request_words_api
 from src.services.translation_service import translate_text
 from src.services.firestore.firestore_word import save_word_to_firestore
-from src.schemas.words_schema import WordsSchema
+from src.schemas.word_schema import WordSchema
 
 app = FastAPI()
 

@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 @dataclass
-class WordsSchema:
+class WordSchema:
     word: str  
     meaning_id_list: List[str]  
     core_meaning: str
@@ -24,10 +24,10 @@ class WordsSchema:
         }
 
     @staticmethod
-    def from_dict(data: dict) -> 'WordsSchema':
+    def from_dict(data: dict) -> 'WordSchema':
         """Firestoreのデータからwordオブジェクトを作成"""
         
-        return WordsSchema(
+        return WordSchema(
             word=data.get('word'),
             meaning_id_list=data.get('meaning_id_list'),
             core_meaning=data.get('core_meaning'),

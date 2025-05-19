@@ -1,5 +1,5 @@
 from src.config.settings import db
-from src.schemas.words_schema import WordsSchema, MeaningSchema
+from src.schemas.word_schema import WordSchema, MeaningSchema
 
 def test_firestore_word() -> None:
     """
@@ -10,7 +10,7 @@ def test_firestore_word() -> None:
     """
     try:
         doc_ref = db.collection("test_words")
-        example_word = WordsSchema(
+        example_word = WordSchema(
             wordId="1",
             word="example",
             core_meaning="example",

@@ -4,32 +4,30 @@ from typing import List, Optional
 
 @dataclass
 class FlashcardSchema:
-    flashcardId: str
-    wordId: str
-    usingMeaningIdList: List[str]
+    word_id: str
+    using_meaning_list: List[str]
     memo: str
-    mediaIdList: List[str]
+    media_id_list: List[str]
     currentMediaId: str
-    comparisonId: Optional[str]
-    createdBy: str
+    comparison_id: Optional[str]
+    created_by: str
     version: int
-    checkFlag: bool
+    check_flag: bool
     created_at: datetime = None
     updated_at: datetime = None
 
     def to_dict(self) -> dict:
         """FlashcardオブジェクトをFirestore用のdictに変換"""
         return {
-            'flashcardId': self.flashcardId,
-            'wordId': self.wordId,
-            'usingMeaningIdList': self.usingMeaningIdList,
+            'word_id': self.word_id,
+            'using_meaning_list': self.using_meaning_list,
             'memo': self.memo,
-            'mediaIdList': self.mediaIdList,
+            'media_id_list': self.media_id_list,
             'currentMediaId': self.currentMediaId,
-            'comparisonId': self.comparisonId,
-            'createdBy': self.createdBy,
+            'comparison_id': self.comparison_id,
+            'created_by': self.created_by,
             'version': self.version,
-            'checkFlag': self.checkFlag,
+            'check_flag': self.check_flag,
             'created_at': self.created_at or datetime.now(),
             'updated_at': self.updated_at or datetime.now()
         }
@@ -38,16 +36,15 @@ class FlashcardSchema:
     def from_dict(data: dict) -> 'FlashcardSchema':
         """FirestoreのデータからFlashcardオブジェクトを作成"""
         return FlashcardSchema(
-            flashcardId=data.get('flashcardId'),
-            wordId=data.get('wordId'),
-            usingMeaningIdList=data.get('usingMeaningIdList', []),
+            word_id=data.get('word_id'),
+            using_meaning_list=data.get('using_meaning_list', []),
             memo=data.get('memo'),
-            mediaIdList=data.get('mediaIdList', []),
+            media_id_list=data.get('media_id_list', []),
             currentMediaId=data.get('currentMediaId'),
-            comparisonId=data.get('comparisonId'),
-            createdBy=data.get('createdBy'),
+            comparison_id=data.get('comparison_id'),
+            created_by=data.get('created_by'),
             version=data.get('version'),
-            checkFlag=data.get('checkFlag'),
+            check_flag=data.get('check_flag'),
             created_at=data.get('created_at'),
             updated_at=data.get('updated_at')
         ) 
