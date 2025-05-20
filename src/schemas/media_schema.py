@@ -9,7 +9,7 @@ class MediaSchema:
     meaning_id: str
     media_urls: List[str]
     generation_type: str
-    templateId: Optional[str]
+    template_id: Optional[str]
     userPrompt: str
     generated_prompt: str
     input_media_urls: Optional[List[str]]
@@ -28,7 +28,7 @@ class MediaSchema:
             'meaning_id': self.meaning_id,
             'media_urls': self.media_urls,
             'generation_type': self.generation_type,
-            'templateId': self.templateId,
+            'template_id': self.template_id,
             'userPrompt': self.userPrompt,
             'generated_prompt': self.generated_prompt,
             'input_media_urls': self.input_media_urls,
@@ -49,7 +49,7 @@ class MediaSchema:
             meaning_id=data.get('meaning_id'),
             media_urls=data.get('media_urls', []),
             generation_type=data.get('generation_type'),
-            templateId=data.get('templateId'),
+            template_id=data.get('template_id'),
             userPrompt=data.get('userPrompt'),
             generated_prompt=data.get('generated_prompt'),
             input_media_urls=data.get('input_media_urls'),

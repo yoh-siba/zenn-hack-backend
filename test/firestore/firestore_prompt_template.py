@@ -8,29 +8,26 @@ def test_firestore_prompt_template_functions():
         # テスト用のプロンプトテンプレートデータを作成
         test_templates = [
             PromptTemplateSchema(
-                templateId="template_001",
                 name="画像生成テンプレート1",
                 description="単語の意味を表す画像を生成するためのテンプレート1",
                 generation_type="image",
-                promptText="以下の単語の意味を表す画像を生成してください：{word}\n意味：{meaning}",
+                prompt_text="以下の単語の意味を表す画像を生成してください：{word}\n意味：{meaning}",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             PromptTemplateSchema(
-                templateId="template_002",
                 name="画像生成テンプレート2",
                 description="単語の例文を表す画像を生成するためのテンプレート2",
                 generation_type="image",
-                promptText="以下の例文を表す画像を生成してください：{example}\n単語：{word}",
+                prompt_text="以下の例文を表す画像を生成してください：{example}\n単語：{word}",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             PromptTemplateSchema(
-                templateId="template_003",
                 name="画像生成テンプレート3",
                 description="単語の関連性を表す画像を生成するためのテンプレート3",
                 generation_type="image",
-                promptText="以下の単語の関連性を表す画像を生成してください：{word}\n関連語：{related_words}",
+                prompt_text="以下の単語の関連性を表す画像を生成してください：{word}\n関連語：{related_words}",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
@@ -75,7 +72,7 @@ def test_firestore_prompt_template_functions():
         try:
             test_templates[0].name = "更新された画像生成テンプレート1"
             test_templates[0].description = "更新された説明文1"
-            test_templates[0].promptText = "更新されたプロンプトテキスト：{word}\n意味：{meaning}\n追加情報：{additional_info}"
+            test_templates[0].prompt_text = "更新されたプロンプトテキスト：{word}\n意味：{meaning}\n追加情報：{additional_info}"
             test_templates[0].updated_at = datetime.now()
             is_success, error = update_prompt_template_doc(template_ids[0], test_templates[0])
             if not is_success:
