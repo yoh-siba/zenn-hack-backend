@@ -11,7 +11,7 @@ def test_firestore_prompt_template_functions():
                 templateId="template_001",
                 name="画像生成テンプレート1",
                 description="単語の意味を表す画像を生成するためのテンプレート1",
-                generationType="image",
+                generation_type="image",
                 promptText="以下の単語の意味を表す画像を生成してください：{word}\n意味：{meaning}",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
@@ -20,7 +20,7 @@ def test_firestore_prompt_template_functions():
                 templateId="template_002",
                 name="画像生成テンプレート2",
                 description="単語の例文を表す画像を生成するためのテンプレート2",
-                generationType="image",
+                generation_type="image",
                 promptText="以下の例文を表す画像を生成してください：{example}\n単語：{word}",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
@@ -29,7 +29,7 @@ def test_firestore_prompt_template_functions():
                 templateId="template_003",
                 name="画像生成テンプレート3",
                 description="単語の関連性を表す画像を生成するためのテンプレート3",
-                generationType="image",
+                generation_type="image",
                 promptText="以下の単語の関連性を表す画像を生成してください：{word}\n関連語：{related_words}",
                 created_at=datetime.now(),
                 updated_at=datetime.now()

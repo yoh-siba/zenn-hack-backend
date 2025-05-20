@@ -9,27 +9,27 @@ def test_firestore_comparison_functions():
         test_comparisons = [
             ComparisonSchema(
                 comparisonId="comp_001",
-                flashcardId="flash_001",
-                oldMediaId="media_001",
-                newMediaId="media_002",
+                flashcard_id="flash_001",
+                oldMedia_id="media_001",
+                new_media_id="media_002",
                 selected="old",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             ComparisonSchema(
                 comparisonId="comp_002",
-                flashcardId="flash_002",
-                oldMediaId="media_003",
-                newMediaId="media_004",
+                flashcard_id="flash_002",
+                oldMedia_id="media_003",
+                new_media_id="media_004",
                 selected="new",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             ComparisonSchema(
                 comparisonId="comp_003",
-                flashcardId="flash_003",
-                oldMediaId="media_005",
-                newMediaId="media_006",
+                flashcard_id="flash_003",
+                oldMedia_id="media_005",
+                new_media_id="media_006",
                 selected="old",
                 created_at=datetime.now(),
                 updated_at=datetime.now()

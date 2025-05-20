@@ -8,53 +8,53 @@ def test_firestore_media_functions():
         # テスト用のメディアデータを作成
         test_media = [
             MediaSchema(
-                mediaId="media_001",
-                flashcardId="flash_001",
-                meaningId="meaning_001",
-                mediaUrls=["https://example.com/media1.jpg"],
-                generationType="image",
+                media_id="media_001",
+                flashcard_id="flash_001",
+                meaning_id="meaning_001",
+                media_urls=["https://example.com/media1.jpg"],
+                generation_type="image",
                 templateId="template_001",
                 userPrompt="テスト用プロンプト1",
-                generatedPrompt="生成されたプロンプト1",
-                inputMediaUrls=["https://example.com/input1.jpg"],
-                promptTokens=100,
-                completionTokens=50,
-                totalTokens=150,
-                createdBy="user_001",
+                generated_prompt="生成されたプロンプト1",
+                input_media_urls=["https://example.com/input1.jpg"],
+                prompt_tokens=100,
+                completion_tokens=50,
+                total_tokens=150,
+                created_by="user_001",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             MediaSchema(
-                mediaId="media_002",
-                flashcardId="flash_002",
-                meaningId="meaning_002",
-                mediaUrls=["https://example.com/media2.jpg"],
-                generationType="image",
+                media_id="media_002",
+                flashcard_id="flash_002",
+                meaning_id="meaning_002",
+                media_urls=["https://example.com/media2.jpg"],
+                generation_type="image",
                 templateId="template_002",
                 userPrompt="テスト用プロンプト2",
-                generatedPrompt="生成されたプロンプト2",
-                inputMediaUrls=["https://example.com/input2.jpg"],
-                promptTokens=120,
-                completionTokens=60,
-                totalTokens=180,
-                createdBy="user_001",
+                generated_prompt="生成されたプロンプト2",
+                input_media_urls=["https://example.com/input2.jpg"],
+                prompt_tokens=120,
+                completion_tokens=60,
+                total_tokens=180,
+                created_by="user_001",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             ),
             MediaSchema(
-                mediaId="media_003",
-                flashcardId="flash_003",
-                meaningId="meaning_003",
-                mediaUrls=["https://example.com/media3.jpg"],
-                generationType="image",
+                media_id="media_003",
+                flashcard_id="flash_003",
+                meaning_id="meaning_003",
+                media_urls=["https://example.com/media3.jpg"],
+                generation_type="image",
                 templateId="template_003",
                 userPrompt="テスト用プロンプト3",
-                generatedPrompt="生成されたプロンプト3",
-                inputMediaUrls=["https://example.com/input3.jpg"],
-                promptTokens=90,
-                completionTokens=45,
-                totalTokens=135,
-                createdBy="user_001",
+                generated_prompt="生成されたプロンプト3",
+                input_media_urls=["https://example.com/input3.jpg"],
+                prompt_tokens=90,
+                completion_tokens=45,
+                total_tokens=135,
+                created_by="user_001",
                 created_at=datetime.now(),
                 updated_at=datetime.now()
             )
@@ -98,7 +98,7 @@ def test_firestore_media_functions():
         print("\n3. 最初のデータの更新")
         try:
             test_media[0].userPrompt = "更新されたプロンプト1"
-            test_media[0].generatedPrompt = "更新された生成プロンプト1"
+            test_media[0].generated_prompt = "更新された生成プロンプト1"
             test_media[0].updated_at = datetime.now()
             is_success, error = update_media_doc(media_ids[0], test_media[0])
             if not is_success:

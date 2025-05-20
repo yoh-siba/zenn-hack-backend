@@ -8,7 +8,7 @@ class FlashcardSchema:
     using_meaning_list: List[str]
     memo: str
     media_id_list: List[str]
-    currentMediaId: str
+    current_media_id: str
     comparison_id: Optional[str]
     created_by: str
     version: int
@@ -23,7 +23,7 @@ class FlashcardSchema:
             'using_meaning_list': self.using_meaning_list,
             'memo': self.memo,
             'media_id_list': self.media_id_list,
-            'currentMediaId': self.currentMediaId,
+            'current_media_id': self.current_media_id,
             'comparison_id': self.comparison_id,
             'created_by': self.created_by,
             'version': self.version,
@@ -40,7 +40,7 @@ class FlashcardSchema:
             using_meaning_list=data.get('using_meaning_list', []),
             memo=data.get('memo'),
             media_id_list=data.get('media_id_list', []),
-            currentMediaId=data.get('currentMediaId'),
+            current_media_id=data.get('current_media_id'),
             comparison_id=data.get('comparison_id'),
             created_by=data.get('created_by'),
             version=data.get('version'),

@@ -16,7 +16,7 @@ def test_firestore_word() -> None:
             core_meaning="example",
             explanation="example",
             meaning_list=[MeaningSchema(
-                meaningId="1",
+                meaning_id="1",
                 pos="noun",
                 definition="example",
                 pronunciation="example",
