@@ -2,30 +2,30 @@ from src.schemas.comparison_schema import ComparisonSchema
 from src.config.settings import db
 from typing import Optional, Tuple
 
-def create_comparison_doc(comparison_instance: ComparisonSchema) -> Tuple[bool, Optional[str], Optional[str]]:
+async def create_comparison_doc(comparison_instance: ComparisonSchema) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("comparisons")
-        new_doc = doc_ref.add(comparison_instance.to_dict())
+        new_doc = await doc_ref.add(comparison_instance.to_dict())
         return True, None, new_doc[1].id
     except Exception as e:
         error_message = f"比較データの作成中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message, None
 
-def update_comparison_doc(comparison_id: str, comparison_instance: ComparisonSchema) -> Tuple[bool, Optional[str]]:
+async def update_comparison_doc(comparison_id: str, comparison_instance: ComparisonSchema) -> Tuple[bool, Optional[str]]:
     try:
         doc_ref = db.collection("comparisons").document(comparison_id)
-        doc_ref.update(comparison_instance.to_dict())
+        await doc_ref.update(comparison_instance.to_dict())
         return True, None
     except Exception as e:
         error_message = f"比較データの更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
 
-def read_comparison_doc(comparison_id: str) -> Tuple[Optional[ComparisonSchema], Optional[str]]:
+async def read_comparison_doc(comparison_id: str) -> Tuple[Optional[ComparisonSchema], Optional[str]]:
     try:
         doc_ref = db.collection("comparisons").document(comparison_id)
-        doc = doc_ref.get()
+        doc = await doc_ref.get()
         if doc.exists:
             return ComparisonSchema.from_dict(doc.to_dict()), None
         return None, "指定された比較データが見つかりません"
@@ -34,12 +34,12 @@ def read_comparison_doc(comparison_id: str) -> Tuple[Optional[ComparisonSchema],
         print(f"\n{error_message}")
         return None, error_message
 
-def read_comparison_docs(comparison_ids: list[str]) -> Tuple[list[ComparisonSchema], Optional[str]]:
+async def read_comparison_docs(comparison_ids: list[str]) -> Tuple[list[ComparisonSchema], Optional[str]]:
     try:
         if not comparison_ids:
             return [], "比較データIDが指定されていません"
             
-        docs = db.collection("comparisons").where("__name__", "in", comparison_ids).get()
+        docs = await db.collection("comparisons").where("__name__", "in", comparison_ids).get()
         comparisons = []
         for doc in docs:
             comparisons.append(ComparisonSchema.from_dict(doc.to_dict()))
