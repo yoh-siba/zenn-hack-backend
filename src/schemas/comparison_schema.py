@@ -13,7 +13,6 @@ class ComparisonSchema:
     def to_dict(self) -> dict:
         """ComparisonオブジェクトをFirestore用のdictに変換"""
         return {
-            'comparison_id': self.comparison_id,
             'flashcard_id': self.flashcard_id,
             'oldMedia_id': self.oldMedia_id,
             'new_media_id': self.new_media_id,
@@ -26,7 +25,6 @@ class ComparisonSchema:
     def from_dict(data: dict) -> 'ComparisonSchema':
         """FirestoreのデータからComparisonオブジェクトを作成"""
         return ComparisonSchema(
-            comparison_id=data.get('comparison_id'),
             flashcard_id=data.get('flashcard_id'),
             oldMedia_id=data.get('oldMedia_id'),
             new_media_id=data.get('new_media_id'),

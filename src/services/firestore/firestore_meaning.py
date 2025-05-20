@@ -1,4 +1,4 @@
-from src.schemas.meanings_schema import MeaningSchema
+from src.schemas.meaning_schema import MeaningSchema
 from src.config.settings import db
 from typing import Optional, Tuple
 

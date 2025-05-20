@@ -122,5 +122,20 @@ def test_firestore_flashcard_functions():
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+def test_read_flashcard(flashcard_id: str):
+    print("\n2. 複数データの一括読み取り")
+    try:
+        read_result, error = read_flashcard_doc(flashcard_id)
+        if error:
+            raise Exception(error)
+        if read_result:
+            print(f"読み取ったデータ: {read_result.to_dict()}")
+        else:
+            print("データが見つかりませんでした")
+    except Exception as e:
+        print(f"データ読み取り中にエラーが発生しました: {str(e)}")
+        raise
+
 if __name__ == "__main__":
-    test_firestore_flashcard_functions() 
+    # test_firestore_flashcard_functions() 
+    test_read_flashcard("duExwo7LSTYoVuhyKNle")
