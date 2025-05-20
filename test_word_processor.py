@@ -1,4 +1,4 @@
-from services.word_service import request_words_api
+from services.words_api_service import request_words_api
 from services.translation_service import translate_and_prioritize
 from services.firestore_service import save_to_firestore
 from models.types import Definitions

@@ -1,6 +1,6 @@
 from datetime import datetime
 import time
-from src.schemas.meanings_schema import MeaningSchema
+from src.schemas.meaning_schema import MeaningSchema
 from src.services.firestore.firestore_meaning import create_meaning_doc, update_meaning_doc, read_meaning_doc, read_meaning_docs
 
 def test_firestore_meaning_functions():
