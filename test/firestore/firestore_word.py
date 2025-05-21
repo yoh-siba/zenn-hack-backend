@@ -1,7 +1,8 @@
 from datetime import datetime
 import time
 from src.schemas.word_schema import WordSchema
-from src.services.firestore.firestore_word import create_word_doc, update_word_doc, read_word_doc, read_word_docs
+from src.services.firestore.create_word_and_meaning import create_word_doc, update_word_doc, read_word_doc, read_word_docs
+from src.services.firestore.create_word_and_meaning import create_word_and_meaning
 
 def test_firestore_word_functions():
     try:
@@ -108,3 +109,4 @@ def test_firestore_word_functions():
 
 if __name__ == "__main__":
     test_firestore_word_functions() 
+    create_word_and_meaning

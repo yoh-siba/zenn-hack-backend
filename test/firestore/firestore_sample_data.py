@@ -6,7 +6,7 @@ from src.schemas.media_schema import MediaSchema
 from src.schemas.comparison_schema import ComparisonSchema
 from src.schemas.flashcard_schema import FlashcardSchema
 from src.services.firestore.firestore_meaning import create_meaning_doc
-from src.services.firestore.firestore_word import create_word_doc
+from src.services.firestore.create_word_and_meaning import create_word_doc
 from src.services.firestore.firestore_media import create_media_doc
 from src.services.firestore.firestore_comparison import create_comparison_doc
 from src.services.firestore.firestore_flashcard import create_flashcard_doc
