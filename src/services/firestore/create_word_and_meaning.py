@@ -29,16 +29,16 @@ async def create_word_and_meaning(
             return False, error, None
 
         # 意味をmeaningsコレクションに追加し、IDを収集
-        meaning_ids = []
+        meaning_id_list = []
         for meaning in meanings_instance:
             meaning.word_id = word_id
             success, error, meaning_id = await create_meaning_doc(meaning)
             if not success:
                 return False, error, None
-            meaning_ids.append(meaning_id)
+            meaning_id_list.append(meaning_id)
 
-        # 単語ドキュメントを更新してmeaning_idsを設定
-        word_instance.meaning_ids = meaning_ids
+        # 単語ドキュメントを更新してmeaning_id_listを設定
+        word_instance.meaning_id_list = meaning_id_list
         success, error = await update_word_doc(word_id, word_instance)
         if not success:
             return False, error, None

@@ -1,7 +1,7 @@
 from datetime import datetime
 import time
 from src.schemas.flashcard_schema import FlashcardSchema
-from src.services.firestore.firestore_flashcard import create_flashcard_doc, update_flashcard_doc, read_flashcard_doc, read_flashcard_docs
+from src.services.firestore.unit.firestore_flashcard import create_flashcard_doc, update_flashcard_doc, read_flashcard_doc, read_flashcard_docs
 
 def test_firestore_flashcard_functions():
     try:
