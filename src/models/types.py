@@ -1,5 +1,6 @@
-from typing import List, Dict, Any, TypedDict, Optional
+from typing import List, Optional
 from enum import Enum
+from dataclasses import dataclass
 
 class PartOfSpeech(str, Enum):
     NOUN = "noun"
@@ -7,41 +8,48 @@ class PartOfSpeech(str, Enum):
     ADVERB = "adverb"
     ADJECTIVE = "adjective"
 
-class WordResult(TypedDict):
+@dataclass
+class WordResult:
     definition: str
     partOfSpeech: PartOfSpeech
     synonyms: List[str]
     typeOf: List[str]
-    hasTypes: Optional[List[str]]
-    derivation: Optional[List[str]]
-    examples: Optional[List[str]]
+    hasTypes: Optional[List[str]] = None
+    derivation: Optional[List[str]] = None
+    examples: Optional[List[str]] = None
 
-class Syllables(TypedDict):
+@dataclass
+class Syllables:
     count: int
     list: List[str]
 
-class Pronunciation(TypedDict):
+@dataclass
+class Pronunciation:
     all: str
 
-class WordsAPIInstance(TypedDict):
+@dataclass
+class WordsAPIInstance:
     word: str
     results: List[WordResult]
     syllables: Syllables
     pronunciation: Pronunciation
     frequency: float
 
-class DefAndExample(TypedDict):
+@dataclass
+class DefAndExample:
     part_of_speech: PartOfSpeech
     definition: str
     example: str
 
-class Translation(TypedDict):
+@dataclass
+class Translation:
     part_of_speech: PartOfSpeech
     meaning: str
     example_en: str
     example_ja: str
 
-class WordInstance(TypedDict):
+@dataclass
+class WordInstance:
     word: str
     defs_and_examples: List[DefAndExample]
 

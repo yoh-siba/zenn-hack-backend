@@ -49,5 +49,6 @@ def request_gemini_text_to_image(_prompt:str, _number_of_images:int, _aspect_rat
 
 if __name__ == "__main__":
     prompt = ('Robot holding a red skateboard')
-    request_gemini_text_to_image(prompt, 1, "1:1", "DONT_ALLOW")
-
+    images = request_gemini_text_to_image(prompt, 1, "1:1", "DONT_ALLOW")
+    for image in images:
+        image.show()

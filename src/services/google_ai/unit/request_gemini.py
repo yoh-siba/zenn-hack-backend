@@ -1,14 +1,7 @@
 from src.config.settings import google_client, GOOGLE_GEMINI_MODEL
 from pydantic import BaseModel
 
-
-
-class Recipe(BaseModel):
-    recipe_name: str
-    ingredients: list[str]
-
-
-def request_gemini_json(_contents:str, _schema:BaseModel) -> None:
+def request_gemini_json(_contents:str, _schema:BaseModel) -> BaseModel:
     try:
         response = google_client.models.generate_content(
             model= GOOGLE_GEMINI_MODEL,
@@ -18,8 +11,6 @@ def request_gemini_json(_contents:str, _schema:BaseModel) -> None:
             "response_schema": _schema
         },
     )
-        # Use the response as a JSON string.
-        print(response.text)
         return response.parsed
     except Exception as e:
         print(e)
@@ -30,13 +21,24 @@ def request_gemini_text(_contents:str) -> None:
     args:
         _contents (str): コンテンツ
     """
-    model = google_client.GenerativeModel(GOOGLE_GEMINI_MODEL)
-    response = model.generate_content(_contents)
-    print(response.text)
+    try:
+        model = google_client.GenerativeModel(GOOGLE_GEMINI_MODEL)
+        response = model.generate_content(_contents)
+        print(response.text)
+    except Exception as e:
+        print(f"エラーが発生しました: {e}")
+        return None
 
 
 if __name__ == "__main__":
     contents = "Explain how AI works in a few words"
     
     # Geminiのレスポンスを取得
-    request_gemini_text(contents)
+    # request_gemini_text(contents)
+
+    class Recipe(BaseModel):
+        recipe_name: str
+        ingredients: list[str]
+
+    recipe = request_gemini_json(contents, list[Recipe])
+    print(recipe)
