@@ -1,12 +1,14 @@
 from src.config.settings import google_client, GOOGLE_GEMINI_MODEL
 from pydantic import BaseModel
 
+
+
 class Recipe(BaseModel):
     recipe_name: str
     ingredients: list[str]
 
 
-def get_gemini_response_json(_contents:str, _schema:BaseModel) -> None:
+def request_gemini_json(_contents:str, _schema:BaseModel) -> None:
     try:
         response = google_client.models.generate_content(
             model= GOOGLE_GEMINI_MODEL,
@@ -23,7 +25,7 @@ def get_gemini_response_json(_contents:str, _schema:BaseModel) -> None:
         print(e)
         return None
 
-def get_gemini_response(_contents:str) -> None:
+def request_gemini_text(_contents:str) -> None:
     """
     args:
         _contents (str): コンテンツ
@@ -37,5 +39,4 @@ if __name__ == "__main__":
     contents = "Explain how AI works in a few words"
     
     # Geminiのレスポンスを取得
-    get_gemini_response(contents)
-
+    request_gemini_text(contents)
