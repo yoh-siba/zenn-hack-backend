@@ -1,6 +1,10 @@
 from typing import List, Optional
 from enum import Enum
 from dataclasses import dataclass
+from src.services.firestore.schemas.word_schema import WordSchema
+from src.services.firestore.schemas.meaning_schema import MeaningSchema
+from datetime import datetime
+
 
 class PartOfSpeech(str, Enum):
     NOUN = "noun"
@@ -42,15 +46,34 @@ class DefAndExample:
     example: str
 
 @dataclass
-class Translation:
-    part_of_speech: PartOfSpeech
-    meaning: str
-    example_en: str
-    example_ja: str
-
-@dataclass
 class WordInstance:
     word: str
     defs_and_examples: List[DefAndExample]
 
 Translations = List[Translation] 
+
+
+@dataclass
+class WordAndMeanings:
+    word: WordSchema
+    meanings: List[MeaningSchema]
+
+@dataclass
+class TranslationByGemini:
+    pos: str  
+    definition: str
+    pronunciation: str
+    example_eng: str 
+    example_jpn: str 
+    rank: int
+
+    def to_dict(self) -> dict:
+        """TranslationMeaningオブジェクトをdictに変換"""
+        return {
+            'pos': self.pos,
+            'definition': self.definition,
+            'pronunciation': self.pronunciation,
+            'example_eng': self.example_eng,
+            'example_jpn': self.example_jpn,
+            'rank': self.rank
+        }
