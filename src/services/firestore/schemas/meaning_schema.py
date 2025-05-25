@@ -1,10 +1,12 @@
 from dataclasses import dataclass
-from typing import List
 from datetime import datetime
+from src.models.enums import PartOfSpeech
+
+
 
 @dataclass
 class MeaningSchema:
-    pos: str  
+    pos: PartOfSpeech
     definition: str
     pronunciation: str
     example_eng: str 
@@ -16,7 +18,7 @@ class MeaningSchema:
     def to_dict(self) -> dict:
         """MeaningオブジェクトをFirestore用のdictに変換"""
         return {
-            'pos': self.pos,
+            'pos': self.pos.value,
             'definition': self.definition,
             'pronunciation': self.pronunciation,
             'example_eng': self.example_eng,
@@ -29,8 +31,11 @@ class MeaningSchema:
     @staticmethod
     def from_dict(data: dict) -> 'MeaningSchema':
         """Firestoreのデータからmeaningオブジェクトを作成"""
+        pos_value = data.get('pos')
+        pos = PartOfSpeech(pos_value) if pos_value else None
+        
         return MeaningSchema(
-            pos=data.get('pos'),
+            pos=pos,
             definition=data.get('definition'),
             pronunciation=data.get('pronunciation'),
             example_eng=data.get('example_eng'),

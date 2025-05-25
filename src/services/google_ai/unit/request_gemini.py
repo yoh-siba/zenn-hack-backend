@@ -1,5 +1,5 @@
-from src.config.settings import google_client, GOOGLE_GEMINI_MODEL
 from pydantic import BaseModel
+from src.config.settings import google_client, GOOGLE_GEMINI_MODEL
 
 def request_gemini_json(_contents:str, _schema:BaseModel) -> BaseModel:
     try:

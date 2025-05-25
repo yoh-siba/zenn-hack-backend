@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-from typing import List
-from datetime import datetime
-from src.schemas.word_schema import WordSchema
-from src.schemas.meaning_schema import MeaningSchema
+from src.services.firestore.schemas.word_schema import WordSchema
+from src.services.firestore.schemas.meaning_schema import MeaningSchema
 
 @dataclass
 class TranslationSchema:

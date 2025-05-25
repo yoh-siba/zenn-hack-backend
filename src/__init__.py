@@ -1,3 +1,3 @@
 """
-Zenn Hack Backend Source Package
+Zenn Hack Backend package
 """ 

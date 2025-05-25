@@ -8,12 +8,11 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.115.12"
-uvicorn = "^0.15.0"
+python = "^3.12"
+fastapi = "^0.111.0"
+uvicorn = "^0.29.0"
 pydantic = "^2.0.0"
 firebase-admin = "^5.0.0"
-google-generativeai = "^0.3.2"
 python-dotenv = "^1.0.0"
 pillow = "^11.2.1"
 google-genai = "^1.16.1"

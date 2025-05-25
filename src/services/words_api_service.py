@@ -1,6 +1,7 @@
 import requests
-from config.settings import WORDS_API_KEY
-from models.types import WordsAPIInstance
+
+from src.config.settings import WORDS_API_KEY
+from src.models.types import WordsAPIInstance
 
 def request_words_api(word: str) -> WordsAPIInstance:
     """

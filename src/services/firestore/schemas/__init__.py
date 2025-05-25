@@ -1,3 +1,3 @@
 """
-Zenn Hack Backend Package
+Firestore schemas package
 """ 
