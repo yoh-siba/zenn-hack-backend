@@ -1,9 +1,9 @@
-from typing import List, Optional
 from dataclasses import dataclass
-from src.services.firestore.schemas.word_schema import WordSchema
-from src.services.firestore.schemas.meaning_schema import MeaningSchema
-from src.models.enums import PartOfSpeech
+from typing import List, Optional
 
+from src.models.enums import PartOfSpeech
+from src.services.firestore.schemas.meaning_schema import MeaningSchema
+from src.services.firestore.schemas.word_schema import WordSchema
 
 
 @dataclass
@@ -16,14 +16,17 @@ class WordResult:
     derivation: Optional[List[str]] = None
     examples: Optional[List[str]] = None
 
+
 @dataclass
 class Syllables:
     count: int
     list: List[str]
 
+
 @dataclass
 class Pronunciation:
     all: str
+
 
 @dataclass
 class WordsAPIInstance:
@@ -33,6 +36,7 @@ class WordsAPIInstance:
     pronunciation: Pronunciation
     frequency: float
 
+
 @dataclass
 class DefAndExample:
     part_of_speech: PartOfSpeech
@@ -40,11 +44,11 @@ class DefAndExample:
     example: str
 
 
-
 @dataclass
 class WordAndMeanings:
     word: WordSchema
     meanings: List[MeaningSchema]
+
 
 @dataclass
 class TranslationByGemini:
@@ -59,11 +63,23 @@ class TranslationByGemini:
     def to_dict(self) -> dict:
         """TranslationMeaningオブジェクトをdictに変換"""
         return {
-            'pos': self.pos,
-            'definition_jpn': self.definition_jpn,
-            'definition_eng': self.definition_eng,
-            'pronunciation': self.pronunciation,
-            'example_eng': self.example_eng,
-            'example_jpn': self.example_jpn,
-            'rank': self.rank
+            "pos": self.pos,
+            "definition_jpn": self.definition_jpn,
+            "definition_eng": self.definition_eng,
+            "pronunciation": self.pronunciation,
+            "example_eng": self.example_eng,
+            "example_jpn": self.example_jpn,
+            "rank": self.rank,
+        }
+
+
+@dataclass
+class PromptForImagenByGemini:
+    meaning_id: str
+    prompt: str
+
+    def to_dict(self) -> dict:
+        return {
+            "meaning_id": self.meaning_id,
+            "prompt": self.prompt,
         }

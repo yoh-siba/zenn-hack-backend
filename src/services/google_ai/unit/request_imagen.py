@@ -1,10 +1,18 @@
-from src.config.settings import google_client, GOOGLE_IMAGEN_MODEL
-from google.genai import types
-from PIL import Image
 from io import BytesIO
 from typing import Literal
 
-def request_gemini_text_to_image(_prompt:str, _number_of_images:int, _aspect_ratio:str, _person_generation:Literal["DONT_ALLOW", "ALLOW_ADULT"]) -> list[Image.Image]:
+from google.genai import types
+from PIL import Image
+
+from src.config.settings import GOOGLE_IMAGEN_MODEL, google_client
+
+
+def request_gemini_text_to_image(
+    _prompt: str,
+    _number_of_images: int,
+    _aspect_ratio: str,
+    _person_generation: Literal["DONT_ALLOW", "ALLOW_ADULT"],
+) -> list[Image.Image]:
     """
     args:
         _prompt (str): 画像生成用プロンプト
@@ -15,27 +23,35 @@ def request_gemini_text_to_image(_prompt:str, _number_of_images:int, _aspect_rat
         Exception: APIリクエスト中にエラーが発生した場合
     """
     try:
-        print(f"APIリクエスト開始: プロンプト={_prompt}, 画像数={_number_of_images}, アスペクト比={_aspect_ratio}")
-        
+        print(
+            f"APIリクエスト開始: プロンプト={_prompt}, 画像数={_number_of_images}, アスペクト比={_aspect_ratio}"
+        )
+
         response = google_client.models.generate_images(
-            model= GOOGLE_IMAGEN_MODEL,
+            model=GOOGLE_IMAGEN_MODEL,
             prompt=_prompt,
             config=types.GenerateImagesConfig(
-                number_of_images= _number_of_images,
-                aspect_ratio= _aspect_ratio,
-                person_generation= _person_generation
+                number_of_images=_number_of_images,
+                aspect_ratio=_aspect_ratio,
+                person_generation=_person_generation,
             ),
         )
-        
+
         if response is None:
-            raise Exception("APIからの応答がNoneです。認証情報やAPIの設定を確認してください。")
-            
-        if not hasattr(response, 'generated_images'):
-            raise Exception(f"APIの応答にgenerated_imagesが含まれていません。応答内容: {response}")
-            
+            raise Exception(
+                "APIからの応答がNoneです。認証情報やAPIの設定を確認してください。"
+            )
+
+        if not hasattr(response, "generated_images"):
+            raise Exception(
+                f"APIの応答にgenerated_imagesが含まれていません。応答内容: {response}"
+            )
+
         if not response.generated_images:
-            raise Exception("生成された画像がありません。プロンプトの内容を確認してください。")
-            
+            raise Exception(
+                "生成された画像がありません。プロンプトの内容を確認してください。"
+            )
+
         images = []
         for generated_image in response.generated_images:
             image = Image.open(BytesIO(generated_image.image.image_bytes))
@@ -48,7 +64,7 @@ def request_gemini_text_to_image(_prompt:str, _number_of_images:int, _aspect_rat
 
 
 if __name__ == "__main__":
-    prompt = ('Robot holding a red skateboard')
+    prompt = "Robot holding a red skateboard"
     images = request_gemini_text_to_image(prompt, 1, "1:1", "DONT_ALLOW")
     for image in images:
         image.show()

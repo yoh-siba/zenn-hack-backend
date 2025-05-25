@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from src.services.firestore.schemas.word_schema import WordSchema
+
 from src.services.firestore.schemas.meaning_schema import MeaningSchema
+from src.services.firestore.schemas.word_schema import WordSchema
+
 
 @dataclass
 class TranslationSchema:
@@ -13,15 +15,12 @@ class TranslationSchema:
 
     def to_dict(self) -> dict:
         """TranslationオブジェクトをFirestore用のdictに変換"""
-        return {
-            'word': self.word.to_dict(),
-            'meaning': self.meaning.to_dict()
-        }
+        return {"word": self.word.to_dict(), "meaning": self.meaning.to_dict()}
 
     @staticmethod
-    def from_dict(data: dict) -> 'TranslationSchema':
+    def from_dict(data: dict) -> "TranslationSchema":
         """FirestoreのデータからTranslationオブジェクトを作成"""
         return TranslationSchema(
-            word=WordSchema.from_dict(data.get('word')),
-            meaning=MeaningSchema.from_dict(data.get('meaning'))
-        ) 
+            word=WordSchema.from_dict(data.get("word")),
+            meaning=MeaningSchema.from_dict(data.get("meaning")),
+        )

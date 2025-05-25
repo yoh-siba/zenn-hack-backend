@@ -1,19 +1,23 @@
-from datetime import datetime
 import json
+from datetime import datetime
 from pathlib import Path
 
-from src.services.google_ai.unit.request_gemini import request_gemini_json
-from src.models.types import TranslationByGemini, PartOfSpeech
+from src.models.types import PartOfSpeech, TranslationByGemini
 from src.services.firestore.schemas.meaning_schema import MeaningSchema
+from src.services.google_ai.unit.request_gemini import request_gemini_json
+
 
 def datetime_handler(obj):
     if isinstance(obj, datetime):
         return obj.isoformat()
     raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-def generate_translation(_content:str) -> list[MeaningSchema]:
+
+def generate_translation(_content: str) -> list[MeaningSchema]:
     try:
-        response = request_gemini_json(_contents=_content, _schema=list[TranslationByGemini])
+        response = request_gemini_json(
+            _contents=_content, _schema=list[TranslationByGemini]
+        )
         if response is None:
             raise ValueError("Response is None")
         if not isinstance(response, list):
@@ -25,13 +29,13 @@ def generate_translation(_content:str) -> list[MeaningSchema]:
             if not isinstance(item, TranslationByGemini):
                 raise ValueError("Item is not of type TranslationByGemini")
             meaning = MeaningSchema(
-                pos= PartOfSpeech(item.pos) if item.pos else None,
+                pos=PartOfSpeech(item.pos) if item.pos else None,
                 definition=item.definition_jpn,
                 pronunciation=item.pronunciation,
                 example_eng=item.example_eng,
                 example_jpn=item.example_jpn,
                 rank=item.rank,
-                created_at= datetime.now(),
+                created_at=datetime.now(),
                 updated_at=datetime.now(),
             )
             result.append(meaning)
@@ -41,9 +45,10 @@ def generate_translation(_content:str) -> list[MeaningSchema]:
         print(e)
         raise ValueError("翻訳の生成に失敗しました") from e
 
+
 if __name__ == "__main__":
     # Example usage
-    content = '''
+    content = """
 英単語「run」の英語の各定義（以下のデータのdefinition）の値について、それぞれ対応する一言の簡潔な日本語訳を考えてください。
 日本語に訳した際、同じ意味になる場合は、その重複は除いてください。
 definition_engには、definitionの値をそのまま入れてください。
@@ -1139,10 +1144,10 @@ definitionが「move fast by using one's feet, with one foot off the ground at a
       "pronunciation": {
     "all": "rən"
   }
-'''
+"""
     result = generate_translation(content)
     result.sort(key=lambda x: x.rank)
-    
+
     if result is None:
         print("No translation generated.")
     # 出力ディレクトリの作成
@@ -1153,5 +1158,11 @@ definitionが「move fast by using one's feet, with one foot off the ground at a
     output_file = output_dir / f"{current_time}_word.json"
     # 結果をJSONファイルに出力
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump([meaning.to_dict() for meaning in result], f, ensure_ascii=False, indent=2, default=datetime_handler)
+        json.dump(
+            [meaning.to_dict() for meaning in result],
+            f,
+            ensure_ascii=False,
+            indent=2,
+            default=datetime_handler,
+        )
     print(f"Translation saved to: {output_file}")

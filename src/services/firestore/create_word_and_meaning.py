@@ -1,13 +1,14 @@
-from src.schemas.word_schema import WordSchema
+from typing import Optional, Tuple
+
 from src.schemas.meaning_schema import MeaningSchema
-from src.config.settings import db
-from src.services.firestore.unit.firestore_word import create_word_doc, update_word_doc
+from src.schemas.word_schema import WordSchema
 from src.services.firestore.unit.firestore_meaning import create_meaning_doc
-from typing import Tuple, Optional
+from src.services.firestore.unit.firestore_word import create_word_doc, update_word_doc
+
 
 async def create_word_and_meaning(
-        word_instance: WordSchema,
-        meanings_instance: list[MeaningSchema],
+    word_instance: WordSchema,
+    meanings_instance: list[MeaningSchema],
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """単語とその意味をFirestoreに作成する関数
 
@@ -17,7 +18,7 @@ async def create_word_and_meaning(
         meanings_instance (list[MeaningSchema]): 作成する意味のインスタンスのリスト
 
     Returns:
-        Tuple[bool, Optional[str], Optional[str]]: 
+        Tuple[bool, Optional[str], Optional[str]]:
             - 成功/失敗を示すブール値
             - エラーメッセージ（成功時はNone）
             - 作成された単語のID（失敗時はNone）

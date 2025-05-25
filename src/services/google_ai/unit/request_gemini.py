@@ -1,22 +1,25 @@
 from pydantic import BaseModel
-from src.config.settings import google_client, GOOGLE_GEMINI_MODEL
 
-def request_gemini_json(_contents:str, _schema:BaseModel) -> BaseModel:
+from src.config.settings import GOOGLE_GEMINI_MODEL, google_client
+
+
+def request_gemini_json(_contents: str, _schema: BaseModel) -> BaseModel:
     try:
         response = google_client.models.generate_content(
-            model= GOOGLE_GEMINI_MODEL,
+            model=GOOGLE_GEMINI_MODEL,
             contents=_contents,
             config={
-            "response_mime_type": "application/json",
-            "response_schema": _schema
-        },
-    )
+                "response_mime_type": "application/json",
+                "response_schema": _schema,
+            },
+        )
         return response.parsed
     except Exception as e:
         print(e)
         return None
 
-def request_gemini_text(_contents:str) -> None:
+
+def request_gemini_text(_contents: str) -> None:
     """
     args:
         _contents (str): コンテンツ
@@ -32,7 +35,7 @@ def request_gemini_text(_contents:str) -> None:
 
 if __name__ == "__main__":
     contents = "Explain how AI works in a few words"
-    
+
     # Geminiのレスポンスを取得
     # request_gemini_text(contents)
 

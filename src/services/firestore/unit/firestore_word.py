@@ -1,8 +1,12 @@
-from src.schemas.word_schema import WordSchema
-from src.config.settings import db
 from typing import Optional, Tuple
 
-async def create_word_doc(word_instance: WordSchema) -> Tuple[bool, Optional[str], Optional[str]]:
+from src.config.settings import db
+from src.schemas.word_schema import WordSchema
+
+
+async def create_word_doc(
+    word_instance: WordSchema,
+) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("words")
         new_doc = await doc_ref.add(word_instance.to_dict())
@@ -12,7 +16,10 @@ async def create_word_doc(word_instance: WordSchema) -> Tuple[bool, Optional[str
         print(f"\n{error_message}")
         return False, error_message, None
 
-async def update_word_doc(word_id: str, word_instance: WordSchema) -> Tuple[bool, Optional[str]]:
+
+async def update_word_doc(
+    word_id: str, word_instance: WordSchema
+) -> Tuple[bool, Optional[str]]:
     try:
         doc_ref = db.collection("words").document(word_id)
         await doc_ref.update(word_instance.to_dict())
@@ -21,6 +28,7 @@ async def update_word_doc(word_id: str, word_instance: WordSchema) -> Tuple[bool
         error_message = f"単語の更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
+
 
 async def read_word_doc(word_id: str) -> Tuple[Optional[WordSchema], Optional[str]]:
     try:
@@ -34,11 +42,12 @@ async def read_word_doc(word_id: str) -> Tuple[Optional[WordSchema], Optional[st
         print(f"\n{error_message}")
         return None, error_message
 
+
 async def read_word_docs(word_ids: list[str]) -> Tuple[list[WordSchema], Optional[str]]:
     try:
         if not word_ids:
             return [], "単語IDが指定されていません"
-            
+
         docs = await db.collection("words").where("__name__", "in", word_ids).get()
         words = []
         for doc in docs:
@@ -47,4 +56,4 @@ async def read_word_docs(word_ids: list[str]) -> Tuple[list[WordSchema], Optiona
     except Exception as e:
         error_message = f"単語の一括読み込み中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
-        return [], error_message 
+        return [], error_message
