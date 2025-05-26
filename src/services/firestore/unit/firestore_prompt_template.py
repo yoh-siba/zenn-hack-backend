@@ -9,7 +9,7 @@ async def create_prompt_template_doc(
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("prompt_templates")
-        new_doc = await doc_ref.add(template_instance.to_dict())
+        new_doc = doc_ref.add(template_instance.to_dict())
         return True, None, new_doc[1].id
     except Exception as e:
         error_message = (
@@ -24,7 +24,7 @@ async def update_prompt_template_doc(
 ) -> Tuple[bool, Optional[str]]:
     try:
         doc_ref = db.collection("prompt_templates").document(template_id)
-        await doc_ref.update(template_instance.to_dict())
+        doc_ref.update(template_instance.to_dict())
         return True, None
     except Exception as e:
         error_message = (
@@ -39,7 +39,7 @@ async def read_prompt_template_doc(
 ) -> Tuple[Optional[PromptTemplateSchema], Optional[str]]:
     try:
         doc_ref = db.collection("prompt_templates").document(template_id)
-        doc = await doc_ref.get()
+        doc = doc_ref.get()
         if doc.exists:
             return PromptTemplateSchema.from_dict(doc.to_dict()), None
         return None, "指定されたプロンプトテンプレートが見つかりません"

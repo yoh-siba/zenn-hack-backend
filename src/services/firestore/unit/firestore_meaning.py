@@ -9,7 +9,7 @@ async def create_meaning_doc(
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("meanings")
-        new_doc = await doc_ref.add(meaning_instance.to_dict())
+        new_doc = doc_ref.add(meaning_instance.to_dict())
         return True, None, new_doc[1].id
     except Exception as e:
         error_message = f"意味の作成中にエラーが発生しました: {str(e)}"
@@ -22,7 +22,7 @@ async def update_meaning_doc(
 ) -> Tuple[bool, Optional[str]]:
     try:
         doc_ref = db.collection("meanings").document(meaning_id)
-        await doc_ref.update(meaning_instance.to_dict())
+        doc_ref.update(meaning_instance.to_dict())
         return True, None
     except Exception as e:
         error_message = f"意味の更新中にエラーが発生しました: {str(e)}"
@@ -35,7 +35,7 @@ async def read_meaning_doc(
 ) -> Tuple[Optional[MeaningSchema], Optional[str]]:
     try:
         doc_ref = db.collection("meanings").document(meaning_id)
-        doc = await doc_ref.get()
+        doc = doc_ref.get()
         if doc.exists:
             return MeaningSchema.from_dict(doc.to_dict()), None
         return None, "指定された意味が見つかりません"

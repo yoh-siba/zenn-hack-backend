@@ -9,7 +9,7 @@ async def create_media_doc(
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("media")
-        new_doc = await doc_ref.add(media_instance.to_dict())
+        new_doc = doc_ref.add(media_instance.to_dict())
         return True, None, new_doc[1].id
     except Exception as e:
         error_message = f"メディアデータの作成中にエラーが発生しました: {str(e)}"
@@ -22,7 +22,7 @@ async def update_media_doc(
 ) -> Tuple[bool, Optional[str]]:
     try:
         doc_ref = db.collection("media").document(media_id)
-        await doc_ref.update(media_instance.to_dict())
+        doc_ref.update(media_instance.to_dict())
         return True, None
     except Exception as e:
         error_message = f"メディアデータの更新中にエラーが発生しました: {str(e)}"
@@ -33,7 +33,7 @@ async def update_media_doc(
 async def read_media_doc(media_id: str) -> Tuple[Optional[MediaSchema], Optional[str]]:
     try:
         doc_ref = db.collection("media").document(media_id)
-        doc = await doc_ref.get()
+        doc = doc_ref.get()
         if doc.exists:
             return MediaSchema.from_dict(doc.to_dict()), None
         return None, "指定されたメディアデータが見つかりません"
