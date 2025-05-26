@@ -75,11 +75,9 @@ class TranslationByGemini:
 
 @dataclass
 class PromptForImagenByGemini:
-    meaning_id: str
-    prompt: str
+    generated_prompt: str
 
     def to_dict(self) -> dict:
         return {
-            "meaning_id": self.meaning_id,
-            "prompt": self.prompt,
+            "generated_prompt": self.generated_prompt,
         }
