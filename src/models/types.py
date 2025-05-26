@@ -29,7 +29,7 @@ class Pronunciation:
 
 
 @dataclass
-class WordsAPIInstance:
+class WordsAPIResponse:
     word: str
     results: List[WordResult]
     syllables: Syllables

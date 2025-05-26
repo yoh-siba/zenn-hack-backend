@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.schemas.comparison_schema import ComparisonSchema
+from src.services.firestore.schemas.comparison_schema import ComparisonSchema
 
 
 async def create_comparison_doc(

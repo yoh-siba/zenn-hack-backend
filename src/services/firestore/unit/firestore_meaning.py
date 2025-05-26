@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.schemas.meaning_schema import MeaningSchema
+from src.services.firestore.schemas.meaning_schema import MeaningSchema
 
 
 async def create_meaning_doc(

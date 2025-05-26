@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
-from src.schemas.meaning_schema import MeaningSchema
-from src.schemas.word_schema import WordSchema
+from src.services.firestore.schemas.meaning_schema import MeaningSchema
+from src.services.firestore.schemas.word_schema import WordSchema
 from src.services.firestore.unit.firestore_meaning import create_meaning_doc
 from src.services.firestore.unit.firestore_word import create_word_doc, update_word_doc
 
@@ -11,7 +11,6 @@ async def create_word_and_meaning(
     meanings_instance: list[MeaningSchema],
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """単語とその意味をFirestoreに作成する関数
-
     Args:
         word_instance (WordSchema): 作成する単語のインスタンス
             meaning_id_listは空の配列でOK（関数内で自動的に設定されます）
