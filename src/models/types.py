@@ -74,6 +74,18 @@ class TranslationByGemini:
 
 
 @dataclass
+class ExplanationByGemini:
+    explanation: str
+    core_meaning: Optional[str]
+
+    def to_dict(self) -> dict:
+        return {
+            "explanation": self.explanation,
+            "core_meaning": self.core_meaning if self.core_meaning else "",
+        }
+
+
+@dataclass
 class PromptForImagenByGemini:
     generated_prompt: str
 
