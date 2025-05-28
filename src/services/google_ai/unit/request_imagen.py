@@ -7,7 +7,7 @@ from PIL import Image
 from src.config.settings import GOOGLE_IMAGEN_MODEL, google_client
 
 
-def request_gemini_text_to_image(
+def request_imagen_text_to_image(
     _prompt: str,
     _number_of_images: int,
     _aspect_ratio: str,
@@ -65,6 +65,6 @@ def request_gemini_text_to_image(
 
 if __name__ == "__main__":
     prompt = "Robot holding a red skateboard"
-    images = request_gemini_text_to_image(prompt, 1, "1:1", "DONT_ALLOW")
+    images = request_imagen_text_to_image(prompt, 1, "1:1", "DONT_ALLOW")
     for image in images:
         image.show()

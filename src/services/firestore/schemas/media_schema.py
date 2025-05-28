@@ -5,7 +5,6 @@ from typing import List, Optional
 
 @dataclass
 class MediaSchema:
-    media_id: str
     flashcard_id: str
     meaning_id: str
     media_urls: List[str]
@@ -24,7 +23,6 @@ class MediaSchema:
     def to_dict(self) -> dict:
         """MediaオブジェクトをFirestore用のdictに変換"""
         return {
-            "media_id": self.media_id,
             "flashcard_id": self.flashcard_id,
             "meaning_id": self.meaning_id,
             "media_urls": self.media_urls,
@@ -45,7 +43,6 @@ class MediaSchema:
     def from_dict(data: dict) -> "MediaSchema":
         """FirestoreのデータからMediaオブジェクトを作成"""
         return MediaSchema(
-            media_id=data.get("media_id"),
             flashcard_id=data.get("flashcard_id"),
             meaning_id=data.get("meaning_id"),
             media_urls=data.get("media_urls", []),

@@ -9,7 +9,7 @@ from src.services.firestore.unit.firestore_word import create_word_doc, update_w
 async def create_word_and_meaning(
     word_instance: WordSchema,
     meanings_instance: list[MeaningSchema],
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> Tuple[bool, Optional[str], Optional[str], Optional[str]]:
     """単語とその意味をFirestoreに作成する関数
     Args:
         word_instance (WordSchema): 作成する単語のインスタンス
@@ -21,6 +21,7 @@ async def create_word_and_meaning(
             - 成功/失敗を示すブール値
             - エラーメッセージ（成功時はNone）
             - 作成された単語のID（失敗時はNone）
+            - 作成された意味のIDリスト（失敗時はNone）
     """
     try:
         # 単語をwordsコレクションに追加
@@ -43,7 +44,7 @@ async def create_word_and_meaning(
         if not success:
             return False, error, None
 
-        return True, None, word_id
+        return True, None, word_id, meaning_id_list
     except Exception as e:
         error_message = f"単語の作成中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
