@@ -2,7 +2,7 @@ import os
 
 import firebase_admin
 from dotenv import load_dotenv
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, firestore, storage
 from google import genai
 
 # 定数
@@ -15,11 +15,16 @@ load_dotenv()
 # APIキーの設定
 WORDS_API_KEY = os.getenv("WORDS_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-google_client = genai.Client(api_key=GOOGLE_API_KEY)
+genai_client = genai.Client(api_key=GOOGLE_API_KEY)
+
 
 # Use a service account.
 cred = credentials.Certificate("serviceAccount.json")
 
-app = firebase_admin.initialize_app(cred)
+app = firebase_admin.initialize_app(
+    cred, {"storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET")}
+)
 
 db = firestore.client()
+
+bucket = storage.bucket()
