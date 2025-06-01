@@ -4,7 +4,7 @@ from typing import Literal
 from google.genai import types
 from PIL import Image
 
-from src.config.settings import GOOGLE_IMAGEN_MODEL, google_client
+from src.config.settings import GOOGLE_IMAGEN_MODEL, genai_client
 
 
 def request_imagen_text_to_image(
@@ -27,7 +27,7 @@ def request_imagen_text_to_image(
             f"APIリクエスト開始: プロンプト={_prompt}, 画像数={_number_of_images}, アスペクト比={_aspect_ratio}"
         )
 
-        response = google_client.models.generate_images(
+        response = genai_client.models.generate_images(
             model=GOOGLE_IMAGEN_MODEL,
             prompt=_prompt,
             config=types.GenerateImagesConfig(

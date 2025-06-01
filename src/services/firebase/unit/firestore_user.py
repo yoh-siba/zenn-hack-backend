@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.services.firestore.schemas.user_schema import UserSchema
+from src.services.firebase.schemas.user_schema import UserSchema
 
 
 async def create_user_doc(

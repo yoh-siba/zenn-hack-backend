@@ -1,9 +1,9 @@
 from typing import Optional, Tuple
 
-from src.services.firestore.schemas.meaning_schema import MeaningSchema
-from src.services.firestore.schemas.word_schema import WordSchema
-from src.services.firestore.unit.firestore_meaning import create_meaning_doc
-from src.services.firestore.unit.firestore_word import create_word_doc, update_word_doc
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.word_schema import WordSchema
+from src.services.firebase.unit.firestore_meaning import create_meaning_doc
+from src.services.firebase.unit.firestore_word import create_word_doc, update_word_doc
 
 
 async def create_word_and_meaning(

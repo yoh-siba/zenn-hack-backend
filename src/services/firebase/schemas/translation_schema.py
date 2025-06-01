@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from src.services.firestore.schemas.meaning_schema import MeaningSchema
-from src.services.firestore.schemas.word_schema import WordSchema
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.word_schema import WordSchema
 
 
 @dataclass

@@ -1,11 +1,11 @@
 from pydantic import BaseModel
 
-from src.config.settings import GOOGLE_GEMINI_MODEL, google_client
+from src.config.settings import GOOGLE_GEMINI_MODEL, genai_client
 
 
 def request_gemini_json(_contents: str, _schema: BaseModel) -> BaseModel:
     try:
-        response = google_client.models.generate_content(
+        response = genai_client.models.generate_content(
             model=GOOGLE_GEMINI_MODEL,
             contents=_contents,
             config={
@@ -25,7 +25,7 @@ def request_gemini_text(_contents: str) -> None:
         _contents (str): コンテンツ
     """
     try:
-        model = google_client.GenerativeModel(GOOGLE_GEMINI_MODEL)
+        model = genai_client.GenerativeModel(GOOGLE_GEMINI_MODEL)
         response = model.generate_content(_contents)
         print(response.text)
     except Exception as e:

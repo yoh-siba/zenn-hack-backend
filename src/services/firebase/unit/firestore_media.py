@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.services.firestore.schemas.media_schema import MediaSchema
+from src.services.firebase.schemas.media_schema import MediaSchema
 
 
 async def create_media_doc(

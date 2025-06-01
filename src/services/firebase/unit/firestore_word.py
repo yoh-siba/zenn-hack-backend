@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.services.firestore.schemas.word_schema import WordSchema
+from src.services.firebase.schemas.word_schema import WordSchema
 
 
 async def create_word_doc(

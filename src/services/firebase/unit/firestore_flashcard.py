@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.services.firestore.schemas.flashcard_schema import FlashcardSchema
+from src.services.firebase.schemas.flashcard_schema import FlashcardSchema
 
 
 async def create_flashcard_doc(

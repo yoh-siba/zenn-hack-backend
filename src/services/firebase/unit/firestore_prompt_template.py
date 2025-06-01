@@ -1,7 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.services.firestore.schemas.prompt_template_schema import PromptTemplateSchema
+from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
 
 
 async def create_prompt_template_doc(
