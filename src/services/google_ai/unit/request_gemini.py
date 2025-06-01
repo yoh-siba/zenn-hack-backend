@@ -1,9 +1,14 @@
+from typing import Tuple
+
+from google.generativeai.types import TokenInfo
 from pydantic import BaseModel
 
 from src.config.settings import GOOGLE_GEMINI_MODEL, genai_client
 
 
-def request_gemini_json(_contents: str, _schema: BaseModel) -> BaseModel:
+def request_gemini_json(
+    _contents: str, _schema: BaseModel
+) -> Tuple[BaseModel, TokenInfo]:
     try:
         response = genai_client.models.generate_content(
             model=GOOGLE_GEMINI_MODEL,
@@ -13,10 +18,10 @@ def request_gemini_json(_contents: str, _schema: BaseModel) -> BaseModel:
                 "response_schema": _schema,
             },
         )
-        return response.parsed
+        return response.parsed, response.token_info
     except Exception as e:
         print(e)
-        return None
+        return None, None
 
 
 def request_gemini_text(_contents: str) -> None:
@@ -43,5 +48,6 @@ if __name__ == "__main__":
         recipe_name: str
         ingredients: list[str]
 
-    recipe = request_gemini_json(contents, list[Recipe])
+    recipe, token_info = request_gemini_json(contents, list[Recipe])
     print(recipe)
+    print(token_info)

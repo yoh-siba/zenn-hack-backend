@@ -14,13 +14,16 @@ def datetime_handler(obj):
 
 def generate_prompt_for_imagen(_content: str) -> PromptForImagenByGemini:
     try:
-        response = request_gemini_json(
+        response, token_info = request_gemini_json(
             _contents=_content, _schema=PromptForImagenByGemini
         )
         if response is None:
             raise ValueError("Response is None")
         result = PromptForImagenByGemini(
             generated_prompt=response.generated_prompt,
+            prompt_tokens=token_info.prompt_tokens,
+            completion_tokens=token_info.completion_tokens,
+            total_tokens=token_info.total_tokens,
         )
         return result
     except Exception as e:

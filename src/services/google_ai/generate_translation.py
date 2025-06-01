@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.models.types import PartOfSpeech, TranslationByGemini
-from src.services.firestore.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
 from src.services.google_ai.unit.request_gemini import request_gemini_json
 
 
@@ -15,7 +15,7 @@ def datetime_handler(obj):
 
 def generate_translation(_content: str) -> list[MeaningSchema]:
     try:
-        response = request_gemini_json(
+        response, token_info = request_gemini_json(
             _contents=_content, _schema=list[TranslationByGemini]
         )
         if response is None:

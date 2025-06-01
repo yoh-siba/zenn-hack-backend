@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 from src.models.types import ExplanationByGemini
-from src.services.firestore.schemas.word_schema import WordSchema
+from src.services.firebase.schemas.word_schema import WordSchema
 from src.services.google_ai.unit.request_gemini import request_gemini_json
 
 
@@ -15,7 +15,9 @@ def datetime_handler(obj):
 
 def generate_explanation_and_core_meaning(_word: str, _content: str) -> WordSchema:
     try:
-        response = request_gemini_json(_contents=_content, _schema=ExplanationByGemini)
+        response, token_info = request_gemini_json(
+            _contents=_content, _schema=ExplanationByGemini
+        )
         if response is None:
             raise ValueError("Response is None")
         result = WordSchema(

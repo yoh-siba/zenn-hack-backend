@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from src.models.enums import PartOfSpeech
-from src.services.firestore.schemas.meaning_schema import MeaningSchema
-from src.services.firestore.schemas.word_schema import WordSchema
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.word_schema import WordSchema
 
 
 @dataclass
@@ -88,8 +88,28 @@ class ExplanationByGemini:
 @dataclass
 class PromptForImagenByGemini:
     generated_prompt: str
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
 
     def to_dict(self) -> dict:
         return {
             "generated_prompt": self.generated_prompt,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "total_tokens": self.total_tokens,
+        }
+
+
+@dataclass
+class TokenInfo:
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+    def to_dict(self) -> dict:
+        return {
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "total_tokens": self.total_tokens,
         }
