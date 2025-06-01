@@ -1,5 +1,5 @@
 from src.config.settings import db
-from src.schemas.word_schema import MeaningSchema, WordSchema
+from src.services.firebase.schemas.word_schema import MeaningSchema, WordSchema
 
 
 def test_firestore_word() -> None:

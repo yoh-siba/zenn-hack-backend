@@ -1,7 +1,13 @@
-from datetime import datetime
 import time
-from src.schemas.prompt_template_schema import PromptTemplateSchema
-from src.services.firestore.firestore_prompt_template import create_prompt_template_doc, update_prompt_template_doc, read_prompt_template_doc, read_prompt_template_docs
+from datetime import datetime
+
+from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
+from src.services.firebase.unit.firestore_prompt_template import (
+    create_prompt_template_doc,
+    read_prompt_template_docs,
+    update_prompt_template_doc,
+)
+
 
 def test_firestore_prompt_template_functions():
     try:
@@ -13,7 +19,7 @@ def test_firestore_prompt_template_functions():
                 generation_type="image",
                 prompt_text="以下の単語の意味を表す画像を生成してください：{word}\n意味：{meaning}",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             PromptTemplateSchema(
                 name="画像生成テンプレート2",
@@ -21,7 +27,7 @@ def test_firestore_prompt_template_functions():
                 generation_type="image",
                 prompt_text="以下の例文を表す画像を生成してください：{example}\n単語：{word}",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             PromptTemplateSchema(
                 name="画像生成テンプレート3",
@@ -29,17 +35,19 @@ def test_firestore_prompt_template_functions():
                 generation_type="image",
                 prompt_text="以下の単語の関連性を表す画像を生成してください：{word}\n関連語：{related_words}",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         template_ids = []
         print("\n=== テスト開始 ===")
-        
+
         # 1. 複数のデータの作成
         print("\n1. 複数のデータの作成")
         try:
             for test_template in test_templates:
-                is_success, error, created_template_id = create_prompt_template_doc(test_template)
+                is_success, error, created_template_id = create_prompt_template_doc(
+                    test_template
+                )
                 if not is_success:
                     raise Exception(error)
                 template_ids.append(created_template_id)
@@ -72,9 +80,13 @@ def test_firestore_prompt_template_functions():
         try:
             test_templates[0].name = "更新された画像生成テンプレート1"
             test_templates[0].description = "更新された説明文1"
-            test_templates[0].prompt_text = "更新されたプロンプトテキスト：{word}\n意味：{meaning}\n追加情報：{additional_info}"
+            test_templates[
+                0
+            ].prompt_text = "更新されたプロンプトテキスト：{word}\n意味：{meaning}\n追加情報：{additional_info}"
             test_templates[0].updated_at = datetime.now()
-            is_success, error = update_prompt_template_doc(template_ids[0], test_templates[0])
+            is_success, error = update_prompt_template_doc(
+                template_ids[0], test_templates[0]
+            )
             if not is_success:
                 raise Exception(error)
             print(f"更新したデータ: {test_templates[0].to_dict()}")
@@ -103,9 +115,10 @@ def test_firestore_prompt_template_functions():
         print("\n=== テスト成功 ===")
 
     except Exception as e:
-        print(f"\n=== テスト失敗 ===")
+        print("\n=== テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    test_firestore_prompt_template_functions() 
+    test_firestore_prompt_template_functions()

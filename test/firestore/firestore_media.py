@@ -1,7 +1,13 @@
-from datetime import datetime
 import time
-from src.schemas.media_schema import MediaSchema
-from src.services.firestore.firestore_media import create_media_doc, update_media_doc, read_media_doc, read_media_docs
+from datetime import datetime
+
+from src.services.firebase.schemas.media_schema import MediaSchema
+from src.services.firebase.unit.firestore_media import (
+    create_media_doc,
+    read_media_docs,
+    update_media_doc,
+)
+
 
 def test_firestore_media_functions():
     try:
@@ -22,7 +28,7 @@ def test_firestore_media_functions():
                 total_tokens=150,
                 created_by="user_001",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             MediaSchema(
                 media_id="media_002",
@@ -39,7 +45,7 @@ def test_firestore_media_functions():
                 total_tokens=180,
                 created_by="user_001",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             MediaSchema(
                 media_id="media_003",
@@ -56,12 +62,12 @@ def test_firestore_media_functions():
                 total_tokens=135,
                 created_by="user_001",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         media_ids = []
         print("\n=== テスト開始 ===")
-        
+
         # 1. 複数のデータの作成
         print("\n1. 複数のデータの作成")
         try:
@@ -129,9 +135,10 @@ def test_firestore_media_functions():
         print("\n=== テスト成功 ===")
 
     except Exception as e:
-        print(f"\n=== テスト失敗 ===")
+        print("\n=== テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    test_firestore_media_functions() 
+    test_firestore_media_functions()

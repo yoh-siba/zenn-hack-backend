@@ -1,20 +1,22 @@
-from datetime import datetime
 import time
-from src.schemas.meaning_schema import MeaningSchema
-from src.schemas.word_schema import WordSchema
-from src.schemas.media_schema import MediaSchema
-from src.schemas.comparison_schema import ComparisonSchema
-from src.schemas.flashcard_schema import FlashcardSchema
-from src.services.firestore.firestore_meaning import create_meaning_doc
-from src.services.firestore.create_word_and_meaning import create_word_doc
-from src.services.firestore.firestore_media import create_media_doc
-from src.services.firestore.firestore_comparison import create_comparison_doc
-from src.services.firestore.firestore_flashcard import create_flashcard_doc
+from datetime import datetime
+
+from src.services.firebase.create_word_and_meaning import create_word_doc
+from src.services.firebase.schemas.comparison_schema import ComparisonSchema
+from src.services.firebase.schemas.flashcard_schema import FlashcardSchema
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.media_schema import MediaSchema
+from src.services.firebase.schemas.word_schema import WordSchema
+from src.services.firebase.unit.firestore_comparison import create_comparison_doc
+from src.services.firebase.unit.firestore_flashcard import create_flashcard_doc
+from src.services.firebase.unit.firestore_meaning import create_meaning_doc
+from src.services.firebase.unit.firestore_media import create_media_doc
+
 
 def test_firestore_sample_data():
     try:
         print("\n=== サンプルデータ格納テスト開始 ===")
-        
+
         # 1. Meaningデータの作成
         print("\n1. Meaningデータの作成")
         meaning = MeaningSchema(
@@ -25,7 +27,7 @@ def test_firestore_sample_data():
             example_jpn="これはテスト例文です。",
             rank=1,
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         is_success, error, meaning_id = create_meaning_doc(meaning)
         if not is_success:
@@ -42,7 +44,7 @@ def test_firestore_sample_data():
             core_meaning="テストの核心的な意味",
             explanation="これはテストの説明です。",
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         is_success, error, word_id = create_word_doc(word)
         if not is_success:
@@ -68,7 +70,7 @@ def test_firestore_sample_data():
             total_tokens=30,
             created_by="test_user",
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         is_success, error, media_id = create_media_doc(media)
         if not is_success:
@@ -85,7 +87,7 @@ def test_firestore_sample_data():
             new_media_id=media_id,
             selected=media_id,
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         is_success, error, comparison_id = create_comparison_doc(comparison)
         if not is_success:
@@ -107,7 +109,7 @@ def test_firestore_sample_data():
             version=1,
             check_flag=False,
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
         is_success, error, flashcard_id = create_flashcard_doc(flashcard)
         if not is_success:
@@ -124,9 +126,10 @@ def test_firestore_sample_data():
         print(f"flashcard_id: {flashcard_id}")
 
     except Exception as e:
-        print(f"\n=== サンプルデータ格納テスト失敗 ===")
+        print("\n=== サンプルデータ格納テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    test_firestore_sample_data() 
+    test_firestore_sample_data()

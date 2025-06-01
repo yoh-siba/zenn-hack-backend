@@ -1,7 +1,13 @@
-from datetime import datetime
 import time
-from src.schemas.meaning_schema import MeaningSchema
-from src.services.firestore.firestore_meaning import create_meaning_doc, update_meaning_doc, read_meaning_doc, read_meaning_docs
+from datetime import datetime
+
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.unit.firestore_meaning import (
+    create_meaning_doc,
+    read_meaning_docs,
+    update_meaning_doc,
+)
+
 
 def test_firestore_meaning_functions():
     try:
@@ -15,7 +21,7 @@ def test_firestore_meaning_functions():
                 example_jpn="これはテスト例文1です。",
                 rank=1,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             MeaningSchema(
                 pos="動詞",
@@ -25,7 +31,7 @@ def test_firestore_meaning_functions():
                 example_jpn="これはテスト例文2です。",
                 rank=2,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             MeaningSchema(
                 pos="形容詞",
@@ -35,12 +41,12 @@ def test_firestore_meaning_functions():
                 example_jpn="これはテスト例文3です。",
                 rank=3,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         meaning_ids = []
         print("\n=== テスト開始 ===")
-        
+
         # 1. 複数のデータの作成
         print("\n1. 複数のデータの作成")
         try:
@@ -108,9 +114,10 @@ def test_firestore_meaning_functions():
         print("\n=== テスト成功 ===")
 
     except Exception as e:
-        print(f"\n=== テスト失敗 ===")
+        print("\n=== テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    test_firestore_meaning_functions() 
+    test_firestore_meaning_functions()

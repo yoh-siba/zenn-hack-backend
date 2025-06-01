@@ -1,7 +1,13 @@
-from datetime import datetime
 import time
-from src.schemas.user_schema import UserSchema
-from src.services.firestore.firestore_user import create_user_doc, update_user_doc, read_user_doc, read_user_docs
+from datetime import datetime
+
+from src.services.firebase.schemas.user_schema import UserSchema
+from src.services.firebase.unit.firestore_user import (
+    create_user_doc,
+    read_user_docs,
+    update_user_doc,
+)
+
 
 def test_firestore_user_functions():
     try:
@@ -12,26 +18,26 @@ def test_firestore_user_functions():
                 display_name="テストユーザー1",
                 flashcard_id_list=["flash_001", "flash_002"],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             UserSchema(
                 email="test2@example.com",
                 display_name="テストユーザー2",
                 flashcard_id_list=["flash_003"],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             UserSchema(
                 email="test3@example.com",
                 display_name="テストユーザー3",
                 flashcard_id_list=["flash_004", "flash_005", "flash_006"],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         user_ids = []
         print("\n=== テスト開始 ===")
-        
+
         # 1. 複数のデータの作成
         print("\n1. 複数のデータの作成")
         try:
@@ -99,9 +105,10 @@ def test_firestore_user_functions():
         print("\n=== テスト成功 ===")
 
     except Exception as e:
-        print(f"\n=== テスト失敗 ===")
+        print("\n=== テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    test_firestore_user_functions() 
+    test_firestore_user_functions()

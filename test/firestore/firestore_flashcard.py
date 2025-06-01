@@ -1,7 +1,14 @@
-from datetime import datetime
 import time
-from src.schemas.flashcard_schema import FlashcardSchema
-from src.services.firestore.unit.firestore_flashcard import create_flashcard_doc, update_flashcard_doc, read_flashcard_doc, read_flashcard_docs
+from datetime import datetime
+
+from src.services.firebase.schemas.flashcard_schema import FlashcardSchema
+from src.services.firebase.unit.firestore_flashcard import (
+    create_flashcard_doc,
+    read_flashcard_doc,
+    read_flashcard_docs,
+    update_flashcard_doc,
+)
+
 
 def test_firestore_flashcard_functions():
     try:
@@ -18,7 +25,7 @@ def test_firestore_flashcard_functions():
                 version=1,
                 check_flag=False,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             FlashcardSchema(
                 word_id="word_002",
@@ -31,7 +38,7 @@ def test_firestore_flashcard_functions():
                 version=1,
                 check_flag=True,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             FlashcardSchema(
                 word_id="word_003",
@@ -44,17 +51,19 @@ def test_firestore_flashcard_functions():
                 version=1,
                 check_flag=False,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         flashcard_ids = []
         print("\n=== テスト開始 ===")
-        
+
         # 1. 複数のデータの作成
         print("\n1. 複数のデータの作成")
         try:
             for test_flashcard in test_flashcards:
-                is_success, error, created_flashcard_id = create_flashcard_doc(test_flashcard)
+                is_success, error, created_flashcard_id = create_flashcard_doc(
+                    test_flashcard
+                )
                 if not is_success:
                     raise Exception(error)
                 flashcard_ids.append(created_flashcard_id)
@@ -89,7 +98,9 @@ def test_firestore_flashcard_functions():
             test_flashcards[0].check_flag = True
             test_flashcards[0].version = 2
             test_flashcards[0].updated_at = datetime.now()
-            is_success, error = update_flashcard_doc(flashcard_ids[0], test_flashcards[0])
+            is_success, error = update_flashcard_doc(
+                flashcard_ids[0], test_flashcards[0]
+            )
             if not is_success:
                 raise Exception(error)
             print(f"更新したデータ: {test_flashcards[0].to_dict()}")
@@ -118,9 +129,10 @@ def test_firestore_flashcard_functions():
         print("\n=== テスト成功 ===")
 
     except Exception as e:
-        print(f"\n=== テスト失敗 ===")
+        print("\n=== テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
+
 
 def test_read_flashcard(flashcard_id: str):
     print("\n2. 複数データの一括読み取り")
@@ -136,6 +148,7 @@ def test_read_flashcard(flashcard_id: str):
         print(f"データ読み取り中にエラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    # test_firestore_flashcard_functions() 
+    # test_firestore_flashcard_functions()
     test_read_flashcard("duExwo7LSTYoVuhyKNle")

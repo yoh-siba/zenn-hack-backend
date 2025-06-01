@@ -1,8 +1,14 @@
-from datetime import datetime
 import time
-from src.schemas.word_schema import WordSchema
-from src.services.firestore.create_word_and_meaning import create_word_doc, update_word_doc, read_word_doc, read_word_docs
-from src.services.firestore.create_word_and_meaning import create_word_and_meaning
+from datetime import datetime
+
+from src.services.firebase.create_word_and_meaning import (
+    create_word_and_meaning,
+    create_word_doc,
+    read_word_docs,
+    update_word_doc,
+)
+from src.services.firebase.schemas.word_schema import WordSchema
+
 
 def test_firestore_word_functions():
     try:
@@ -14,7 +20,7 @@ def test_firestore_word_functions():
                 core_meaning="テストの意味1",
                 explanation="これはテスト用の説明文1です。",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             WordSchema(
                 word="テスト単語2",
@@ -22,7 +28,7 @@ def test_firestore_word_functions():
                 core_meaning="テストの意味2",
                 explanation="これはテスト用の説明文2です。",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             WordSchema(
                 word="テスト単語3",
@@ -30,12 +36,12 @@ def test_firestore_word_functions():
                 core_meaning="テストの意味3",
                 explanation="これはテスト用の説明文3です。",
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
         word_ids = []
         print("\n=== テスト開始 ===")
-        
+
         # 1. 複数のデータの作成
         print("\n1. 複数のデータの作成")
         try:
@@ -103,10 +109,11 @@ def test_firestore_word_functions():
         print("\n=== テスト成功 ===")
 
     except Exception as e:
-        print(f"\n=== テスト失敗 ===")
+        print("\n=== テスト失敗 ===")
         print(f"エラーが発生しました: {str(e)}")
         raise
 
+
 if __name__ == "__main__":
-    test_firestore_word_functions() 
+    test_firestore_word_functions()
     create_word_and_meaning
