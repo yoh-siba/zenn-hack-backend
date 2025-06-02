@@ -13,9 +13,9 @@ class MediaSchema:
     userPrompt: str
     generated_prompt: str
     input_media_urls: Optional[List[str]]
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
+    prompt_token_count: int
+    candidates_token_count: int
+    total_token_count: int
     created_by: str
     created_at: datetime = None
     updated_at: datetime = None
@@ -31,9 +31,9 @@ class MediaSchema:
             "userPrompt": self.userPrompt,
             "generated_prompt": self.generated_prompt,
             "input_media_urls": self.input_media_urls,
-            "prompt_tokens": self.prompt_tokens,
-            "completion_tokens": self.completion_tokens,
-            "total_tokens": self.total_tokens,
+            "prompt_token_count": self.prompt_token_count,
+            "candidates_token_count": self.candidates_token_count,
+            "total_token_count": self.total_token_count,
             "created_by": self.created_by,
             "created_at": self.created_at or datetime.now(),
             "updated_at": self.updated_at or datetime.now(),
@@ -51,9 +51,9 @@ class MediaSchema:
             userPrompt=data.get("userPrompt"),
             generated_prompt=data.get("generated_prompt"),
             input_media_urls=data.get("input_media_urls"),
-            prompt_tokens=data.get("prompt_tokens"),
-            completion_tokens=data.get("completion_tokens"),
-            total_tokens=data.get("total_tokens"),
+            prompt_token_count=data.get("prompt_token_count"),
+            candidates_token_count=data.get("candidates_token_count"),
+            total_token_count=data.get("total_token_count"),
             created_by=data.get("created_by"),
             created_at=data.get("created_at"),
             updated_at=data.get("updated_at"),

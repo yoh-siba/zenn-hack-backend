@@ -21,9 +21,9 @@ def generate_prompt_for_imagen(_content: str) -> PromptForImagenByGemini:
             raise ValueError("Response is None")
         result = PromptForImagenByGemini(
             generated_prompt=response.generated_prompt,
-            prompt_tokens=token_info.prompt_tokens,
-            completion_tokens=token_info.completion_tokens,
-            total_tokens=token_info.total_tokens,
+            prompt_token_count=token_info.prompt_token_count,
+            candidates_token_count=token_info.candidates_token_count,
+            total_token_count=token_info.total_token_count,
         )
         return result
     except Exception as e:

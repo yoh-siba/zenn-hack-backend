@@ -1,9 +1,9 @@
 from typing import Tuple
 
-from google.generativeai.types import TokenInfo
 from pydantic import BaseModel
 
 from src.config.settings import GOOGLE_GEMINI_MODEL, genai_client
+from src.models.types import TokenInfo
 
 
 def request_gemini_json(
@@ -18,7 +18,12 @@ def request_gemini_json(
                 "response_schema": _schema,
             },
         )
-        return response.parsed, response.token_info
+        token_info = TokenInfo(
+            prompt_token_count=response.usage_metadata.prompt_token_count,
+            candidates_token_count=response.usage_metadata.candidates_token_count,
+            total_token_count=response.usage_metadata.total_token_count,
+        )
+        return response.parsed, token_info
     except Exception as e:
         print(e)
         return None, None

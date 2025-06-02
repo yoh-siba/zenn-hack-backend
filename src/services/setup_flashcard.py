@@ -1,11 +1,12 @@
 from typing import Optional, Tuple
 
 from src.models.types import WordsAPIResponse
-from src.services.firestore.create_word_and_meaning import create_word_and_meaning
-from src.services.firestore.schemas.flashcard_schema import FlashcardSchema
-from src.services.firestore.schemas.media_schema import MediaSchema
-from src.services.firestore.unit.firestore_flashcard import create_flashcard_doc
-from src.services.firestore.unit.firestore_media import (
+from src.services.firebase.create_word_and_meaning import create_word_and_meaning
+from src.services.firebase.schemas.flashcard_schema import FlashcardSchema
+from src.services.firebase.schemas.media_schema import MediaSchema
+from src.services.firebase.unit.cloud_storage_image import create_image_url_from_image
+from src.services.firebase.unit.firestore_flashcard import create_flashcard_doc
+from src.services.firebase.unit.firestore_media import (
     create_media_doc,
     update_media_doc,
 )
@@ -54,7 +55,7 @@ async def setup_word_and_meaning(
         ### コアミーニングの例（「run」場合）
         ある方向に，連続して，（すばやくなめらかに）動く
         """
-        word_instance = generate_explanation_and_core_meaning("account", content)
+        word_instance = generate_explanation_and_core_meaning(word, content)
         if word_instance is None:
             raise ValueError("WordSchema is None")
         # MeaningSchema用のコンテンツを作成
@@ -89,7 +90,8 @@ async def setup_word_and_meaning(
         )
         if not success:
             return False, error, None
-        # 代表となる単語の意味情報を取得（）
+        print("WordとMeaningの保存に成功。画像生成用プロンプトを生成中...")
+        # 代表となる単語の意味情報を取得
         main_meaning = meanings_instance[0] if meanings_instance else None
         content = f"""
         あなたは画像生成AIでイラストを生成するためのプロンプトエンジニアです。
@@ -117,36 +119,43 @@ async def setup_word_and_meaning(
             _person_generation="ALLOW_ADULT",  # 人物生成を許可しない
         )
 
+        image_url_list = []
+        for image in generated_images:
+            success, error, image_url = await create_image_url_from_image(
+                image, f"{word}.png"
+            )
+            if not success:
+                raise ValueError("画像のURL取得に失敗しました", error)
+            image_url_list.append(image_url)
+
         ## TODO: Mediaの保存処理を追加する
         if not generated_images:
             raise ValueError("No images generated")
         media_instance = MediaSchema(
             flashcard_id="",  # 後で更新する
             meaning_id=meaning_id_list[0],
-            media_urls=[image.url for image in generated_images],
-            generation_type="imagen",
+            media_urls=image_url_list,
+            generation_type="text-to-image",
             template_id=None,  # TODO: テンプレートIDを設定する
-            userPrompt=generated_prompt.userPrompt,
+            userPrompt="",
             generated_prompt=generated_prompt.generated_prompt,
             input_media_urls=None,  # 入力メディアURLはNone
-            prompt_tokens=generated_prompt.prompt_tokens,
-            completion_tokens=generated_prompt.completion_tokens,
-            total_tokens=generated_prompt.total_tokens,
+            prompt_token_count=generated_prompt.prompt_token_count,
+            candidates_token_count=generated_prompt.candidates_token_count,
+            total_token_count=generated_prompt.total_token_count,
             created_by="default",  # 作成者はシステム
-            created_at=generated_prompt.created_at,
-            updated_at=generated_prompt.updated_at,
+            created_at=word_instance.created_at,
+            updated_at=word_instance.updated_at,
         )
 
         success, error, media_id = await create_media_doc(media_instance)
         if not success:
             return False, error, None
 
+        print("Mediaの保存に成功。Flashcardのセットアップ中...")
         flashcard_instance = FlashcardSchema(
             word_id=word_id,
-            # rankが先頭から5個までを使用
-            using_meaning_list=[
-                meaning.meaning_id for meaning in meanings_instance[:5]
-            ],
+            using_meaning_list=meaning_id_list[:5],
             memo="",
             media_id_list=[media_id],  # 後で更新される
             current_media_id=media_id,
@@ -157,36 +166,35 @@ async def setup_word_and_meaning(
             created_at=word_instance.created_at,
             updated_at=word_instance.updated_at,
         )
-        success, error, flashcard_id = await create_flashcard_doc(
-            flashcard_instance, media_id, word_id, meanings_instance[0].meaning_id
-        )
+        success, error, flashcard_id = await create_flashcard_doc(flashcard_instance)
         if not success:
             return False, error, None
 
+        print("Flashcardの保存に成功。Mediaの更新中...")
         media_instance = MediaSchema(
             flashcard_id=flashcard_id,
-            meaning_id=meanings_instance[0].meaning_id,
-            media_urls=[image.url for image in generated_images],
+            meaning_id=meaning_id_list[0],  # 最初の意味を使用
+            media_urls=image_url_list,
             generation_type="imagen",
             template_id=None,  # TODO: テンプレートIDを設定する
-            userPrompt=generated_prompt.userPrompt,
+            userPrompt="",
             generated_prompt=generated_prompt.generated_prompt,
             input_media_urls=None,  # 入力メディアURLはNone
-            prompt_tokens=generated_prompt.prompt_tokens,
-            completion_tokens=generated_prompt.completion_tokens,
-            total_tokens=generated_prompt.total_tokens,
+            prompt_token_count=generated_prompt.prompt_token_count,
+            candidates_token_count=generated_prompt.candidates_token_count,
+            total_token_count=generated_prompt.total_token_count,
             created_by="default",  # 作成者はシステム
-            created_at=generated_prompt.created_at,
-            updated_at=generated_prompt.updated_at,
+            created_at=word_instance.created_at,
+            updated_at=word_instance.updated_at,
         )
 
-        success, error, media_id = update_media_doc(
+        success, error = await update_media_doc(
             media_id=media_id, media_instance=media_instance
         )
         if not success:
             return False, error, None
 
-        return True, None, flashcard_instance.flashcard_id
+        return True, None, flashcard_id
 
     except Exception as e:
         error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"

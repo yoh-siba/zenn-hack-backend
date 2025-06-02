@@ -56,7 +56,6 @@ def request_imagen_text_to_image(
         for generated_image in response.generated_images:
             image = Image.open(BytesIO(generated_image.image.image_bytes))
             images.append(image)
-            image.show()
         return images
     except Exception as e:
         print(f"エラーの詳細: {str(e)}")

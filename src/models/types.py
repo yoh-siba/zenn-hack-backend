@@ -88,28 +88,28 @@ class ExplanationByGemini:
 @dataclass
 class PromptForImagenByGemini:
     generated_prompt: str
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
+    prompt_token_count: int
+    candidates_token_count: int
+    total_token_count: int
 
     def to_dict(self) -> dict:
         return {
             "generated_prompt": self.generated_prompt,
-            "prompt_tokens": self.prompt_tokens,
-            "completion_tokens": self.completion_tokens,
-            "total_tokens": self.total_tokens,
+            "prompt_token_count": self.prompt_token_count,
+            "candidates_token_count": self.candidates_token_count,
+            "total_token_count": self.total_token_count,
         }
 
 
 @dataclass
 class TokenInfo:
-    prompt_tokens: int
-    completion_tokens: int
-    total_tokens: int
+    prompt_token_count: int
+    candidates_token_count: int
+    total_token_count: int
 
     def to_dict(self) -> dict:
         return {
-            "prompt_tokens": self.prompt_tokens,
-            "completion_tokens": self.completion_tokens,
-            "total_tokens": self.total_tokens,
+            "prompt_token_count": self.prompt_token_count,
+            "candidates_token_count": self.candidates_token_count,
+            "total_token_count": self.total_token_count,
         }
