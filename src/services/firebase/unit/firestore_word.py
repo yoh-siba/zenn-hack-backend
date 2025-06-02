@@ -57,3 +57,21 @@ async def read_word_docs(word_ids: list[str]) -> Tuple[list[WordSchema], Optiona
         error_message = f"単語の一括読み込み中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return [], error_message
+
+
+async def read_word_id_by_word(
+    _word: str,
+) -> Optional[str]:
+    try:
+        query = db.collection("words").where("word", "==", _word).limit(1)
+        docs = query.get()
+        if not docs:
+            return None
+
+        doc = docs[0]
+        return doc.id
+
+    except Exception as e:
+        error_message = f"単語の読み込み中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return None

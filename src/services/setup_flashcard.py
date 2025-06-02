@@ -10,6 +10,7 @@ from src.services.firebase.unit.firestore_media import (
     create_media_doc,
     update_media_doc,
 )
+from src.services.firebase.unit.firestore_word import read_word_id_by_word
 from src.services.google_ai.generate_explanation_and_core_meaning import (
     generate_explanation_and_core_meaning,
 )
@@ -35,6 +36,9 @@ async def setup_word_and_meaning(
             - 作成された単語のID（失敗時はNone）
     """
     try:
+        is_exist = await read_word_id_by_word(word)
+        if is_exist:
+            raise ValueError(f"単語 '{word}' は既に存在します。")
         # WordsAPIから単語情報を取得
         words_api_response: WordsAPIResponse = await request_words_api(word)
 
