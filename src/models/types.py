@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from pydantic import BaseModel, Field
+
 from src.models.enums import PartOfSpeech
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
 from src.services.firebase.schemas.word_schema import WordSchema
@@ -113,3 +115,9 @@ class TokenInfo:
             "candidates_token_count": self.candidates_token_count,
             "total_token_count": self.total_token_count,
         }
+
+class NewUser(BaseModel):
+    email: str
+    display_name: str = Field(alias="displayName")
+    class Config:
+        allow_population_by_field_name = True
