@@ -9,6 +9,11 @@ async def create_user_doc(
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("users")
+        existing_docs = await doc_ref.where("email", "==", user_instance.email).get()
+        if existing_docs:
+            error_message = "このメールアドレスは既に登録されています。"
+            print(f"\n{error_message}")
+            return False, error_message, None
         new_doc = doc_ref.add(user_instance.to_dict())
         return True, None, new_doc[1].id
     except Exception as e:
