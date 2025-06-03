@@ -50,10 +50,11 @@ if __name__ == "__main__":
         test_user_list = [
             NewUser(
                 email="test1@example.com",
-                display_name="User One",
+                display_name="test1",
             ),
         ]
         for test_user in test_user_list:
+            print(f"\nユーザー '{test_user.email}' のセットアップ")
             success, error, user_id = await setup_user(test_user)
             if success:
                 print(

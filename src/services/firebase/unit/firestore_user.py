@@ -9,7 +9,7 @@ async def create_user_doc(
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
         doc_ref = db.collection("users")
-        existing_docs = await doc_ref.where("email", "==", user_instance.email).get()
+        existing_docs = doc_ref.where("email", "==", user_instance.email).get()
         if existing_docs:
             error_message = "このメールアドレスは既に登録されています。"
             print(f"\n{error_message}")

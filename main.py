@@ -1,11 +1,10 @@
 from fastapi import FastAPI, HTTPException
 
-from src.models.types import NewUser
-from src.services.firebase.create_word_and_meaning import save_word_to_firestore
-from src.services.firebase.schemas.user_schema import UserSchema
+from src.models.types import NewUser, NewUserRequest
+from src.services.firebase.create_word_and_meaning import create_word_and_meaning
 from src.services.firebase.unit.firestore_flashcard import read_flashcard_docs
 from src.services.firebase.unit.firestore_user import read_user_doc
-from src.services.setup_flashcard import translate_text
+from src.services.setup_flashcard import setup_flashcard
 from src.services.setup_user import setup_user
 from src.services.words_api import request_words_api
 
@@ -24,22 +23,22 @@ async def get_word(word: str):
         word_data = request_words_api(word)
 
         # 翻訳を実行
-        translated_data = translate_text(word_data)
+        translated_data = setup_flashcard(word_data)
 
         # Firestoreに保存
-        save_word_to_firestore(translated_data)
+        create_word_and_meaning(translated_data)
 
         return translated_data
     except Exception as e:
         return {"error": str(e)}
     
 @app.post("/setup/user")
-async def setup_user_endpoint(user: NewUser):
+async def setup_user_endpoint(_user: NewUserRequest):
     try:
-        user_instance = UserSchema(**user.model_dump())
-        success, error, user_id = await setup_user(user_instance)
+        user = NewUser(**_user.model_dump(by_alias=False))
+        success, error, user_id = await setup_user(user)
         if success:
-            return {"message": "User setup successful", "user_id": user_id}
+            return {"message": "User setup successful", "userId": user_id}
         else:
             raise HTTPException(status_code=400, detail=error)
     except Exception as e:
@@ -64,9 +63,7 @@ async def get_flashcards(userId: str):
             raise HTTPException(status_code=500, detail=error)
         if not flashcards:
             raise HTTPException(status_code=404, detail="No flashcards found for this user")
-        return flashcards
+        return [fc.model_dump(by_alias=True) for fc in flashcards]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-
     

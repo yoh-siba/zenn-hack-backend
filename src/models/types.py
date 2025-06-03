@@ -116,8 +116,13 @@ class TokenInfo:
             "total_token_count": self.total_token_count,
         }
 
-class NewUser(BaseModel):
+class NewUserRequest(BaseModel):
     email: str
     display_name: str = Field(alias="displayName")
     class Config:
         allow_population_by_field_name = True
+
+@dataclass
+class NewUser:
+    email: str
+    display_name: str
