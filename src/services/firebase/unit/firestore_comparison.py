@@ -37,7 +37,7 @@ async def read_comparison_doc(
         doc_ref = db.collection("comparisons").document(comparison_id)
         doc = doc_ref.get()
         if doc.exists:
-            return ComparisonSchema.from_dict(doc.to_dict()), None
+            return ComparisonSchema.from_json(doc.to_dict()), None
         return None, "指定された比較データが見つかりません"
     except Exception as e:
         error_message = f"比較データの読み込み中にエラーが発生しました: {str(e)}"
@@ -59,7 +59,7 @@ async def read_comparison_docs(
         )
         comparisons = []
         for doc in docs:
-            comparisons.append(ComparisonSchema.from_dict(doc.to_dict()))
+            comparisons.append(ComparisonSchema.from_json(doc.to_dict()))
         return comparisons, None
     except Exception as e:
         error_message = f"比較データの一括読み込み中にエラーが発生しました: {str(e)}"

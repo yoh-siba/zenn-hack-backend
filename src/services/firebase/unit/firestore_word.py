@@ -8,6 +8,7 @@ async def create_word_doc(
     word_instance: WordSchema,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
+        print("word_instance.to_dict():", word_instance.to_dict())
         doc_ref = db.collection("words")
         new_doc = doc_ref.add(word_instance.to_dict())
         return True, None, new_doc[1].id
@@ -35,7 +36,7 @@ async def read_word_doc(word_id: str) -> Tuple[Optional[WordSchema], Optional[st
         doc_ref = db.collection("words").document(word_id)
         doc = doc_ref.get()
         if doc.exists:
-            return WordSchema.from_dict(doc.to_dict()), None
+            return WordSchema.from_json(doc.to_dict()), None
         return None, "指定された単語が見つかりません"
     except Exception as e:
         error_message = f"単語の読み込み中にエラーが発生しました: {str(e)}"
@@ -51,7 +52,7 @@ async def read_word_docs(word_ids: list[str]) -> Tuple[list[WordSchema], Optiona
         docs = db.collection("words").where("__name__", "in", word_ids).get()
         words = []
         for doc in docs:
-            words.append(WordSchema.from_dict(doc.to_dict()))
+            words.append(WordSchema.from_json(doc.to_dict()))
         return words, None
     except Exception as e:
         error_message = f"単語の一括読み込み中にエラーが発生しました: {str(e)}"

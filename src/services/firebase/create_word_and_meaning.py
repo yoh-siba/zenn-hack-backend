@@ -27,23 +27,26 @@ async def create_word_and_meaning(
         # 単語をwordsコレクションに追加
         success, error, word_id = await create_word_doc(word_instance)
         if not success:
-            return False, error, None
+            print(f"\n単語の作成に失敗しました: {error}")
+            return False, error, None, None
 
         # 意味をmeaningsコレクションに追加し、IDを収集
+        print(f"\n単語 '{word_instance.word}' の意味を作成中...")
         meaning_id_list = []
         for meaning in meanings_instance:
             meaning.word_id = word_id
             success, error, meaning_id = await create_meaning_doc(meaning)
             if not success:
-                return False, error, None
+                print(f"\n意味の作成に失敗しました: {error}")
+                return False, error, None, None
             meaning_id_list.append(meaning_id)
 
         # 単語ドキュメントを更新してmeaning_id_listを設定
         word_instance.meaning_id_list = meaning_id_list
         success, error = await update_word_doc(word_id, word_instance)
         if not success:
-            return False, error, None
-
+            print(f"\n単語の更新に失敗しました: {error}")
+            return False, error, None, None
         return True, None, word_id, meaning_id_list
     except Exception as e:
         error_message = f"単語の作成中にエラーが発生しました: {str(e)}"

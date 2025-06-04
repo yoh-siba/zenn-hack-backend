@@ -37,7 +37,7 @@ async def read_flashcard_doc(
         doc_ref = db.collection("flashcards").document(flashcard_id)
         doc = doc_ref.get()
         if doc.exists:
-            return FlashcardSchema.from_dict(doc.to_dict()), None
+            return FlashcardSchema.from_json(doc.to_dict()), None
         return None, "指定されたフラッシュカードが見つかりません"
     except Exception as e:
         error_message = f"フラッシュカードの読み込み中にエラーが発生しました: {str(e)}"
@@ -55,7 +55,7 @@ async def read_flashcard_docs(
         docs = db.collection("flashcards").where("__name__", "in", flashcard_ids).get()
         flashcards = []
         for doc in docs:
-            flashcards.append(FlashcardSchema.from_dict(doc.to_dict()))
+            flashcards.append(FlashcardSchema.from_json(doc.to_dict()))
         return flashcards, None
     except Exception as e:
         error_message = (

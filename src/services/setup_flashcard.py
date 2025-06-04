@@ -212,6 +212,7 @@ if __name__ == "__main__":
     async def main():
         # テスト用の単語
         test_word_list = ["account", "apple", "challenge","issue", "sound"]
+        # test_word_list = ["account"]
         for test_word in test_word_list:
             success, error, flashcard_id = await setup_flashcard(test_word)
             if success:

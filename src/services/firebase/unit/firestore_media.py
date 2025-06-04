@@ -35,7 +35,7 @@ async def read_media_doc(media_id: str) -> Tuple[Optional[MediaSchema], Optional
         doc_ref = db.collection("media").document(media_id)
         doc = doc_ref.get()
         if doc.exists:
-            return MediaSchema.from_dict(doc.to_dict()), None
+            return MediaSchema.from_json(doc.to_dict()), None
         return None, "指定されたメディアデータが見つかりません"
     except Exception as e:
         error_message = f"メディアデータの読み込み中にエラーが発生しました: {str(e)}"
@@ -53,7 +53,7 @@ async def read_media_docs(
         docs = await db.collection("media").where("__name__", "in", media_ids).get()
         media_list = []
         for doc in docs:
-            media_list.append(MediaSchema.from_dict(doc.to_dict()))
+            media_list.append(MediaSchema.from_json(doc.to_dict()))
         return media_list, None
     except Exception as e:
         error_message = (

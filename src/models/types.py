@@ -51,7 +51,7 @@ class WordAndMeanings:
     word: WordSchema
     meanings: List[MeaningSchema]
 
-
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class TranslationByGemini:
     pos: PartOfSpeech
@@ -62,31 +62,14 @@ class TranslationByGemini:
     example_jpn: str
     rank: int
 
-    def to_dict(self) -> dict:
-        """TranslationMeaningオブジェクトをdictに変換"""
-        return {
-            "pos": self.pos,
-            "definition_jpn": self.definition_jpn,
-            "definition_eng": self.definition_eng,
-            "pronunciation": self.pronunciation,
-            "example_eng": self.example_eng,
-            "example_jpn": self.example_jpn,
-            "rank": self.rank,
-        }
 
-
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class ExplanationByGemini:
     explanation: str
     core_meaning: Optional[str]
 
-    def to_dict(self) -> dict:
-        return {
-            "explanation": self.explanation,
-            "core_meaning": self.core_meaning if self.core_meaning else "",
-        }
-
-
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class PromptForImagenByGemini:
     generated_prompt: str
@@ -94,27 +77,13 @@ class PromptForImagenByGemini:
     candidates_token_count: int
     total_token_count: int
 
-    def to_dict(self) -> dict:
-        return {
-            "generated_prompt": self.generated_prompt,
-            "prompt_token_count": self.prompt_token_count,
-            "candidates_token_count": self.candidates_token_count,
-            "total_token_count": self.total_token_count,
-        }
 
-
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class TokenInfo:
     prompt_token_count: int
     candidates_token_count: int
     total_token_count: int
-
-    def to_dict(self) -> dict:
-        return {
-            "prompt_token_count": self.prompt_token_count,
-            "candidates_token_count": self.candidates_token_count,
-            "total_token_count": self.total_token_count,
-        }
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)

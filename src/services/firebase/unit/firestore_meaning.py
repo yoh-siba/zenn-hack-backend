@@ -37,7 +37,7 @@ async def read_meaning_doc(
         doc_ref = db.collection("meanings").document(meaning_id)
         doc = doc_ref.get()
         if doc.exists:
-            return MeaningSchema.from_dict(doc.to_dict()), None
+            return MeaningSchema.from_json(doc.to_dict()), None
         return None, "指定された意味が見つかりません"
     except Exception as e:
         error_message = f"意味の読み込み中にエラーが発生しました: {str(e)}"
@@ -57,7 +57,7 @@ async def read_meaning_docs(
         )
         meanings = []
         for doc in docs:
-            meanings.append(MeaningSchema.from_dict(doc.to_dict()))
+            meanings.append(MeaningSchema.from_json(doc.to_dict()))
         return meanings, None
     except Exception as e:
         error_message = f"意味の一括読み込み中にエラーが発生しました: {str(e)}"
