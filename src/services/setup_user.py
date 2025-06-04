@@ -49,8 +49,8 @@ if __name__ == "__main__":
         # テスト用のユーザー
         test_user_list = [
             NewUser(
-                email="test1@example.com",
-                display_name="test1",
+                email="test2@example.com",
+                display_name="test2",
             ),
         ]
         for test_user in test_user_list:

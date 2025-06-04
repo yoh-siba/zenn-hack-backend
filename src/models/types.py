@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from dataclasses_json import LetterCase, dataclass_json
 
 from src.models.enums import PartOfSpeech
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
@@ -116,12 +116,8 @@ class TokenInfo:
             "total_token_count": self.total_token_count,
         }
 
-class NewUserRequest(BaseModel):
-    email: str
-    display_name: str = Field(alias="displayName")
-    class Config:
-        allow_population_by_field_name = True
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class NewUser:
     email: str
