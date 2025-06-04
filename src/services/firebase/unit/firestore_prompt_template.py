@@ -41,7 +41,7 @@ async def read_prompt_template_doc(
         doc_ref = db.collection("prompt_templates").document(template_id)
         doc = doc_ref.get()
         if doc.exists:
-            return PromptTemplateSchema.from_json(doc.to_dict()), None
+            return PromptTemplateSchema.from_dict(doc.to_dict()), None
         return None, "指定されたプロンプトテンプレートが見つかりません"
     except Exception as e:
         error_message = (
@@ -65,7 +65,7 @@ async def read_prompt_template_docs(
         )
         templates = []
         for doc in docs:
-            templates.append(PromptTemplateSchema.from_json(doc.to_dict()))
+            templates.append(PromptTemplateSchema.from_dict(doc.to_dict()))
         return templates, None
     except Exception as e:
         error_message = (

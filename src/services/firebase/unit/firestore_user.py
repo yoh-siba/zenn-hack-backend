@@ -40,7 +40,8 @@ async def read_user_doc(user_id: str) -> Tuple[Optional[UserSchema], Optional[st
         doc_ref = db.collection("users").document(user_id)
         doc = doc_ref.get()
         if doc.exists:
-            return UserSchema.from_json(doc.to_dict()), None
+            user_instance = UserSchema.from_dict(doc.to_dict())
+            return user_instance, None
         return None, "指定されたユーザーが見つかりません"
     except Exception as e:
         error_message = f"ユーザーデータの読み込み中にエラーが発生しました: {str(e)}"
@@ -56,7 +57,7 @@ async def read_user_docs(user_ids: list[str]) -> Tuple[list[UserSchema], Optiona
         docs = await db.collection("users").where("__name__", "in", user_ids).get()
         users = []
         for doc in docs:
-            users.append(UserSchema.from_json(doc.to_dict()))
+            users.append(UserSchema.from_dict(doc.to_dict()))
         return users, None
     except Exception as e:
         error_message = (

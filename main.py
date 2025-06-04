@@ -5,6 +5,8 @@ from pydantic import ValidationError
 
 from src.models.types import NewUser
 from src.services.firebase.create_word_and_meaning import create_word_and_meaning
+from src.services.firebase.unit.firestore_flashcard import read_flashcard_docs
+from src.services.firebase.unit.firestore_user import read_user_doc
 from src.services.setup_flashcard import setup_flashcard
 from src.services.setup_user import setup_user
 from src.services.words_api import request_words_api
@@ -50,27 +52,27 @@ async def setup_user_endpoint(_user: dict = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# @app.get("/flashcards/{userId}")
-# async def get_flashcards(userId: str):
-#     try:
-#         user_id = userId
-#         user_instance, error = await read_user_doc(user_id)
-#         if error:
-#             raise HTTPException(status_code=500, detail=error)
-#         if not user_instance:
-#             raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
-#         # 登録単語が0の場合はフロント側で処理（エラーではない）
-#         if len(user_instance.flashcard_id_list) == 0:
-#             return []
-#         flashcards, error = await read_flashcard_docs(user_instance.flashcard_id_list)
-#         if error:
-#             raise HTTPException(status_code=500, detail=error)
-#         if not flashcards:
-#             raise HTTPException(status_code=404, detail="このユーザーのフラッシュカードが見つかりません")
-#         print(f"flashcards: {flashcards}")
-#         return {
-#             "message": "Flashcards retrieved successfully",
-#             "flashcards": [FlashcardResponse.model_validate(flashcard).model_dump(by_alias=True) for flashcard in flashcards]
-#         }
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.get("/flashcards/{userId}")
+async def get_flashcards(userId: str):
+    try:
+        user_id = userId
+        user_instance, error = await read_user_doc(user_id)
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if not user_instance:
+            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+        # 登録単語が0の場合はフロント側で処理（エラーではない）
+        if len(user_instance.flashcard_id_list) == 0:
+            return []
+        flashcards, error = await read_flashcard_docs(user_instance.flashcard_id_list)
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if not flashcards:
+            raise HTTPException(status_code=404, detail="このユーザーのフラッシュカードが見つかりません")
+        print(f"flashcards: {flashcards}")
+        return {
+            "message": "Flashcards retrieved successfully",
+            "flashcards": [flashcard.to_dict() for flashcard in flashcards]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
