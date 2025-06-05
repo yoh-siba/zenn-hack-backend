@@ -11,8 +11,14 @@ COPY pyproject.toml poetry.lock /app/
 RUN pip install poetry
 
 # Install dependencies using Poetry
-RUN poetry config virtualenvs.create false \
-    && poetry install --only main --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi
+
+# Activate the virtual environment
+RUN poetry env use python && echo "$(poetry env info --path)" > /venv_path
+
+# Set the virtual environment path
+ENV VIRTUAL_ENV=/venv_path
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy the rest of the application code to the container
 COPY . /app
