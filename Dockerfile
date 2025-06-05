@@ -24,5 +24,5 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY . /app
 COPY src /app/src
 # Command to run the application
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
 
