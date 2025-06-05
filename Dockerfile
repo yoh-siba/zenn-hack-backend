@@ -11,7 +11,7 @@ COPY pyproject.toml poetry.lock /app/
 RUN pip install poetry
 
 # Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi
+RUN poetry install --no-interaction --no-ansi --no-root
 
 # Activate the virtual environment
 RUN poetry env use python && echo "$(poetry env info --path)" > /venv_path
@@ -22,6 +22,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Copy the rest of the application code to the container
 COPY . /app
+COPY src /app/src
 
 # Expose the port that the app runs on
 EXPOSE 8000
