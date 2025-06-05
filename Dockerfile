@@ -28,5 +28,5 @@ COPY src /app/src
 EXPOSE 8080
 
 # Command to run the application
-CMD ["sh", "-c", "poetry run uvicorn main:app --host 0.0.0.0 --port $PORT"]
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
 
