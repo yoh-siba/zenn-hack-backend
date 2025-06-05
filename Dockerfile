@@ -23,10 +23,6 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Copy the rest of the application code to the container
 COPY . /app
 COPY src /app/src
-
-# Expose the port that the app runs on
-EXPOSE 8080
-
 # Command to run the application
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
