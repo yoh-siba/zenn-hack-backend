@@ -11,14 +11,15 @@ COPY pyproject.toml poetry.lock /app/
 RUN pip install poetry
 
 # Install dependencies using Poetry
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+RUN poetry install
+
+# Activate the virtual environment
+RUN poetry env use python && poetry env activate
+
+ENV PORT=8080
 
 # Copy the rest of the application code to the container
 COPY . /app
-
-# Expose the port that the app runs on
-EXPOSE 8000
-
 # Command to run the application
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+
