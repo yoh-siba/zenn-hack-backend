@@ -1,28 +1,32 @@
-# Use the official Python image as a base image
+# ベースイメージ
 FROM python:3.12-slim
 
-# Set the working directory in the container
+# 作業ディレクトリを設定
 WORKDIR /app
 
-# Copy the pyproject.toml and poetry.lock files to the container
-COPY pyproject.toml poetry.lock /app/
+# 必要なシステムパッケージをインストール
+RUN apt-get update && apt-get install -y \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install poetry
+# Poetryのインストール
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Install dependencies using Poetry
-RUN poetry install --no-interaction --no-ansi --no-root
+# プロジェクトファイルをコピー
+COPY pyproject.toml poetry.lock ./
 
-# Activate the virtual environment
-RUN poetry env use python && echo "$(poetry env info --path)" > /venv_path
+# 依存関係をインストール
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-dev --no-interaction --no-ansi
 
-# Set the virtual environment path
-ENV VIRTUAL_ENV=/venv_path
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# アプリケーションコードをコピー
+COPY . .
 
-# Copy the rest of the application code to the container
-COPY . /app
-COPY src /app/src
-# Command to run the application
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT}"]
+# ポートを公開
+EXPOSE 8000
+
+# FastAPIアプリケーションを起動
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
