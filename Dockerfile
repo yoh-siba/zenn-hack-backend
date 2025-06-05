@@ -12,7 +12,7 @@ RUN pip install poetry
 
 # Install dependencies using Poetry
 RUN poetry config virtualenvs.create false \
-    && poetry install --without dev --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi
 
 # Copy the rest of the application code to the container
 COPY . /app
