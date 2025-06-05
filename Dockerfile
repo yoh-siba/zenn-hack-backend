@@ -1,32 +1,24 @@
-# ベースイメージ
+# Use the official Python image as a base image
 FROM python:3.12-slim
 
-# 作業ディレクトリを設定
+# Set the working directory in the container
 WORKDIR /app
 
-# 必要なシステムパッケージをインストール
-RUN apt-get update && apt-get install -y \
-    curl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Copy the pyproject.toml and poetry.lock files to the container
+COPY pyproject.toml poetry.lock /app/
 
-# Poetryのインストール
-RUN curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+# Install Poetry
+RUN pip install poetry
 
-# プロジェクトファイルをコピー
-COPY pyproject.toml poetry.lock ./
-
-# 依存関係をインストール
+# Install dependencies using Poetry
 RUN poetry config virtualenvs.create false \
     && poetry install --no-dev --no-interaction --no-ansi
 
-# アプリケーションコードをコピー
-COPY . .
+# Copy the rest of the application code to the container
+COPY . /app
 
-# ポートを公開
+# Expose the port that the app runs on
 EXPOSE 8000
 
-# FastAPIアプリケーションを起動
+# Command to run the application
 CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
