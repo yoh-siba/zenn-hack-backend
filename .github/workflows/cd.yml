@@ -1,0 +1,59 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main # メインブランチへのプッシュ時に実行
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # GitHubに登録したGCPのプロジェクトID
+  SA_KEY: ${{ secrets.GCP_SA_KEY }} # GitHubに登録したGCPのサービスアカウントキー
+  SERVICE_NAME: python-app # Cloud Runのサービス名
+  REGION: asia-northeast1 # デプロイするリージョン（Artifact Registryのリポジトリと同じにする）
+  REPOSITORY_NAME: my-app # Artifact Registryのリポジトリ名
+
+permissions:
+  contents: "read" # リポジトリ内容の読み取り権限
+  id-token: "write" # OIDC認証トークンの生成権限
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # 最新版のubuntuを指定
+
+    steps:
+      # リポジトリからコードを取得
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Google Cloudへの認証を設定
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.SA_KEY }}
+          project_id: ${{ env.PROJECT_ID }}
+
+      # Artifact Registryへのログイン
+      - name: "Login to Artifact Registry"
+        uses: "docker/login-action@v3"
+        with:
+          registry: ${{ env.REGION }}-docker.pkg.dev
+          username: _json_key
+          password: ${{ env.SA_KEY }}
+
+      # コンテナイメージのビルドとArtifact Registryへのプッシュ
+      - name: Build and Push Container
+        run: |-
+          IMAGE_URI="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker build -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+
+      # Cloud Runへのデプロイ
+      - name: Deploy to Cloud Run
+        run: |-
+          IMAGE_URI="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image "$IMAGE_URI" \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-secrets="KEY=SECRET_NAME:VERSION:latest"
