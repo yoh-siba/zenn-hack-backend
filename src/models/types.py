@@ -91,3 +91,16 @@ class TokenInfo:
 class NewUser:
     email: str
     display_name: str
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class UpdateFlagRequest:
+    flashcard_id: str
+    change_flag: bool
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class UpdateMemoRequest:
+    flashcard_id: str
+    memo: str
