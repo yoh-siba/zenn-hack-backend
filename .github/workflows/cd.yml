@@ -8,9 +8,9 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # GitHubに登録したGCPのプロジェクトID
   SA_KEY: ${{ secrets.GCP_SA_KEY }} # GitHubに登録したGCPのサービスアカウントキー
-  SERVICE_NAME: python-app # Cloud Runのサービス名
-  REGION: asia-northeast1 # デプロイするリージョン（Artifact Registryのリポジトリと同じにする）
-  REPOSITORY_NAME: my-app # Artifact Registryのリポジトリ名
+  SERVICE_NAME: zenn-hack-fast-api-app # Cloud Runのサービス名
+  REGION: asia-northeast2 # デプロイするリージョン（Artifact Registryのリポジトリと同じにする）
+  REPOSITORY_NAME: zenn-hack-backend # Artifact Registryのリポジトリ名
 
 permissions:
   contents: "read" # リポジトリ内容の読み取り権限
