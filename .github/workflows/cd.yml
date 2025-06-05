@@ -55,5 +55,4 @@ jobs:
             --image "$IMAGE_URI" \
             --region ${{ env.REGION }} \
             --platform managed \
-            --allow-unauthenticated \
-            --set-secrets="KEY=SECRET_NAME:VERSION:latest"
+            --allow-unauthenticated
