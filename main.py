@@ -1,7 +1,5 @@
 import json
-import os
 
-import uvicorn
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import ValidationError
 
@@ -78,10 +76,6 @@ async def get_flashcards(userId: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8080))
-    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 
