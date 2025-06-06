@@ -19,4 +19,4 @@ RUN poetry install
 ENV PORT=8080
 
 # Run app directly without poetry
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
