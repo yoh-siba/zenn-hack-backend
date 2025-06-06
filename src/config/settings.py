@@ -19,7 +19,7 @@ genai_client = genai.Client(api_key=GOOGLE_API_KEY)
 
 
 # Use a service account.
-cred = credentials.Certificate("src/config/serviceAccount.json")
+cred = credentials.Certificate("/src/config/serviceAccount.json")
 
 app = firebase_admin.initialize_app(
     cred, {"storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET")}
