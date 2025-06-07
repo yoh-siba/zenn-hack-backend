@@ -9,7 +9,7 @@ from dataclasses_json import LetterCase, dataclass_json
 @dataclass
 class FlashcardSchema:
     word_id: str
-    using_meaning_list: List[str]
+    using_meaning_id_list: List[str]
     memo: str
     media_id_list: List[str]
     current_media_id: str

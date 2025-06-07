@@ -159,7 +159,7 @@ async def setup_flashcard(
         print("Mediaの保存に成功。Flashcardのセットアップ中...")
         flashcard_instance = FlashcardSchema(
             word_id=word_id,
-            using_meaning_list=meaning_id_list[:5],
+            using_meaning_id_list=meaning_id_list[:5],
             memo="",
             media_id_list=[media_id],  # 後で更新される
             current_media_id=media_id,

@@ -100,7 +100,7 @@ def test_firestore_sample_data():
         print("\n5. Flashcardデータの作成")
         flashcard = FlashcardSchema(
             word_id=word_id,
-            using_meaning_list=[meaning_id],
+            using_meaning_id_list=[meaning_id],
             memo="テスト用のメモ",
             media_id_list=[media_id],
             current_media_id=media_id,

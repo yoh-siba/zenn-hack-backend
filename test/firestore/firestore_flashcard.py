@@ -16,7 +16,7 @@ def test_firestore_flashcard_functions():
         test_flashcards = [
             FlashcardSchema(
                 word_id="word_001",
-                using_meaning_list=["meaning_001", "meaning_002"],
+                using_meaning_id_list=["meaning_001", "meaning_002"],
                 memo="テスト用メモ1",
                 media_id_list=["media_001", "media_002"],
                 current_media_id="media_001",
@@ -29,7 +29,7 @@ def test_firestore_flashcard_functions():
             ),
             FlashcardSchema(
                 word_id="word_002",
-                using_meaning_list=["meaning_003"],
+                using_meaning_id_list=["meaning_003"],
                 memo="テスト用メモ2",
                 media_id_list=["media_003"],
                 current_media_id="media_003",
@@ -42,7 +42,7 @@ def test_firestore_flashcard_functions():
             ),
             FlashcardSchema(
                 word_id="word_003",
-                using_meaning_list=["meaning_004", "meaning_005"],
+                using_meaning_id_list=["meaning_004", "meaning_005"],
                 memo="テスト用メモ3",
                 media_id_list=["media_004", "media_005"],
                 current_media_id="media_004",
