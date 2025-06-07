@@ -150,7 +150,7 @@ async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# 意味取得API
+# 単語の意味取得API
 @app.get("/meaning/{wordId}")
 async def get_meanings_endpoint(wordId: str):
     try:
@@ -172,4 +172,30 @@ async def get_meanings_endpoint(wordId: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+
+#  エラー報告の仕様を整理したうえで実装
+# 単語の意味追加API（注：ユーザーごとの意味追加APIとは別）
+@app.post("/apply/add_meaning")
+async def apply_add_meaning_endpoint(_request: dict = Body(...)):
+    try:
+    #    add_meaning_request = ApplyAddMeaningRequest.from_dict(_request)
+       raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+#  エラー報告の仕様を整理したうえで実装
+# 単語の意味追加API（注：ユーザーごとの意味追加APIとは別）
+@app.post("/apply/modify_meaning")
+async def apply_modify_meaning_endpoint(_request: dict = Body(...)):
+    try:
+        # modify_meaning_request = ApplyModifyMeaningRequest.from_dict(_request)
+        raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 

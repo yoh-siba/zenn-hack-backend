@@ -110,3 +110,20 @@ class UpdateMemoRequest:
 class UpdateUsingMeaningsRequest:
     flashcard_id: str
     using_meaning_id_list: List[str]
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class ApplyAddMeaningRequest:
+    word_id: str
+    definition: str
+    pronunciation: str
+    comment: str
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class ApplyModifyMeaningRequest:
+    word_id: str
+    meaning_id: str
+    definition: str
+    pronunciation: str
+    comment: str
