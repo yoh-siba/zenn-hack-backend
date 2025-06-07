@@ -3,12 +3,18 @@ import json
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import ValidationError
 
-from src.models.types import NewUser, UpdateFlagRequest, UpdateMemoRequest
+from src.models.types import (
+    NewUser,
+    UpdateFlagRequest,
+    UpdateMemoRequest,
+    UpdateUsingMeaningsRequest,
+)
 from src.services.firebase.create_word_and_meaning import create_word_and_meaning
 from src.services.firebase.unit.firestore_flashcard import (
-    read_flashcard_doc,
     read_flashcard_docs,
-    update_flashcard_doc,
+    update_flashcard_doc_on_check_flag,
+    update_flashcard_doc_on_memo,
+    update_flashcard_doc_on_using_meaning_id_list,
 )
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
 from src.services.firebase.unit.firestore_user import read_user_doc
@@ -58,9 +64,9 @@ async def setup_user_endpoint(_user: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ✓フラッシュカード一覧取得API
+# フラッシュカード一覧取得API
 @app.get("/flashcard/{userId}")
-async def get_flashcards(userId: str):
+async def get_flashcards_endpoint(userId: str):
     try:
         user_id = userId
         user_instance, error = await read_user_doc(user_id)
@@ -90,17 +96,9 @@ async def update_check_flag_endpoint(_request: dict = Body(...),):
     try:
         # リクエストボディの型を確認
         update_flag_request = UpdateFlagRequest.from_dict(_request)
-        flashcard_instance, error = await read_flashcard_doc(flashcard_id=update_flag_request.flashcard_id)
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if not flashcard_instance:
-            raise HTTPException(status_code=404, detail="フラッシュカードが見つかりません")
-        # フラッシュカードの更新
-        flashcard_instance.check_flag = update_flag_request.check_flag
-        flashcard_instance.updated_at = update_flag_request.flashcard_instance.updated_at
-        success, error = await update_flashcard_doc(
+        success, error = await update_flashcard_doc_on_check_flag(
             flashcard_id=update_flag_request.flashcard_id,
-            flashcard_instance=flashcard_instance
+            check_flag=update_flag_request.check_flag
         )
         if success:
             return {"message": "Flashcard update successful"}
@@ -116,20 +114,34 @@ async def update_check_flag_endpoint(_request: dict = Body(...),):
 async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
     try:
         update_memo_request = UpdateMemoRequest.from_dict(_request)
-        flashcard_instance, error = await read_flashcard_doc(flashcard_id=update_memo_request.flashcard_id)
+        success, error = await update_flashcard_doc_on_memo(
+            flashcard_id=update_memo_request.flashcard_id,
+            memo=update_memo_request.memo
+        )
         if error:
             raise HTTPException(status_code=500, detail=error)
-        if not flashcard_instance:
-            raise HTTPException(status_code=404, detail="フラッシュカードが見つかりません")
-        # フラッシュカードのメモを更新
-        flashcard_instance.memo = update_memo_request.flashcard_instance.memo
-        flashcard_instance.updated_at = update_memo_request.flashcard_instance.updated_at
-        success, error = await update_flashcard_doc(
-            flashcard_id=update_memo_request.flashcard_id,
-            flashcard_instance=flashcard_instance
-        )
         if success:
             return {"message": "Flashcard memo update successful"}
+        else:
+            raise HTTPException(status_code=400, detail=error)
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# （ユーザごと）表示する意味の更新API
+@app.post("/flashcard/update/usingMeaningIdList")
+async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
+    try:
+        create_meaning_request = UpdateUsingMeaningsRequest.from_dict(_request)
+        success, error = await update_flashcard_doc_on_using_meaning_id_list(
+            flashcard_id=create_meaning_request.flashcard_id,
+            using_meaning_id_list=create_meaning_request.using_meaning_id_list
+        )
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if success:
+            return {"message": "Meaning updated successfully"}
         else:
             raise HTTPException(status_code=400, detail=error)
     except ValidationError as ve:
@@ -140,7 +152,7 @@ async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
 
 # 意味取得API
 @app.get("/meaning/{wordId}")
-async def get_meanings(wordId: str):
+async def get_meanings_endpoint(wordId: str):
     try:
         word_id = wordId
         word_instance, error = await read_word_doc(word_id =word_id)
@@ -159,3 +171,5 @@ async def get_meanings(wordId: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+

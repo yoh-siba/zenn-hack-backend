@@ -104,3 +104,9 @@ class UpdateFlagRequest:
 class UpdateMemoRequest:
     flashcard_id: str
     memo: str
+    
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class UpdateUsingMeaningsRequest:
+    flashcard_id: str
+    using_meaning_id_list: List[str]

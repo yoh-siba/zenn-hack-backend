@@ -63,3 +63,40 @@ async def read_flashcard_docs(
         )
         print(f"\n{error_message}")
         return [], error_message
+
+async def update_flashcard_doc_on_memo(
+    flashcard_id: str, memo: str
+) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("flashcards").document(flashcard_id)
+        doc_ref.update({"memo": memo})
+        return True, None
+    except Exception as e:
+        error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message
+
+async def update_flashcard_doc_on_check_flag(
+    flashcard_id: str, check_flag: bool
+) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("flashcards").document(flashcard_id)
+        doc_ref.update({"checkFlag": check_flag})
+        return True, None
+    except Exception as e:
+        error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message
+
+
+async def update_flashcard_doc_on_using_meaning_id_list(
+    flashcard_id: str, using_meaning_id_list: list[str]
+) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("flashcards").document(flashcard_id)
+        doc_ref.update({"usingMeaningIdList": using_meaning_id_list})
+        return True, None
+    except Exception as e:
+        error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message
