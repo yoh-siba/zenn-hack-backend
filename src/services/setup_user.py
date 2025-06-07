@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import Optional, Tuple
 
-from src.models.types import NewUser
+from src.models.types import SetUpUserRequest
 from src.services.firebase.schemas.user_schema import UserSchema
 from src.services.firebase.unit.firestore_user import create_user_doc
 
 
 async def setup_user(
-    _user: NewUser,
+    _user: SetUpUserRequest,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """
     DBにUserObjectをセットアップする関数
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     async def main():
         # テスト用のユーザー
         test_user_list = [
-            NewUser(
+            SetUpUserRequest(
                 email="test2@example.com",
                 display_name="test2",
             ),

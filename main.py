@@ -4,9 +4,10 @@ from fastapi import Body, FastAPI, HTTPException
 from pydantic import ValidationError
 
 from src.models.types import (
-    NewUser,
+    SetUpUserRequest,
     UpdateFlagRequest,
     UpdateMemoRequest,
+    UpdateUserRequest,
     UpdateUsingMeaningsRequest,
 )
 from src.services.firebase.create_word_and_meaning import create_word_and_meaning
@@ -17,7 +18,7 @@ from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_using_meaning_id_list,
 )
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
-from src.services.firebase.unit.firestore_user import read_user_doc
+from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.setup_flashcard import setup_flashcard
 from src.services.setup_user import setup_user
@@ -47,16 +48,50 @@ async def get_word(word: str):
     except Exception as e:
         return {"error": str(e)}
     
+# ユーザー取得API
+@app.get("user/{userId}")
+async def get_user_endpoint(userId: str):
+    try:
+        user_instance, error = await read_user_doc(userId)
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if not user_instance:
+            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+        return {
+            "message": "User retrieved successfully",
+            "user": user_instance.to_dict()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 # ユーザー登録API
-@app.post("/setup/user")
+@app.post("user/setup")
 async def setup_user_endpoint(_user: dict = Body(...)):
     try:
-        print(f"\nユーザーのセットアップを開始: {_user}")
-        user = NewUser.from_json(json.dumps(_user))
-        print(f"Parsed user: {user}")
+        user = SetUpUserRequest.from_json(json.dumps(_user))
         success, error, user_id = await setup_user(user)
         if success:
             return {"message": "User setup successful", "userId": user_id}
+        else:
+            raise HTTPException(status_code=400, detail=error)
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ユーザー情報更新API
+@app.post("/user/update")
+async def update_user_endpoint(_user: dict = Body(...)):
+    try:
+        user = UpdateUserRequest.from_json(json.dumps(_user))
+        success, error = await update_user_doc(
+            user_id=user.user_id,
+            user_instance=user
+        )
+        if success:
+            return {"message": "User update successful", "userId": user.user_id}
         else:
             raise HTTPException(status_code=400, detail=error)
     except ValidationError as ve:
@@ -130,7 +165,7 @@ async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # （ユーザごと）表示する意味の更新API
-@app.post("/flashcard/update/usingMeaningIdList")
+@app.put("/flashcard/update/usingMeaningIdList")
 async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
     try:
         create_meaning_request = UpdateUsingMeaningsRequest.from_dict(_request)
@@ -173,6 +208,31 @@ async def get_meanings_endpoint(wordId: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+
+
+
+
+# プロンプトのテンプレート全取得API
+@app.get("/template")
+async def get_template_endpoint():
+    try:
+       raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# プロンプトのテンプレート更新API
+@app.put("/template/update")
+async def update_template_endpoint(_request: dict = Body(...)):
+    try:
+        # update_template_request = UpdateTemplateRequest.from_dict(_request)
+        raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 #  エラー報告の仕様を整理したうえで実装
