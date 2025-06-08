@@ -15,7 +15,7 @@ def test_firestore_meaning_functions():
         test_meanings = [
             MeaningSchema(
                 pos="名詞",
-                definition="テストの定義1",
+               translation="テストの定義1",
                 pronunciation="てすと1",
                 example_eng="This is a test example 1.",
                 example_jpn="これはテスト例文1です。",
@@ -25,7 +25,7 @@ def test_firestore_meaning_functions():
             ),
             MeaningSchema(
                 pos="動詞",
-                definition="テストの定義2",
+               translation="テストの定義2",
                 pronunciation="てすと2",
                 example_eng="This is a test example 2.",
                 example_jpn="これはテスト例文2です。",
@@ -35,7 +35,7 @@ def test_firestore_meaning_functions():
             ),
             MeaningSchema(
                 pos="形容詞",
-                definition="テストの定義3",
+               translation="テストの定義3",
                 pronunciation="てすと3",
                 example_eng="This is a test example 3.",
                 example_jpn="これはテスト例文3です。",
@@ -82,7 +82,7 @@ def test_firestore_meaning_functions():
         # 3. 最初のデータの更新
         print("\n3. 最初のデータの更新")
         try:
-            test_meanings[0].definition = "更新された定義1"
+            test_meanings[0].translation = "更新された定義1"
             test_meanings[0].example_eng = "This is an updated test example 1."
             test_meanings[0].updated_at = datetime.now()
             is_success, error = update_meaning_doc(meaning_ids[0], test_meanings[0])

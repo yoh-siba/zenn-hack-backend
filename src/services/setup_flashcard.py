@@ -99,7 +99,7 @@ async def setup_flashcard(
         main_meaning = meanings_instance[0] if meanings_instance else None
         content = f"""
         あなたは画像生成AIでイラストを生成するためのプロンプトエンジニアです。
-        英単語「{word}」の{main_meaning.pos}としての意味「{main_meaning.definition}」を表現するために、
+        英単語「{word}」の{main_meaning.pos}としての意味「{main_meaning.translation}」を表現するために、
         text-to-imageモデルのImagenに入力する英語のプロンプトを考えてください。
 
         ### 良いプロンプトの書き方のコツ

@@ -1,6 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
+from src.models.types import MeaningResponse
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
 
 
@@ -47,17 +48,18 @@ async def read_meaning_doc(
 
 async def read_meaning_docs(
     meaning_ids: list[str],
-) -> Tuple[list[MeaningSchema], Optional[str]]:
+) -> Tuple[list[MeaningResponse], Optional[str]]:
     try:
         if not meaning_ids:
             return [], "意味IDが指定されていません"
-
         docs = (
            db.collection("meanings").where("__name__", "in", meaning_ids).get()
         )
         meanings = []
         for doc in docs:
-            meanings.append(MeaningSchema.from_dict(doc.to_dict()))
+            meaning_instance = doc.to_dict()
+            meaning_instance["meaning_id"] = doc.id
+            meanings.append(MeaningResponse.from_dict(meaning_instance))
         return meanings, None
     except Exception as e:
         error_message = f"意味の一括読み込み中にエラーが発生しました: {str(e)}"

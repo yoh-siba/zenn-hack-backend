@@ -20,7 +20,7 @@ def test_firestore_word() -> None:
                 MeaningSchema(
                     meaning_id="1",
                     pos="noun",
-                    definition="example",
+                   translation="example",
                     pronunciation="example",
                     example_eng="example",
                     example_jpn="example",

@@ -21,7 +21,7 @@ def test_firestore_sample_data():
         print("\n1. Meaningデータの作成")
         meaning = MeaningSchema(
             pos="名詞",
-            definition="テストの定義",
+           translation="テストの定義",
             pronunciation="てすと",
             example_eng="This is a test example.",
             example_jpn="これはテスト例文です。",

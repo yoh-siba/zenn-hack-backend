@@ -168,7 +168,7 @@ async def get_flashcards_endpoint(userId: str):
             if error:
                 raise HTTPException(status_code=500, detail=error)
             flashcard = FlashcardResponse(
-                flashcard_id=user_instance.flashcard_id_list[i],
+                flashcard_id=flashcard.flashcard_id,
                 word=word,
                 meanings=meanings,
                 media=media,

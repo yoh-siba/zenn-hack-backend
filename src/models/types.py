@@ -5,7 +5,6 @@ from dataclasses_json import LetterCase, dataclass_json
 
 from src.models.enums import PartOfSpeech
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
-from src.services.firebase.schemas.media_schema import MediaSchema
 from src.services.firebase.schemas.word_schema import WordSchema
 
 
@@ -38,14 +37,6 @@ class WordsAPIResponse:
     syllables: Syllables
     pronunciation: Pronunciation
     frequency: float
-
-
-@dataclass
-class DefAndExample:
-    part_of_speech: PartOfSpeech
-    definition: str
-    example: str
-
 
 @dataclass
 class WordAndMeanings:
@@ -123,7 +114,7 @@ class UpdateUsingMeaningsRequest:
 @dataclass
 class ApplyAddMeaningRequest:
     word_id: str
-    definition: str
+    translation: str
     pronunciation: str
     comment: str
 
@@ -132,18 +123,46 @@ class ApplyAddMeaningRequest:
 class ApplyModifyMeaningRequest:
     word_id: str
     meaning_id: str
-    definition: str
+    translation: str
     pronunciation: str
     comment: str
 
+
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class WordResponse:
+    word_id: str
+    word : str
+    core_meaning: str
+    explanation: str
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class MeaningResponse:
+    meaning_id: str
+    pos: str
+    translation: str
+    pronunciation: str
+    example_eng: str
+    example_jpn: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class MediaResponse:
+    media_id: str
+    meaning_id: str
+    media_urls: List[str]
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class FlashcardResponse:
     flashcard_id: str
-    word: str
-    meanings: List[MeaningSchema]
-    media: MediaSchema
+    word: WordResponse
+    meanings: List[MeaningResponse]
+    media: MediaResponse
     memo: str
     version: int
     check_flag: bool = False

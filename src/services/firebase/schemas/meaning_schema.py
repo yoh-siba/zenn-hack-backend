@@ -10,7 +10,7 @@ from src.models.enums import PartOfSpeech, PartOfSpeechField
 @dataclass
 class MeaningSchema:
     pos: PartOfSpeech = field(metadata=PartOfSpeechField)
-    definition: str
+    translation: str
     pronunciation: str
     example_eng: str
     example_jpn: str

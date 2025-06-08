@@ -35,7 +35,7 @@ def test_words_api(word: str) -> None:
         for i, result in enumerate(word_data["results"], 1):
             print(f"\n定義 {i}:")
             print(f"- 品詞: {result['partOfSpeech']}")
-            print(f"- 意味: {result['definition']}")
+            print(f"- 意味: {result['translation']}")
             if result.get("examples"):
                 print(f"- 例文: {result['examples'][0]}")
             if result.get("synonyms"):

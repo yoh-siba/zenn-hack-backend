@@ -1,7 +1,10 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.services.firebase.schemas.flashcard_schema import FlashcardSchema
+from src.services.firebase.schemas.flashcard_schema import (
+    FlashcardSchema,
+    FlashcardSchemaWithId,
+)
 
 
 async def create_flashcard_doc(
@@ -47,7 +50,7 @@ async def read_flashcard_doc(
 
 async def read_flashcard_docs(
     flashcard_ids: list[str],
-) -> Tuple[list[FlashcardSchema], Optional[str]]:
+) -> Tuple[list[FlashcardSchemaWithId], Optional[str]]:
     try:
         if not flashcard_ids:
             return [], "フラッシュカードIDが指定されていません"
@@ -55,7 +58,10 @@ async def read_flashcard_docs(
         docs = db.collection("flashcards").where("__name__", "in", flashcard_ids).get()
         flashcards = []
         for doc in docs:
-            flashcards.append(FlashcardSchema.from_dict(doc.to_dict()))
+            flashcard_instance = doc.to_dict()
+            flashcard_instance["flashcard_id"] = doc.id
+            flashcard = FlashcardSchemaWithId.from_dict(flashcard_instance)
+            flashcards.append(flashcard)
         return flashcards, None
     except Exception as e:
         error_message = (
