@@ -5,6 +5,7 @@ from dataclasses_json import LetterCase, dataclass_json
 
 from src.models.enums import PartOfSpeech
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.media_schema import MediaSchema
 from src.services.firebase.schemas.word_schema import WordSchema
 
 
@@ -134,3 +135,15 @@ class ApplyModifyMeaningRequest:
     definition: str
     pronunciation: str
     comment: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class FlashcardResponse:
+    flashcard_id: str
+    word: str
+    meanings: List[MeaningSchema]
+    media: MediaSchema
+    memo: str
+    version: int
+    check_flag: bool = False

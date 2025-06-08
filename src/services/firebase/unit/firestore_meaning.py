@@ -53,7 +53,7 @@ async def read_meaning_docs(
             return [], "意味IDが指定されていません"
 
         docs = (
-            await db.collection("meanings").where("__name__", "in", meaning_ids).get()
+           db.collection("meanings").where("__name__", "in", meaning_ids).get()
         )
         meanings = []
         for doc in docs:

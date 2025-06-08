@@ -4,6 +4,7 @@ from fastapi import Body, FastAPI, HTTPException
 from pydantic import ValidationError
 
 from src.models.types import (
+    FlashcardResponse,
     SetUpUserRequest,
     UpdateFlagRequest,
     UpdateMemoRequest,
@@ -18,6 +19,7 @@ from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_using_meaning_id_list,
 )
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
+from src.services.firebase.unit.firestore_media import read_media_doc
 from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.setup_flashcard import setup_flashcard
@@ -29,28 +31,42 @@ app = FastAPI()
 
 @app.get("/")
 async def root():
+    """
+    Root endpoint to check server status.
+    """
     return {"message": "Hello World"}
 
 
-@app.get("/word/{word}")
+@app.get("/word/{word}", description="Retrieve word information and translations.")
 async def get_word(word: str):
+    """
+    Fetches word data from Words API, translates it, and stores it in Firestore.
+
+    Args:
+        word (str): The word to retrieve information for.
+
+    Returns:
+        dict: Translated word data.
+    """
     try:
-        # Words APIから単語情報を取得
         word_data = request_words_api(word)
-
-        # 翻訳を実行
         translated_data = setup_flashcard(word_data)
-
-        # Firestoreに保存
         create_word_and_meaning(translated_data)
-
         return translated_data
     except Exception as e:
         return {"error": str(e)}
-    
-# ユーザー取得API
-@app.get("user/{userId}")
+
+@app.get("/user/{userId}", description="Retrieve user information by user ID.")
 async def get_user_endpoint(userId: str):
+    """
+    Fetches user data from Firestore.
+
+    Args:
+        userId (str): The ID of the user to retrieve.
+
+    Returns:
+        dict: User data.
+    """
     try:
         user_instance, error = await read_user_doc(userId)
         if error:
@@ -63,12 +79,18 @@ async def get_user_endpoint(userId: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-# ユーザー登録API
-@app.post("user/setup")
+
+@app.post("/user/setup", description="Set up a new user.")
 async def setup_user_endpoint(_user: dict = Body(...)):
+    """
+    Registers a new user in Firestore.
+
+    Args:
+        _user (dict): User data for registration.
+
+    Returns:
+        dict: Success message and user ID.
+    """
     try:
         user = SetUpUserRequest.from_json(json.dumps(_user))
         success, error, user_id = await setup_user(user)
@@ -81,9 +103,17 @@ async def setup_user_endpoint(_user: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ユーザー情報更新API
-@app.post("/user/update")
+@app.post("/user/update", description="Update user information.")
 async def update_user_endpoint(_user: dict = Body(...)):
+    """
+    Updates user information in Firestore.
+
+    Args:
+        _user (dict): Updated user data.
+
+    Returns:
+        dict: Success message and user ID.
+    """
     try:
         user = UpdateUserRequest.from_json(json.dumps(_user))
         success, error = await update_user_doc(
@@ -99,9 +129,17 @@ async def update_user_endpoint(_user: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# フラッシュカード一覧取得API
-@app.get("/flashcard/{userId}")
+@app.get("/flashcard/{userId}", description="Retrieve flashcards for a user.")
 async def get_flashcards_endpoint(userId: str):
+    """
+    Fetches flashcards associated with a user from Firestore.
+
+    Args:
+        userId (str): The ID of the user whose flashcards to retrieve.
+
+    Returns:
+        dict: User's flashcards data.
+    """
     try:
         user_id = userId
         user_instance, error = await read_user_doc(user_id)
@@ -117,17 +155,47 @@ async def get_flashcards_endpoint(userId: str):
             raise HTTPException(status_code=500, detail=error)
         if not flashcards:
             raise HTTPException(status_code=404, detail="このユーザーのフラッシュカードが見つかりません")
-        print(f"flashcards: {flashcards}")
+        flashcard_responses = []
+        i = 0
+        for flashcard in flashcards:
+            word, error = await read_word_doc(flashcard.word_id)
+            if error:
+                raise HTTPException(status_code=500, detail=error)
+            meanings, error = await read_meaning_docs(flashcard.using_meaning_id_list)
+            if error:
+                raise HTTPException(status_code=500, detail=error) 
+            media, error = await read_media_doc(flashcard.current_media_id)
+            if error:
+                raise HTTPException(status_code=500, detail=error)
+            flashcard = FlashcardResponse(
+                flashcard_id=user_instance.flashcard_id_list[i],
+                word=word,
+                meanings=meanings,
+                media=media,
+                memo=flashcard.memo,
+                version=flashcard.version,
+                check_flag=flashcard.check_flag,
+            )
+            flashcard_responses.append(flashcard.to_dict())
+            i += 1
         return {
             "message": "Flashcards retrieved successfully",
-            "flashcards": [flashcard.to_dict() for flashcard in flashcards]
+            "flashcards": flashcard_responses
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ✓フラグ更新API
-@app.put("/flashcard/update/checkFlag")
-async def update_check_flag_endpoint(_request: dict = Body(...),):
+@app.put("/flashcard/update/checkFlag", description="Update the check flag of a flashcard.")
+async def update_check_flag_endpoint(_request: dict = Body(...)):
+    """
+    Updates the check flag for a specific flashcard.
+
+    Args:
+        _request (dict): Request data containing flashcard ID and check flag.
+
+    Returns:
+        dict: Success message.
+    """
     try:
         # リクエストボディの型を確認
         update_flag_request = UpdateFlagRequest.from_dict(_request)
@@ -144,9 +212,17 @@ async def update_check_flag_endpoint(_request: dict = Body(...),):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# メモ更新API
-@app.put("/flashcard/update/memo")
+@app.put("/flashcard/update/memo", description="Update the memo of a flashcard.")
 async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
+    """
+    Updates the memo for a specific flashcard.
+
+    Args:
+        _request (dict): Request data containing flashcard ID and memo.
+
+    Returns:
+        dict: Success message.
+    """
     try:
         update_memo_request = UpdateMemoRequest.from_dict(_request)
         success, error = await update_flashcard_doc_on_memo(
@@ -164,9 +240,17 @@ async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# （ユーザごと）表示する意味の更新API
-@app.put("/flashcard/update/usingMeaningIdList")
+@app.put("/flashcard/update/usingMeaningIdList", description="Update the list of meanings used by a flashcard.")
 async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
+    """
+    Updates the list of meanings associated with a specific flashcard.
+
+    Args:
+        _request (dict): Request data containing flashcard ID and meaning ID list.
+
+    Returns:
+        dict: Success message.
+    """
     try:
         create_meaning_request = UpdateUsingMeaningsRequest.from_dict(_request)
         success, error = await update_flashcard_doc_on_using_meaning_id_list(
@@ -185,7 +269,6 @@ async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# 単語の意味取得API
 @app.get("/meaning/{wordId}")
 async def get_meanings_endpoint(wordId: str):
     try:
