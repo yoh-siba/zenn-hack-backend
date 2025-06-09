@@ -1,17 +1,19 @@
 import json
 
 from fastapi import Body, FastAPI, HTTPException
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from src.models.types import (
     CreateMediaRequest,
+    FlashcardResponse,
     SetUpUserRequest,
     UpdateFlagRequest,
     UpdateMemoRequest,
     UpdateUserRequest,
     UpdateUsingMeaningsRequest,
 )
-from src.services.firebase.create_word_and_meaning import create_word_and_meaning
+from src.services.firebase.schemas.meaning_schema import MeaningSchema
+from src.services.firebase.schemas.user_schema import UserSchema
 from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_check_flag,
     update_flashcard_doc_on_memo,
@@ -21,52 +23,22 @@ from src.services.firebase.unit.firestore_meaning import read_meaning_docs
 from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
-from src.services.setup_default_flashcard import setup_default_flashcard
 from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
-from src.services.words_api import request_words_api
 
 app = FastAPI()
 
 
 @app.get("/")
-async def root():
-    """
-    Root endpoint to check server status.
-    """
+async def root(description: str = "サーバーの稼働確認用エンドポイント"):
     return {"message": "Hello World"}
 
-
-@app.get("/word/{word}", description="Retrieve word information and translations.")
-async def get_word(word: str):
-    """
-    Fetches word data from Words API, translates it, and stores it in Firestore.
-
-    Args:
-        word (str): The word to retrieve information for.
-
-    Returns:
-        dict: Translated word data.
-    """
-    try:
-        word_data = request_words_api(word)
-        translated_data = setup_default_flashcard(word_data)
-        create_word_and_meaning(translated_data)
-        return translated_data
-    except Exception as e:
-        return {"error": str(e)}
-
-@app.get("/user/{userId}", description="Retrieve user information by user ID.")
+class GetUserResponseModel(BaseModel):
+    message: str
+    user: UserSchema
+@app.get("/user/{userId}", description="ユーザー情報の取得用エンドポイント",
+         response_model=GetUserResponseModel)
 async def get_user_endpoint(userId: str):
-    """
-    Fetches user data from Firestore.
-
-    Args:
-        userId (str): The ID of the user to retrieve.
-
-    Returns:
-        dict: User data.
-    """
     try:
         user_instance, error = await read_user_doc(userId)
         if error:
@@ -80,17 +52,14 @@ async def get_user_endpoint(userId: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/user/setup", description="Set up a new user.")
-async def setup_user_endpoint(_user: dict = Body(...)):
-    """
-    Registers a new user in Firestore.
-
-    Args:
-        _user (dict): User data for registration.
-
-    Returns:
-        dict: Success message and user ID.
-    """
+class SetUpUserResponseModel(BaseModel):
+    message: str
+    user_id: str
+@app.post("/user/setup", description="新規のユーザー登録用エンドポイント",
+         response_model=SetUpUserResponseModel)
+async def setup_user_endpoint(
+    _user: dict = Body(..., example={"email": "yamada@yamada.com", "displayName": "山田"})
+):
     try:
         user = SetUpUserRequest.from_json(json.dumps(_user))
         success, error, user_id = await setup_user(user)
@@ -103,17 +72,12 @@ async def setup_user_endpoint(_user: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/user/update", description="Update user information.")
-async def update_user_endpoint(_user: dict = Body(...)):
-    """
-    Updates user information in Firestore.
-
-    Args:
-        _user (dict): Updated user data.
-
-    Returns:
-        dict: Success message and user ID.
-    """
+class UpdateUserResponseModel(BaseModel):
+    message: str
+    user_id: str
+@app.put("/user/update", description="ユーザ情報の更新用エンドポイント",
+          response_model=UpdateUserResponseModel)
+async def update_user_endpoint(_user: dict = Body(..., example={"userId": "12345","email": "yamada@yamada.com", "displayName": "山田"})):
     try:
         user = UpdateUserRequest.from_json(json.dumps(_user))
         success, error = await update_user_doc(
@@ -129,17 +93,12 @@ async def update_user_endpoint(_user: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/flashcard/{userId}", description="Retrieve flashcards for a user.")
+class GetFlashcardsResponseModel(BaseModel):
+    message: str
+    flashcards: list[FlashcardResponse]
+@app.get("/flashcard/{userId}", description="ユーザのフラッシュカード一覧取得用エンドポイント",
+         response_model=GetFlashcardsResponseModel)
 async def get_flashcards_endpoint(userId: str):
-    """
-    Fetches flashcards associated with a user from Firestore.
-
-    Args:
-        userId (str): The ID of the user whose flashcards to retrieve.
-
-    Returns:
-        dict: User's flashcards data.
-    """
     try:
         user_id = userId
         success, error, flashcard_responses = await get_flashcard_list(user_id)
@@ -152,17 +111,11 @@ async def get_flashcards_endpoint(userId: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/flashcard/update/checkFlag", description="Update the check flag of a flashcard.")
-async def update_check_flag_endpoint(_request: dict = Body(...)):
-    """
-    Updates the check flag for a specific flashcard.
-
-    Args:
-        _request (dict): Request data containing flashcard ID and check flag.
-
-    Returns:
-        dict: Success message.
-    """
+class UpdateFlashcardResponseModel(BaseModel):
+    message: str
+@app.put("/flashcard/update/checkFlag", description="フラッシュカードのチェックフラグ更新用エンドポイント",
+         response_model=UpdateFlashcardResponseModel)
+async def update_check_flag_endpoint(_request: dict = Body(..., example={"flashcardId": "12345", "checkFlag": True})):
     try:
         # リクエストボディの型を確認
         update_flag_request = UpdateFlagRequest.from_dict(_request)
@@ -179,17 +132,9 @@ async def update_check_flag_endpoint(_request: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/flashcard/update/memo", description="Update the memo of a flashcard.")
-async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
-    """
-    Updates the memo for a specific flashcard.
-
-    Args:
-        _request (dict): Request data containing flashcard ID and memo.
-
-    Returns:
-        dict: Success message.
-    """
+@app.put("/flashcard/update/memo", description="フラッシュカードのメモ更新用エンドポイント",
+         response_model=UpdateFlashcardResponseModel)
+async def update_flashcard_memo_endpoint(_request: dict = Body(..., example={"flashcardId": "12345", "memo": "新しいメモ内容"})):
     try:
         update_memo_request = UpdateMemoRequest.from_dict(_request)
         success, error = await update_flashcard_doc_on_memo(
@@ -207,17 +152,9 @@ async def update_flashcard_memo_endpoint(_request: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/flashcard/update/usingMeaningIdList", description="Update the list of meanings used by a flashcard.")
-async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
-    """
-    Updates the list of meanings associated with a specific flashcard.
-
-    Args:
-        _request (dict): Request data containing flashcard ID and meaning ID list.
-
-    Returns:
-        dict: Success message.
-    """
+@app.put("/flashcard/update/usingMeaningIdList", description="フラッシュカードの意味IDリスト更新用エンドポイント",
+         response_model=UpdateFlashcardResponseModel)
+async def update_using_meaning_id_list_endpoint(_request: dict = Body(..., example={"flashcardId": "12345", "usingMeaningIdList": ["67890", "54321"]})):
     try:
         create_meaning_request = UpdateUsingMeaningsRequest.from_dict(_request)
         success, error = await update_flashcard_doc_on_using_meaning_id_list(
@@ -234,21 +171,13 @@ async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
-@app.post("/media/create", description="Set up media for a flashcard.")
-async def setup_media_endpoint(_request: dict = Body(...)):
-    """
-    新しいメディアの生成（プロンプトの生成＆画像・動画生成）
-    メディアColへ格納
-    ComparisonsColへ格納
-    フラッシュカードColのcomparisonIdを更新
-    〇〇を返す（Flashcard？currentMediaId?）
-    Args:
-        _request (dict): Request data containing flashcard and media information.
 
-    Returns:
-        dict: Success message and flashcard ID.
-    """
+class CreateMediaResponseModel(BaseModel):
+    message: str
+    media_id: str
+@app.post("/media/create", description="フラッシュカード用のメディアを生成するエンドポイント",
+         response_model=CreateMediaResponseModel)
+async def setup_media_endpoint(_request: dict = Body(..., example={"flashcardId": "12345", "oldMediaId": "67890", "meaningId": "54321", "generationType": "text-to-image", "templateId": "template_001", "userPrompt": "Generate an image of a cat", "allowGeneratingPerson": True, "inputMediaUrls": ["https://example.com/input1.jpg", "https://example.com/input2.jpg"]})):
     try:
         create_media_request = CreateMediaRequest.from_dict(_request)
         success, error, media_id = await setup_media(
@@ -257,15 +186,19 @@ async def setup_media_endpoint(_request: dict = Body(...)):
         if error:
             raise HTTPException(status_code=500, detail=error)
         if success:
-            return {"message": "Flashcard comparison ID updated successfully"}
+            return {"message": "Flashcard comparison ID updated successfully",
+                    "media_id": media_id}
 
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.get("/meaning/{wordId}")
+class GetAllMeaningsResponseModel(BaseModel):
+    message: str
+    meanings: list[MeaningSchema]
+@app.get("/meaning/{wordId}", description="単語の全ての意味一覧取得用エンドポイント",
+         response_model=GetAllMeaningsResponseModel)
 async def get_meanings_endpoint(wordId: str):
     try:
         word_id = wordId
@@ -285,12 +218,6 @@ async def get_meanings_endpoint(wordId: str):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
-
-
-
-
 
 # プロンプトのテンプレート全取得API
 @app.get("/template")
