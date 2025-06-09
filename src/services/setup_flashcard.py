@@ -141,7 +141,7 @@ async def setup_flashcard(
             media_urls=image_url_list,
             generation_type="text-to-image",
             template_id=None,  # TODO: テンプレートIDを設定する
-            userPrompt="",
+            user_prompt="",
             generated_prompt=generated_prompt.generated_prompt,
             input_media_urls=None,  # 入力メディアURLはNone
             prompt_token_count=generated_prompt.prompt_token_count,
@@ -181,7 +181,7 @@ async def setup_flashcard(
             media_urls=image_url_list,
             generation_type="imagen",
             template_id=None,  # TODO: テンプレートIDを設定する
-            userPrompt="",
+            user_prompt="",
             generated_prompt=generated_prompt.generated_prompt,
             input_media_urls=None,  # 入力メディアURLはNone
             prompt_token_count=generated_prompt.prompt_token_count,

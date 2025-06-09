@@ -13,7 +13,7 @@ class MediaSchema:
     media_urls: List[str]
     generation_type: str
     template_id: Optional[str]
-    userPrompt: str
+    user_prompt: str
     generated_prompt: str
     input_media_urls: Optional[List[str]]
     prompt_token_count: int

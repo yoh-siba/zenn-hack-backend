@@ -20,7 +20,7 @@ def test_firestore_media_functions():
                 media_urls=["https://example.com/media1.jpg"],
                 generation_type="image",
                 template_id="template_001",
-                userPrompt="テスト用プロンプト1",
+                user_prompt="テスト用プロンプト1",
                 generated_prompt="生成されたプロンプト1",
                 input_media_urls=["https://example.com/input1.jpg"],
                 prompt_token_count=100,
@@ -37,7 +37,7 @@ def test_firestore_media_functions():
                 media_urls=["https://example.com/media2.jpg"],
                 generation_type="image",
                 template_id="template_002",
-                userPrompt="テスト用プロンプト2",
+                user_prompt="テスト用プロンプト2",
                 generated_prompt="生成されたプロンプト2",
                 input_media_urls=["https://example.com/input2.jpg"],
                 prompt_token_count=120,
@@ -54,7 +54,7 @@ def test_firestore_media_functions():
                 media_urls=["https://example.com/media3.jpg"],
                 generation_type="image",
                 template_id="template_003",
-                userPrompt="テスト用プロンプト3",
+                user_prompt="テスト用プロンプト3",
                 generated_prompt="生成されたプロンプト3",
                 input_media_urls=["https://example.com/input3.jpg"],
                 prompt_token_count=90,
@@ -103,7 +103,7 @@ def test_firestore_media_functions():
         # 3. 最初のデータの更新
         print("\n3. 最初のデータの更新")
         try:
-            test_media[0].userPrompt = "更新されたプロンプト1"
+            test_media[0].user_prompt = "更新されたプロンプト1"
             test_media[0].generated_prompt = "更新された生成プロンプト1"
             test_media[0].updated_at = datetime.now()
             is_success, error = update_media_doc(media_ids[0], test_media[0])

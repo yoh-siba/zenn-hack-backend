@@ -4,6 +4,7 @@ from fastapi import Body, FastAPI, HTTPException
 from pydantic import ValidationError
 
 from src.models.types import (
+    CreateMediaRequest,
     FlashcardResponse,
     SetUpUserRequest,
     UpdateFlagRequest,
@@ -23,6 +24,7 @@ from src.services.firebase.unit.firestore_media import read_media_doc
 from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.setup_flashcard import setup_flashcard
+from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 from src.services.words_api import request_words_api
 
@@ -263,6 +265,35 @@ async def update_using_meaning_id_list_endpoint(_request: dict = Body(...)):
             return {"message": "Meaning updated successfully"}
         else:
             raise HTTPException(status_code=400, detail=error)
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/media/create", description="Set up media for a flashcard.")
+async def setup_media_endpoint(_request: dict = Body(...)):
+    """
+    新しいメディアの生成（プロンプトの生成＆画像・動画生成）
+    メディアColへ格納
+    ComparisonsColへ格納
+    フラッシュカードColのcomparisonIdを更新
+    〇〇を返す（Flashcard？currentMediaId?）
+    Args:
+        _request (dict): Request data containing flashcard and media information.
+
+    Returns:
+        dict: Success message and flashcard ID.
+    """
+    try:
+        create_media_request = CreateMediaRequest.from_dict(_request)
+        success, error, media_id = await setup_media(
+            create_media_request=create_media_request
+        )
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if success:
+            return {"message": "Flashcard comparison ID updated successfully"}
+
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:

@@ -62,7 +62,7 @@ def test_firestore_sample_data():
             media_urls=["https://example.com/test.jpg"],
             generation_type="image",
             template_id=None,
-            userPrompt="テストの画像を生成してください",
+            user_prompt="テストの画像を生成してください",
             generated_prompt="A test image showing the concept of testing",
             input_media_urls=None,
             prompt_token_count=10,
