@@ -95,21 +95,3 @@ async def setup_media(
         error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message, None
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    async def main():
-        # テスト用の単語
-        test_word = "account"
-        success, error, word_id = await setup_media(test_word)
-        if success:
-            print(
-                f"単語 '{test_word}' のセットアップに成功しました。生成されたword_id: {word_id}"
-            )
-        else:
-            print(f"単語 '{test_word}' のセットアップに失敗しました。エラー: {error}")
-
-    # 非同期関数を実行
-    asyncio.run(main())

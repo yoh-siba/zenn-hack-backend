@@ -5,7 +5,6 @@ from pydantic import ValidationError
 
 from src.models.types import (
     CreateMediaRequest,
-    FlashcardResponse,
     SetUpUserRequest,
     UpdateFlagRequest,
     UpdateMemoRequest,
@@ -14,16 +13,15 @@ from src.models.types import (
 )
 from src.services.firebase.create_word_and_meaning import create_word_and_meaning
 from src.services.firebase.unit.firestore_flashcard import (
-    read_flashcard_docs,
     update_flashcard_doc_on_check_flag,
     update_flashcard_doc_on_memo,
     update_flashcard_doc_on_using_meaning_id_list,
 )
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
-from src.services.firebase.unit.firestore_media import read_media_doc
 from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
 from src.services.firebase.unit.firestore_word import read_word_doc
-from src.services.setup_flashcard import setup_flashcard
+from src.services.get_flashcard_list import get_flashcard_list
+from src.services.setup_default_flashcard import setup_default_flashcard
 from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 from src.services.words_api import request_words_api
@@ -52,7 +50,7 @@ async def get_word(word: str):
     """
     try:
         word_data = request_words_api(word)
-        translated_data = setup_flashcard(word_data)
+        translated_data = setup_default_flashcard(word_data)
         create_word_and_meaning(translated_data)
         return translated_data
     except Exception as e:
@@ -144,45 +142,12 @@ async def get_flashcards_endpoint(userId: str):
     """
     try:
         user_id = userId
-        user_instance, error = await read_user_doc(user_id)
-        if error:
+        success, error, flashcard_responses = await get_flashcard_list(user_id)
+        if not success:
             raise HTTPException(status_code=500, detail=error)
-        if not user_instance:
-            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
-        # 登録単語が0の場合はフロント側で処理（エラーではない）
-        if len(user_instance.flashcard_id_list) == 0:
-            return []
-        flashcards, error = await read_flashcard_docs(user_instance.flashcard_id_list)
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if not flashcards:
-            raise HTTPException(status_code=404, detail="このユーザーのフラッシュカードが見つかりません")
-        flashcard_responses = []
-        i = 0
-        for flashcard in flashcards:
-            word, error = await read_word_doc(flashcard.word_id)
-            if error:
-                raise HTTPException(status_code=500, detail=error)
-            meanings, error = await read_meaning_docs(flashcard.using_meaning_id_list)
-            if error:
-                raise HTTPException(status_code=500, detail=error) 
-            media, error = await read_media_doc(flashcard.current_media_id)
-            if error:
-                raise HTTPException(status_code=500, detail=error)
-            flashcard = FlashcardResponse(
-                flashcard_id=flashcard.flashcard_id,
-                word=word,
-                meanings=meanings,
-                media=media,
-                memo=flashcard.memo,
-                version=flashcard.version,
-                check_flag=flashcard.check_flag,
-            )
-            flashcard_responses.append(flashcard.to_dict())
-            i += 1
         return {
             "message": "Flashcards retrieved successfully",
-            "flashcards": flashcard_responses
+            "flashcards": [flashcard.to_dict() for flashcard in flashcard_responses]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

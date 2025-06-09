@@ -20,7 +20,7 @@ from src.services.google_ai.unit.request_imagen import request_imagen_text_to_im
 from src.services.words_api.request_words_api import request_words_api
 
 
-async def setup_flashcard(
+async def setup_default_flashcard(
     word: str,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     """単語とその意味の生成＆格納用の関数
@@ -214,7 +214,7 @@ if __name__ == "__main__":
         test_word_list = ["account", "apple", "challenge","issue", "sound"]
         # test_word_list = ["account"]
         for test_word in test_word_list:
-            success, error, flashcard_id = await setup_flashcard(test_word)
+            success, error, flashcard_id = await setup_default_flashcard(test_word)
             if success:
                 print(
                     f"単語 '{test_word}' のセットアップに成功しました。生成されたflashcard_id: {flashcard_id}"
