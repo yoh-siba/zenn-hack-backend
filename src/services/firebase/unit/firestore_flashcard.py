@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Tuple
 
 from src.config.settings import db
@@ -74,8 +75,9 @@ async def update_flashcard_doc_on_memo(
     flashcard_id: str, memo: str
 ) -> Tuple[bool, Optional[str]]:
     try:
+        now = datetime.now()
         doc_ref = db.collection("flashcards").document(flashcard_id)
-        doc_ref.update({"memo": memo})
+        doc_ref.update({"memo": memo, "updatedAt": now})
         return True, None
     except Exception as e:
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
@@ -86,8 +88,9 @@ async def update_flashcard_doc_on_check_flag(
     flashcard_id: str, check_flag: bool
 ) -> Tuple[bool, Optional[str]]:
     try:
+        now = datetime.now()
         doc_ref = db.collection("flashcards").document(flashcard_id)
-        doc_ref.update({"checkFlag": check_flag})
+        doc_ref.update({"checkFlag": check_flag, "updatedAt": now})
         return True, None
     except Exception as e:
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
@@ -99,8 +102,9 @@ async def update_flashcard_doc_on_using_meaning_id_list(
     flashcard_id: str, using_meaning_id_list: list[str]
 ) -> Tuple[bool, Optional[str]]:
     try:
+        now = datetime.now()
         doc_ref = db.collection("flashcards").document(flashcard_id)
-        doc_ref.update({"usingMeaningIdList": using_meaning_id_list})
+        doc_ref.update({"usingMeaningIdList": using_meaning_id_list, "updatedAt": now})
         return True, None
     except Exception as e:
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
@@ -111,8 +115,9 @@ async def update_flashcard_doc_on_comparison_id(
     flashcard_id: str, comparison_id: str
 ) -> Tuple[bool, Optional[str]]:
     try:
+        now = datetime.now()
         doc_ref = db.collection("flashcards").document(flashcard_id)
-        doc_ref.update({"comparisonId": comparison_id})
+        doc_ref.update({"comparisonId": comparison_id, "updatedAt": now})
         return True, None
     except Exception as e:
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
@@ -123,8 +128,9 @@ async def update_flashcard_doc_on_comparison_id_and_current_media(
     flashcard_id: str, comparison_id: str | None, current_media_id: str
 ) -> Tuple[bool, Optional[str]]:
     try:
+        now = datetime.now()
         doc_ref = db.collection("flashcards").document(flashcard_id)
-        doc_ref.update({"comparisonId": comparison_id, "currentMediaId": current_media_id})
+        doc_ref.update({"comparisonId": comparison_id, "currentMediaId": current_media_id, "updatedAt": now})
         return True, None
     except Exception as e:
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"

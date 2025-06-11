@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Tuple
 
 from src.config.settings import db
@@ -70,8 +71,9 @@ async def update_comparison_doc_on_is_selected_new(
     comparison_id: str, is_selected_new: str
 ) -> Tuple[bool, Optional[str]]:
     try:
+        now = datetime.now()
         doc_ref = db.collection("comparisons").document(comparison_id)
-        doc_ref.update({"isSelectedNew": is_selected_new})
+        doc_ref.update({"isSelectedNew": is_selected_new, "updatedAt": now})
         return True, None
     except Exception as e:
         error_message = f"比較データの更新中にエラーが発生しました: {str(e)}"
