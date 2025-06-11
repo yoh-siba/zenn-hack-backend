@@ -77,7 +77,7 @@ async def setup_media(
                 flashcard_id=create_media_request.flashcard_id,
                 old_media_id=create_media_request.old_media_id,
                 new_media_id=media_id,
-                selected="",
+                is_selected_new="",
                 created_at=now,
                 updated_at=now,
             )

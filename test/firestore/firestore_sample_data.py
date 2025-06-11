@@ -85,7 +85,7 @@ def test_firestore_sample_data():
             flashcard_id="",  # 後で更新
             oldMedia_id="old_media_001",
             new_media_id=media_id,
-            selected=media_id,
+            is_selected_new=media_id,
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )

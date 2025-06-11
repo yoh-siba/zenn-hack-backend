@@ -18,7 +18,7 @@ def test_firestore_comparison_functions():
                 flashcard_id="flash_001",
                 oldMedia_id="media_001",
                 new_media_id="media_002",
-                selected="old",
+                is_selected_new="old",
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             ),
@@ -27,7 +27,7 @@ def test_firestore_comparison_functions():
                 flashcard_id="flash_002",
                 oldMedia_id="media_003",
                 new_media_id="media_004",
-                selected="new",
+                is_selected_new="new",
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             ),
@@ -36,7 +36,7 @@ def test_firestore_comparison_functions():
                 flashcard_id="flash_003",
                 oldMedia_id="media_005",
                 new_media_id="media_006",
-                selected="old",
+                is_selected_new="old",
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             ),
@@ -81,7 +81,7 @@ def test_firestore_comparison_functions():
         # 3. 最初のデータの更新
         print("\n3. 最初のデータの更新")
         try:
-            test_comparisons[0].selected = "new"
+            test_comparisons[0].is_selected_new = "new"
             test_comparisons[0].updated_at = datetime.now()
             is_success, error = update_comparison_doc(
                 comparison_ids[0], test_comparisons[0]

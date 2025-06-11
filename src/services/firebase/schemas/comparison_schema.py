@@ -10,6 +10,6 @@ class ComparisonSchema:
     flashcard_id: str
     old_media_id: str
     new_media_id: str
-    selected: str
+    is_selected_new: str
     created_at: datetime = None
     updated_at: datetime = None

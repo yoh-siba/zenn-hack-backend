@@ -4,6 +4,7 @@ from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel, ValidationError
 
 from src.models.types import (
+    CompareMediasRequest,
     CreateMediaRequest,
     FlashcardResponse,
     SetUpUserRequest,
@@ -12,6 +13,7 @@ from src.models.types import (
     UpdateUserRequest,
     UpdateUsingMeaningsRequest,
 )
+from src.services.compare_medias import compare_medias
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
 from src.services.firebase.schemas.user_schema import UserSchema
 from src.services.firebase.unit.firestore_flashcard import (
@@ -188,6 +190,32 @@ async def setup_media_endpoint(_request: dict = Body(..., example={"flashcardId"
         if success:
             return {"message": "Flashcard comparison ID updated successfully",
                     "media_id": media_id}
+
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class CompareMediasResponseModel(BaseModel):
+    message: str
+@app.post("/media/compare", description="メディアの比較エンドポイント",
+         response_model=CompareMediasResponseModel)
+async def compare_medias_endpoint(_request: dict = Body(..., example={
+    "flashcardId": "12345",
+    "comparisonId": "null", 
+    "oldMediaId": "54321",
+    "newMediaId": "67890",
+    "isSelectedNew": True
+})):
+    try:
+        compare_medias_request = CompareMediasRequest.from_dict(_request)
+        success, error = await compare_medias(
+            compare_medias_request=compare_medias_request
+        )
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if success:
+            return {"message": "Flashcard comparison ID updated successfully"}
 
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")

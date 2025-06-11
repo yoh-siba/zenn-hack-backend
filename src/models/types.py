@@ -116,6 +116,14 @@ class CreateMediaRequest:
     allow_generating_person: bool
     input_media_urls: Optional[List[str]]
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class CompareMediasRequest:
+    flashcard_id: str
+    comparison_id: str
+    old_media_id: Optional[str]
+    new_media_id: str
+    is_selected_new: str
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass

@@ -118,3 +118,15 @@ async def update_flashcard_doc_on_comparison_id(
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
+    
+async def update_flashcard_doc_on_comparison_id_and_current_media(
+    flashcard_id: str, comparison_id: str | None, current_media_id: str
+) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("flashcards").document(flashcard_id)
+        doc_ref.update({"comparisonId": comparison_id, "currentMediaId": current_media_id})
+        return True, None
+    except Exception as e:
+        error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message
