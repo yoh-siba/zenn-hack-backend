@@ -102,7 +102,7 @@ class UpdateUserRequest:
 @dataclass
 class UpdateFlagRequest:
     flashcard_id: str
-    change_flag: bool
+    check_flag: bool
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
