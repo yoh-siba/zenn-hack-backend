@@ -198,7 +198,7 @@ async def setup_media_endpoint(_request: dict = Body(..., example={"flashcardId"
 
 class CompareMediasResponseModel(BaseModel):
     message: str
-@app.post("/media/compare", description="メディアの比較エンドポイント",
+@app.post("/comparison/update", description="メディアの比較結果送信用エンドポイント",
          response_model=CompareMediasResponseModel)
 async def compare_medias_endpoint(_request: dict = Body(..., example={
     "flashcardId": "12345",
