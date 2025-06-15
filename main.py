@@ -96,7 +96,7 @@ async def setup_user_endpoint(
 
 class UpdateUserResponseModel(BaseModel):
     message: str
-    user_id: str
+    userId: str
 
 
 @app.put(
