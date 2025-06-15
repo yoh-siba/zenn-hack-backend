@@ -5,6 +5,7 @@ from src.models.types import (
     CompareMediasRequest,
     CreateMediaRequest,
     FlashcardResponseModel,
+    GetNotComparedMediaResponse,
     MeaningResponseModel,
     SetUpUserRequest,
     UpdateFlagRequest,
@@ -24,6 +25,7 @@ from src.services.firebase.unit.firestore_meaning import read_meaning_docs
 from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
+from src.services.get_not_compared_media_list import get_not_compared_media_list
 from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 
@@ -273,6 +275,34 @@ async def setup_media_endpoint(
             return {
                 "message": "Flashcard comparison ID updated successfully",
                 "media_id": media_id,
+            }
+
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class GetNoComparedMediasResponseModel(BaseModel):
+    message: str
+    medias: list[GetNotComparedMediaResponse]
+
+
+@app.post(
+    "/comparison/{userId}",
+    description="未比較のメディア一括取得用エンドポイント",
+    response_model=GetNoComparedMediasResponseModel,
+)
+async def compare_medias_endpoint(userId: str):
+    try:
+        user_id = userId
+        success, error, media_list = await get_not_compared_media_list(user_id=user_id)
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if success:
+            return {
+                "message": "Not compared medias retrieved successfully",
+                "medias": media_list,
             }
 
     except ValidationError as ve:

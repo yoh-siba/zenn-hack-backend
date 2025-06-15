@@ -127,6 +127,14 @@ class CreateMediaRequest:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class GetNotComparedMediaResponse:
+    comparison_id: str
+    flashcard_id: str
+    new_media_url: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class CompareMediasRequest:
     flashcard_id: str
     comparison_id: str
