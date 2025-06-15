@@ -8,7 +8,7 @@ from src.services.firebase.unit.firestore_user import create_user_doc
 
 async def setup_user(
     _user: SetUpUserRequest,
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> Tuple[bool, Optional[str]]:
     """
     DBにUserObjectをセットアップする関数
     Args:
@@ -26,20 +26,22 @@ async def setup_user(
         user_instance = UserSchema(
             email=_user.email,
             display_name=_user.display_name,
-           flashcard_id_list=[],
-           created_at=now,
+            flashcard_id_list=[],
+            created_at=now,
             updated_at=now,
         )
-        success, error_message, user_id = await create_user_doc(user_instance)
+        success, error_message = await create_user_doc(
+            user_id=_user.user_id, user_instance=user_instance
+        )
         if not success:
             print(f"\nユーザーのセットアップに失敗しました: {error_message}")
-            return False, error_message, None
+            return False, error_message
         # ユーザーのセットアップが成功
-        return True, None, user_id
+        return True, None
     except Exception as e:
         error_message = f"ユーザーのセットアップ中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
-        return False, error_message, None
+        return False, error_message
 
 
 if __name__ == "__main__":
@@ -61,7 +63,9 @@ if __name__ == "__main__":
                     f"ユーザー '{test_user.email}' のセットアップに成功しました。生成されたユーザーID: {user_id}"
                 )
             else:
-                print(f"ユーザー '{test_user.email}' のセットアップに失敗しました。エラー: {error}")
+                print(
+                    f"ユーザー '{test_user.email}' のセットアップに失敗しました。エラー: {error}"
+                )
 
     # 非同期関数を実行
     asyncio.run(main())

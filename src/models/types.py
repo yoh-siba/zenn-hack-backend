@@ -81,6 +81,7 @@ class TokenInfo:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class SetUpUserRequest:
+    user_id: str
     email: str
     display_name: str
 

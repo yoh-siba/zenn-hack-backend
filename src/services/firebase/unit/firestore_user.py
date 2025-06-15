@@ -5,8 +5,9 @@ from src.services.firebase.schemas.user_schema import UserSchema
 
 
 async def create_user_doc(
+    user_id: str,
     user_instance: UserSchema,
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> Tuple[bool, Optional[str]]:
     try:
         doc_ref = db.collection("users")
         existing_docs = doc_ref.where("email", "==", user_instance.email).get()
@@ -14,8 +15,9 @@ async def create_user_doc(
             error_message = "このメールアドレスは既に登録されています。"
             print(f"\n{error_message}")
             return False, error_message, None
-        new_doc = doc_ref.add(user_instance.to_dict())
-        return True, None, new_doc[1].id
+        new_doc_ref = doc_ref.document(user_id)
+        new_doc_ref.set(user_instance.to_dict())
+        return True, None
     except Exception as e:
         error_message = f"ユーザーデータの作成中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
