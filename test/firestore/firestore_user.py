@@ -15,21 +15,21 @@ def test_firestore_user_functions():
         test_users = [
             UserSchema(
                 email="test1@example.com",
-                display_name="テストユーザー1",
+                user_name="テストユーザー1",
                 flashcard_id_list=["flash_001", "flash_002"],
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             ),
             UserSchema(
                 email="test2@example.com",
-                display_name="テストユーザー2",
+                user_name="テストユーザー2",
                 flashcard_id_list=["flash_003"],
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
             ),
             UserSchema(
                 email="test3@example.com",
-                display_name="テストユーザー3",
+                user_name="テストユーザー3",
                 flashcard_id_list=["flash_004", "flash_005", "flash_006"],
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
@@ -73,7 +73,7 @@ def test_firestore_user_functions():
         # 3. 最初のデータの更新
         print("\n3. 最初のデータの更新")
         try:
-            test_users[0].display_name = "更新されたテストユーザー1"
+            test_users[0].user_name = "更新されたテストユーザー1"
             test_users[0].flashcard_id_list.append("flash_007")
             test_users[0].updated_at = datetime.now()
             is_success, error = update_user_doc(user_ids[0], test_users[0])

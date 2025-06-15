@@ -77,7 +77,7 @@ async def setup_user_endpoint(
         example={
             "userId": "12345",
             "email": "yamada@yamada.com",
-            "displayName": "山田",
+            "userName": "山田",
         },
     ),
 ):
@@ -110,7 +110,7 @@ async def update_user_endpoint(
         example={
             "userId": "12345",
             "email": "yamada@yamada.com",
-            "displayName": "山田",
+            "userName": "山田",
         },
     ),
 ):

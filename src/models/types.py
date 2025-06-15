@@ -87,7 +87,7 @@ class TokenInfo:
 class SetUpUserRequest:
     user_id: str
     email: str
-    display_name: str
+    user_name: str
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -95,7 +95,7 @@ class SetUpUserRequest:
 class UpdateUserRequest:
     user_id: str
     email: str
-    display_name: str
+    user_name: str
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -166,7 +166,7 @@ class ApplyModifyMeaningRequest:
 class UserResponse:
     user_id: str
     email: str
-    display_name: str
+    user_name: str
     flashcard_id_list: List[str]
 
 
@@ -174,7 +174,7 @@ class UserResponse:
 class UserResponseModel(BaseModel):
     userId: str
     email: str
-    displayName: str
+    userName: str
     flashcardIdList: list[str]
 
 

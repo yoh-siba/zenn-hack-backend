@@ -25,7 +25,7 @@ async def setup_user(
         now = datetime.now()
         user_instance = UserSchema(
             email=_user.email,
-            display_name=_user.display_name,
+            user_name=_user.user_name,
             flashcard_id_list=[],
             created_at=now,
             updated_at=now,
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         test_user_list = [
             SetUpUserRequest(
                 email="test2@example.com",
-                display_name="test2",
+                user_name="test2",
             ),
         ]
         for test_user in test_user_list:

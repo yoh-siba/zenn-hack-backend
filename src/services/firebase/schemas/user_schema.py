@@ -9,7 +9,7 @@ from pydantic.dataclasses import dataclass
 @dataclass
 class UserSchema:
     email: str
-    display_name: str
+    user_name: str
     flashcard_id_list: List[str]
     created_at: datetime = None
     updated_at: datetime = None
