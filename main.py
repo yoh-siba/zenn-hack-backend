@@ -4,16 +4,17 @@ from pydantic import BaseModel, ValidationError
 from src.models.types import (
     CompareMediasRequest,
     CreateMediaRequest,
-    FlashcardResponse,
+    FlashcardResponseModel,
+    MeaningResponseModel,
     SetUpUserRequest,
     UpdateFlagRequest,
     UpdateMemoRequest,
     UpdateUserRequest,
     UpdateUsingMeaningsRequest,
+    UserResponse,
+    UserResponseModel,
 )
 from src.services.compare_medias import compare_medias
-from src.services.firebase.schemas.meaning_schema import MeaningSchema
-from src.services.firebase.schemas.user_schema import UserSchema
 from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_check_flag,
     update_flashcard_doc_on_memo,
@@ -36,7 +37,7 @@ async def root(description: str = "サーバーの稼働確認用エンドポイ
 
 class GetUserResponseModel(BaseModel):
     message: str
-    user: UserSchema
+    user: UserResponseModel
 
 
 @app.get(
@@ -51,9 +52,11 @@ async def get_user_endpoint(userId: str):
             raise HTTPException(status_code=500, detail=error)
         if not user_instance:
             raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+        user_response = user_instance.to_dict()
+        user_response["user_id"] = userId
         return {
             "message": "User retrieved successfully",
-            "user": user_instance.to_dict(),
+            "user": UserResponse.from_dict(user_response).to_dict(),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -126,7 +129,7 @@ async def update_user_endpoint(
 
 class GetFlashcardsResponseModel(BaseModel):
     message: str
-    flashcards: list[FlashcardResponse]
+    flashcards: list[FlashcardResponseModel]
 
 
 @app.get(
@@ -318,7 +321,7 @@ async def compare_medias_endpoint(
 
 class GetAllMeaningsResponseModel(BaseModel):
     message: str
-    meanings: list[MeaningSchema]
+    meanings: list[MeaningResponseModel]
 
 
 @app.get(
