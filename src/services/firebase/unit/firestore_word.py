@@ -1,7 +1,6 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
-from src.models.types import WordResponse
 from src.services.firebase.schemas.word_schema import WordSchema
 
 
@@ -32,14 +31,14 @@ async def update_word_doc(
         return False, error_message
 
 
-async def read_word_doc(word_id: str) -> Tuple[Optional[WordResponse], Optional[str]]:
+async def read_word_doc(word_id: str) -> Tuple[Optional[WordSchema], Optional[str]]:
     try:
         doc_ref = db.collection("words").document(word_id)
         doc = doc_ref.get()
         if doc.exists:
             word_instance = doc.to_dict()
             word_instance["word_id"] = doc.id
-            return WordResponse.from_dict(word_instance), None
+            return WordSchema.from_dict(word_instance), None
         return None, "指定された単語が見つかりません"
     except Exception as e:
         error_message = f"単語の読み込み中にエラーが発生しました: {str(e)}"

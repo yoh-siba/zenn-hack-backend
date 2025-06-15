@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 
 from fastapi import HTTPException
 
-from src.models.types import FlashcardResponse
+from src.models.types import FlashcardResponse, WordResponse
 from src.services.firebase.unit.firestore_flashcard import (
     read_flashcard_docs,
 )
@@ -39,21 +39,25 @@ async def get_flashcard_list(
         if error:
             raise HTTPException(status_code=500, detail=error)
         if not flashcards:
-            raise HTTPException(status_code=404, detail="このユーザーのフラッシュカードが見つかりません")
+            raise HTTPException(
+                status_code=404, detail="このユーザーのフラッシュカードが見つかりません"
+            )
         flashcard_responses = []
         for flashcard in flashcards:
             word, error = await read_word_doc(flashcard.word_id)
             if error:
                 raise HTTPException(status_code=500, detail=error)
+            word_response = word.to_dict()
+            word_response["wordId"] = flashcard.word_id
             meanings, error = await read_meaning_docs(flashcard.using_meaning_id_list)
             if error:
-                raise HTTPException(status_code=500, detail=error) 
+                raise HTTPException(status_code=500, detail=error)
             media, error = await read_media_doc(flashcard.current_media_id)
             if error:
                 raise HTTPException(status_code=500, detail=error)
             flashcard = FlashcardResponse(
                 flashcard_id=flashcard.flashcard_id,
-                word=word,
+                word=WordResponse.from_dict(word_response),
                 meanings=meanings,
                 media=media,
                 memo=flashcard.memo,

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from dataclasses_json import LetterCase, dataclass_json
+from pydantic import BaseModel
 
 from src.models.enums import PartOfSpeech
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
@@ -38,10 +39,12 @@ class WordsAPIResponse:
     pronunciation: Pronunciation
     frequency: float
 
+
 @dataclass
 class WordAndMeanings:
     word: WordSchema
     meanings: List[MeaningSchema]
+
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -60,6 +63,7 @@ class TranslationByGemini:
 class ExplanationByGemini:
     explanation: str
     core_meaning: Optional[str]
+
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -85,12 +89,14 @@ class SetUpUserRequest:
     email: str
     display_name: str
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class UpdateUserRequest:
     user_id: str
     email: str
     display_name: str
+
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -105,6 +111,7 @@ class UpdateMemoRequest:
     flashcard_id: str
     memo: str
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class CreateMediaRequest:
@@ -117,6 +124,7 @@ class CreateMediaRequest:
     allow_generating_person: bool
     input_media_urls: Optional[List[str]]
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class CompareMediasRequest:
@@ -126,11 +134,13 @@ class CompareMediasRequest:
     new_media_id: str
     is_selected_new: str
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class UpdateUsingMeaningsRequest:
     flashcard_id: str
     using_meaning_id_list: List[str]
+
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -139,6 +149,7 @@ class ApplyAddMeaningRequest:
     translation: str
     pronunciation: str
     comment: str
+
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -150,15 +161,31 @@ class ApplyModifyMeaningRequest:
     comment: str
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class UserResponse:
+    user_id: str
+    email: str
+    display_name: str
+    flashcard_id_list: List[str]
+
+
+@dataclass
+class UserResponseModel(BaseModel):
+    userId: str
+    email: str
+    displayName: str
+    flashcardIdList: list[str]
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class WordResponse:
     word_id: str
-    word : str
+    word: str
     core_meaning: str
     explanation: str
+
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -178,6 +205,7 @@ class MediaResponse:
     meaning_id: str
     media_urls: List[str]
 
+
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class FlashcardResponse:
@@ -188,3 +216,39 @@ class FlashcardResponse:
     memo: str
     version: int
     check_flag: bool = False
+
+
+@dataclass
+class WordResponseModel(BaseModel):
+    wordId: str
+    word: str
+    coreMeaning: str
+    explanation: str
+
+
+@dataclass
+class MeaningResponseModel(BaseModel):
+    meaningId: str
+    pos: str
+    translation: str
+    pronunciation: str
+    exampleEng: str
+    exampleJpn: str
+
+
+@dataclass
+class MediaResponseModel(BaseModel):
+    mediaId: str
+    meaningId: str
+    mediaUrls: List[str]
+
+
+@dataclass
+class FlashcardResponseModel(BaseModel):
+    flashcardId: str
+    word: WordResponseModel
+    meanings: List[MeaningResponseModel]
+    media: MediaResponseModel
+    memo: str
+    version: int
+    checkFlag: bool = False
