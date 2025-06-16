@@ -26,7 +26,13 @@ async def setup_user(
         user_instance = UserSchema(
             email=_user.email,
             user_name=_user.user_name,
-            flashcard_id_list=[],
+            flashcard_id_list=[
+                "U0R53LJvpZOCdvVDbUYF",
+                "iota2j31aw9opZXXEQAy",
+                "qTZ97Xx6lF3rldphGOBS",
+                "qiRQwQhwuokaclEG4c37",
+                "tlqZh0L3POx6cFzpBpo3",
+            ],
             created_at=now,
             updated_at=now,
         )

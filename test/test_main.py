@@ -42,7 +42,13 @@ def test_get_user():
             "userId": "sampleId",
             "email": "sample@sample.com",
             "userName": "山田",
-            "flashcardIdList": [],
+            "flashcardIdList": [
+                "U0R53LJvpZOCdvVDbUYF",
+                "iota2j31aw9opZXXEQAy",
+                "qTZ97Xx6lF3rldphGOBS",
+                "qiRQwQhwuokaclEG4c37",
+                "tlqZh0L3POx6cFzpBpo3",
+            ],
         },
     }
 
@@ -90,7 +96,13 @@ def test_get_user2():
             "userId": "sampleId",
             "email": "sample@sample.com",
             "userName": "山田2",
-            "flashcardIdList": [],
+            "flashcardIdList": [
+                "U0R53LJvpZOCdvVDbUYF",
+                "iota2j31aw9opZXXEQAy",
+                "qTZ97Xx6lF3rldphGOBS",
+                "qiRQwQhwuokaclEG4c37",
+                "tlqZh0L3POx6cFzpBpo3",
+            ],
         },
     }
 
