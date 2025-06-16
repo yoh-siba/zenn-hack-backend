@@ -28,7 +28,7 @@ def generate_prompt_for_imagen(_content: str) -> PromptForImagenByGemini:
         return result
     except Exception as e:
         print(e)
-        raise ValueError("翻訳の生成に失敗しました") from e
+        raise ValueError("画像生成用プロンプトの生成に失敗しました") from e
 
 
 if __name__ == "__main__":

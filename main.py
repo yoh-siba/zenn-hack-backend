@@ -172,7 +172,7 @@ async def update_check_flag_endpoint(
             check_flag=update_flag_request.check_flag,
         )
         if success:
-            return {"message": "Flashcard update successful"}
+            return {"message": "Check flag updated successfully"}
         else:
             raise HTTPException(status_code=400, detail=error)
     except ValidationError as ve:
@@ -227,7 +227,7 @@ async def update_using_meaning_id_list_endpoint(
         if error:
             raise HTTPException(status_code=500, detail=error)
         if success:
-            return {"message": "Meaning updated successfully"}
+            return {"message": "Using meaning ID list updated successfully"}
         else:
             raise HTTPException(status_code=400, detail=error)
     except ValidationError as ve:
