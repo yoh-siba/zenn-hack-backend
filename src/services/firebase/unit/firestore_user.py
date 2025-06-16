@@ -44,7 +44,7 @@ async def read_user_doc(user_id: str) -> Tuple[Optional[UserSchema], Optional[st
         if doc.exists:
             user_instance = UserSchema.from_dict(doc.to_dict())
             return user_instance, None
-        return None, "指定されたユーザーが見つかりません"
+        return None, "指定されたユーザーは存在しません"
     except Exception as e:
         error_message = f"ユーザーデータの読み込み中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
@@ -67,3 +67,17 @@ async def read_user_docs(user_ids: list[str]) -> Tuple[list[UserSchema], Optiona
         )
         print(f"\n{error_message}")
         return [], error_message
+
+
+async def delete_user_doc(user_id: str) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("users").document(user_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return False, "指定されたユーザーは存在しません"
+        doc_ref.delete()
+        return True, None
+    except Exception as e:
+        error_message = "ユーザーデータの削除中にエラーが発生しました"
+        print(f"\n{error_message}: {str(e)}")
+        return False, error_message

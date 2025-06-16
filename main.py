@@ -22,7 +22,11 @@ from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_using_meaning_id_list,
 )
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
-from src.services.firebase.unit.firestore_user import read_user_doc, update_user_doc
+from src.services.firebase.unit.firestore_user import (
+    delete_user_doc,
+    read_user_doc,
+    update_user_doc,
+)
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
 from src.services.get_not_compared_media_list import get_not_compared_media_list
@@ -53,7 +57,9 @@ async def get_user_endpoint(userId: str):
         if error:
             raise HTTPException(status_code=500, detail=error)
         if not user_instance:
-            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+            raise HTTPException(
+                status_code=500, detail="指定されたユーザーは存在しません"
+            )
         user_response = user_instance.to_dict()
         user_response["user_id"] = userId
         return {
@@ -89,7 +95,7 @@ async def setup_user_endpoint(
         if success:
             return {"message": "User setup successful"}
         else:
-            raise HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=500, detail=error)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -121,7 +127,30 @@ async def update_user_endpoint(
         if success:
             return {"message": "User update successful", "userId": user.user_id}
         else:
-            raise HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=500, detail=error)
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class DeleteUserResponseModel(BaseModel):
+    message: str
+
+
+@app.delete(
+    "/user/{userId}",
+    description="ユーザ情報の削除用エンドポイント",
+    response_model=DeleteUserResponseModel,
+)
+async def delete_user_endpoint(userId: str):
+    try:
+        user_id = userId
+        success, error = await delete_user_doc(user_id=user_id)
+        if success:
+            return {"message": "User delete successful"}
+        else:
+            raise HTTPException(status_code=500, detail=error)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
