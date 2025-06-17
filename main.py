@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel, ValidationError
 
 from src.models.types import (
     CompareMediasRequest,
     CreateMediaRequest,
+    CreateTemplateRequest,
     FlashcardResponseModel,
     GetNotComparedMediaResponse,
     MeaningResponseModel,
@@ -16,12 +19,16 @@ from src.models.types import (
     UserResponseModel,
 )
 from src.services.compare_medias import compare_medias
+from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
 from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_check_flag,
     update_flashcard_doc_on_memo,
     update_flashcard_doc_on_using_meaning_id_list,
 )
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
+from src.services.firebase.unit.firestore_prompt_template import (
+    create_prompt_template_doc,
+)
 from src.services.firebase.unit.firestore_user import (
     delete_user_doc,
     read_user_doc,
@@ -414,10 +421,58 @@ async def get_meanings_endpoint(wordId: str):
 
 
 # プロンプトのテンプレート全取得API
-@app.get("/template")
+@app.get("/template/")
 async def get_template_endpoint():
     try:
         raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class CreateTemplateResponseModel(BaseModel):
+    message: str
+    templateId: str
+
+
+# プロンプトのテンプレート作成API
+@app.post(
+    "/template/create",
+    description="プロンプトのテンプレート作成用エンドポイント",
+    response_model=CreateTemplateResponseModel,
+)
+async def create_template_endpoint(
+    _request: dict = Body(
+        ...,
+        example={
+            "generationType": "text-to-image",
+            "target": "cat",
+            "preText": "Generate an image of a cat",
+        },
+    ),
+):
+    try:
+        create_template_request = CreateTemplateRequest.from_dict(_request)
+        now = datetime.now()
+        template_instance = PromptTemplateSchema(
+            generation_type=create_template_request.generation_type,
+            target=create_template_request.target,
+            pre_text=create_template_request.pre_text,
+            created_at=now.isoformat(),
+            updated_at=now.isoformat(),
+        )
+        success, error, template_id = await create_prompt_template_doc(
+            template_instance=template_instance
+        )
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if success:
+            return {
+                "message": "Template created successfully",
+                "templateId": template_id,
+            }
+
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:

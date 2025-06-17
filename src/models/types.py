@@ -145,6 +145,14 @@ class CompareMediasRequest:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class CreateTemplateRequest:
+    generation_type: str
+    target: str
+    pre_text: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class UpdateUsingMeaningsRequest:
     flashcard_id: str
     using_meaning_id_list: List[str]
@@ -260,3 +268,14 @@ class FlashcardResponseModel(BaseModel):
     memo: str
     version: int
     checkFlag: bool = False
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class CreateTemplateResponse:
+    template_id: str
+
+
+@dataclass
+class CreateTemplateResponseModel:
+    templateId: str
