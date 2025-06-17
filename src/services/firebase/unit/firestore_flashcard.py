@@ -71,6 +71,7 @@ async def read_flashcard_docs(
         print(f"\n{error_message}")
         return [], error_message
 
+
 async def update_flashcard_doc_on_memo(
     flashcard_id: str, memo: str
 ) -> Tuple[bool, Optional[str]]:
@@ -83,6 +84,7 @@ async def update_flashcard_doc_on_memo(
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
+
 
 async def update_flashcard_doc_on_check_flag(
     flashcard_id: str, check_flag: bool
@@ -110,7 +112,8 @@ async def update_flashcard_doc_on_using_meaning_id_list(
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
-    
+
+
 async def update_flashcard_doc_on_comparison_id(
     flashcard_id: str, comparison_id: str
 ) -> Tuple[bool, Optional[str]]:
@@ -123,16 +126,48 @@ async def update_flashcard_doc_on_comparison_id(
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
-    
+
+
 async def update_flashcard_doc_on_comparison_id_and_current_media(
     flashcard_id: str, comparison_id: str | None, current_media_id: str
 ) -> Tuple[bool, Optional[str]]:
     try:
         now = datetime.now()
         doc_ref = db.collection("flashcards").document(flashcard_id)
-        doc_ref.update({"comparisonId": comparison_id, "currentMediaId": current_media_id, "updatedAt": now})
+        doc_ref.update(
+            {
+                "comparisonId": comparison_id,
+                "currentMediaId": current_media_id,
+                "updatedAt": now,
+            }
+        )
         return True, None
     except Exception as e:
         error_message = f"フラッシュカードの更新中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message
+
+
+async def copy_flashcard_docs(
+    flashcard_ids: list[str],
+) -> Tuple[bool, Optional[str], list[str]]:
+    try:
+        if not flashcard_ids:
+            return False, "フラッシュカードIDが指定されていません", []
+
+        new_flashcard_ids = []
+        for flashcard_id in flashcard_ids:
+            doc_ref = db.collection("flashcards").document(flashcard_id)
+            doc = doc_ref.get()
+            if doc.exists:
+                flashcard_instance = doc.to_dict()
+                new_doc = db.collection("flashcards").add(flashcard_instance)
+                new_flashcard_ids.append(new_doc[1].id)
+            else:
+                return False, f"フラッシュカードID {flashcard_id} が見つかりません", []
+
+        return True, None, new_flashcard_ids
+    except Exception as e:
+        error_message = f"フラッシュカードのコピー中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message, []

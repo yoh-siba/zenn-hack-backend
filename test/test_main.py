@@ -12,6 +12,11 @@ def test_root():
     assert response.json() == {"message": "Hello World"}
 
 
+################################################
+############## ユーザー関連のテスト ##############
+################################################
+
+
 # 正常系：新しいユーザーをセットアップする場合
 def test_user_setup():
     response = client.post(
@@ -140,6 +145,26 @@ def test_get_user3():
 #     assert response.json() == {
 #         "message": "Flashcards retrieved successfully",
 #         "flashcards": [],
+#     }
+
+# # 正常系：指定したユーザーIDでユーザー情報を取得する場合
+# def test_get_user2():
+#     response = client.get("/user/sampleId")
+#     assert response.status_code == 200
+#     assert response.json() == {
+#         "message": "User retrieved successfully",
+#         "user": {
+#             "userId": "sampleId",
+#             "email": "sample@sample.com",
+#             "userName": "山田",
+#             "flashcardIdList": [
+#                 "U0R53LJvpZOCdvVDbUYF",
+#                 "iota2j31aw9opZXXEQAy",
+#                 "qTZ97Xx6lF3rldphGOBS",
+#                 "qiRQwQhwuokaclEG4c37",
+#                 "tlqZh0L3POx6cFzpBpo3",
+#             ],
+#         },
 #     }
 
 

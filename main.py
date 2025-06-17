@@ -148,6 +148,7 @@ async def delete_user_endpoint(userId: str):
         user_id = userId
         success, error = await delete_user_doc(user_id=user_id)
         if success:
+            # TODO: ユーザーの使用したFlashcardを削除する処理を実装
             return {"message": "User delete successful"}
         else:
             raise HTTPException(status_code=500, detail=error)
