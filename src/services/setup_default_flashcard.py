@@ -42,36 +42,19 @@ async def setup_default_flashcard(
         # WordsAPIから単語情報を取得
         words_api_response: WordsAPIResponse = await request_words_api(word)
 
-        content = f"""
-        英単語「{word}」について、解説文とコアミーニングを生成してください。
-        explanationには、以下に示すような解説文を生成してください。
-        core_meaningには、以下の例のような、全ての意味を包括するコアミーニングを生成してください。
-        コアミーニングが無い場合は無くていいです。
-
-
-        ### 解説文の説明
-        以下のいずれかで50字程度の文章にして。
-        1. 単語の語源や、その単語がよく使われるシチュエーションなどの豆知識
-        2. 単語の覚え方（例：swimはスイスイ泳ぐ）
-        （注意点）英単語の意味を羅列しないで。
-
-
-        ### コアミーニングの例（「run」場合）
-        ある方向に，連続して，（すばやくなめらかに）動く
-        """
-        word_instance = generate_explanation_and_core_meaning(word, content)
-        if word_instance is None:
-            raise ValueError("WordSchema is None")
         # MeaningSchema用のコンテンツを作成
         content = f"""
         英単語「{word}」の英語の各定義（以下のデータのdefinition）の値について、それぞれ対応する一言の簡潔な日本語訳を考えてください。
         日本語に訳した際、同じ意味になる場合は、その重複は除いてください。
         definition_engには、definitionの値をそのまま入れてください。
         definition_jpnには、考えた日本語訳を入れてください。
-        posには、以下のデータのpartOfSpeechの値をそのまま入れてください。
+        日本語訳はできるだけ簡潔にし、補足説明部分は「（）」でくくることで、どこが単語の意味なのかを明確にしてください。
+        日本語訳は、example_jpnで使ったものと同様の表現を使用してください。
+        posには、以下のデータのpartOfSpeechを参考にしつつ、[noun, pronoun, intransitiveVerb, transitiveVerb, adjective, adverb, auxiliaryVerb, article, interjection, conjunction, preposition]のいずれかを入れてください。
         pronunciationには、以下のデータのpronunciationの値をそのまま入れてください。
         example_engには、examplesの最初の要素を、example_jpnにはその日本語訳を入れてください。
-        rankには、そのdefinitionの重要度を考慮して、rankを1から5の整数で設定してください。
+        examplesが空の場合は、簡単な例文を考えて、example_engとexample_jpnにそれぞれ入れてください。
+        rankには、そのdefinitionの重要度を考慮して、rankを1（重要度高い）から5（重要度低い）の整数で設定してください。
 
         ### 例（「run」場合）
         definitionが「move fast by using one's feet, with one foot off the ground at any given time」なら、意味は「走る」
@@ -86,6 +69,33 @@ async def setup_default_flashcard(
         """
         print(f"\n単語「{word}」の翻訳を生成中...")
         meanings_instance = generate_translation(content)
+        if meanings_instance is None:
+            raise ValueError("MeaningsSchema is None")
+
+        content = f"""
+        英単語「{word}」について、解説文とコアミーニングを生成してください。
+        explanationには、以下に示すような解説文を生成してください。
+        core_meaningには、以下の例のような、全ての意味を包括する50字以内の大まかな意味かNULLを入力してください。
+    
+
+        ### 解説文の説明
+        以下のいずれかで50字程度の文章にして。
+        1. 単語の覚え方（例：swimは「スイスイ泳ぐ」と覚えよう）
+        2. その単語がよく使われるシチュエーション、類義語などの豆知識
+        3. 単語の語源や由来
+        （注意点）英単語の意味を羅列しないで。
+
+
+        ### コアミーニングの例（「run」場合）
+        ある方向に，連続して，（すばやくなめらかに）動く
+
+        ### 単語の意味
+        {[{meaning.pos, meaning.translation} for meaning in meanings_instance]}
+        """
+        print(f"content: {content}")
+        word_instance = generate_explanation_and_core_meaning(word, content)
+        if word_instance is None:
+            raise ValueError("WordSchema is None")
 
         print("翻訳完了。WordとMeaningをFirestoreに保存")
 
@@ -211,7 +221,7 @@ if __name__ == "__main__":
 
     async def main():
         # テスト用の単語
-        test_word_list = ["account", "apple", "challenge","issue", "sound"]
+        test_word_list = ["account", "apple", "challenge", "issue", "sound"]
         # test_word_list = ["account"]
         for test_word in test_word_list:
             success, error, flashcard_id = await setup_default_flashcard(test_word)
@@ -220,7 +230,9 @@ if __name__ == "__main__":
                     f"単語 '{test_word}' のセットアップに成功しました。生成されたflashcard_id: {flashcard_id}"
                 )
             else:
-                print(f"単語 '{test_word}' のセットアップに失敗しました。エラー: {error}")
+                print(
+                    f"単語 '{test_word}' のセットアップに失敗しました。エラー: {error}"
+                )
 
     # 非同期関数を実行
     asyncio.run(main())
