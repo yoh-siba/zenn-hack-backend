@@ -31,7 +31,9 @@ async def update_media_doc(
         return False, error_message
 
 
-async def read_media_doc(media_id: str) -> Tuple[Optional[MediaResponse], Optional[str]]:
+async def read_media_doc(
+    media_id: str,
+) -> Tuple[Optional[MediaResponse], Optional[str]]:
     try:
         doc_ref = db.collection("medias").document(media_id)
         doc = doc_ref.get()
@@ -64,3 +66,16 @@ async def read_media_docs(
         )
         print(f"\n{error_message}")
         return [], error_message
+
+
+async def update_media_doc_on_media_urls(
+    media_id: str, media_urls: list[str]
+) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("medias").document(media_id)
+        doc_ref.update({"mediaUrls": media_urls})
+        return True, None
+    except Exception as e:
+        error_message = f"メディアデータの更新中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message

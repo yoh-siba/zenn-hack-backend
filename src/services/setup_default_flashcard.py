@@ -136,7 +136,8 @@ async def setup_default_flashcard(
         image_url_list = []
         for image in generated_images:
             success, error, image_url = await create_image_url_from_image(
-                image, f"{word}.png"
+                image,
+                f"_default/{word}/{main_meaning.pos}/{main_meaning.translation}.png",
             )
             if not success:
                 raise ValueError("画像のURL取得に失敗しました", error)

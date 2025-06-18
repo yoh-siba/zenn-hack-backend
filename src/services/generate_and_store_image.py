@@ -1,12 +1,17 @@
 from typing import Literal, Optional, Tuple
 
+from src.services.firebase.unit.cloud_storage_image import create_image_url_from_image
 from src.services.google_ai.unit.request_imagen import request_imagen_text_to_image
 
 
 async def generate_and_store_image(
     _prompt: str,
     _person_generation: Literal["DONT_ALLOW", "ALLOW_ADULT"],
-) -> Tuple[bool, Optional[str], Optional[str]]:
+    _word: str,
+    _pos: str,
+    _meaning: str,
+    _flashcard_id: str,
+) -> Tuple[bool, Optional[str], Optional[list[str]]]:
     """単語とその意味の生成＆格納用の関数
         WordsAPIでベース取得 -> 解説・コアミーニング生成 -> 意味リスト生成 -> データ格納
     Args:
@@ -26,14 +31,21 @@ async def generate_and_store_image(
             _aspect_ratio="1:1",  # アスペクト比を1:1に設定
             _person_generation=_person_generation,  # 人物生成を許可しない
         )
-
         if not generated_images:
             raise ValueError("No images generated")
 
         # 生成された画像をFirestorageに保存して、URLを取得
-        image_url = ""
+        image_url_list = []
+        for image in generated_images:
+            success, error, image_url = await create_image_url_from_image(
+                image,
+                f"{_word}/{_pos}/{_meaning}/{_flashcard_id}.png",
+            )
+            if not success:
+                raise ValueError("画像のURL取得に失敗しました", error)
+            image_url_list.append(image_url)
 
-        return True, None, image_url
+        return True, None, image_url_list
 
     except Exception as e:
         error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"
@@ -47,7 +59,14 @@ if __name__ == "__main__":
     async def main():
         # テスト用の単語
         test_word = "account"
-        success, error, flascard_id = await generate_and_store_image(test_word)
+        success, error, flascard_id = await generate_and_store_image(
+            test_word,
+            "DONT_ALLOW",
+            "account",
+            "noun",
+            "a record of financial expenditure",
+            "flashcard_123",
+        )
         if success:
             print(
                 f"単語 '{test_word}' のセットアップに成功しました。生成されたflascard_id: {flascard_id}"

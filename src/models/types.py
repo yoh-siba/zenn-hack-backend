@@ -76,6 +76,15 @@ class PromptForImagenByGemini:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class ModifiedOtherSettingsByGemini:
+    generated_other_settings: str
+    prompt_token_count: int
+    candidates_token_count: int
+    total_token_count: int
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class TokenInfo:
     prompt_token_count: int
     candidates_token_count: int
@@ -118,9 +127,15 @@ class CreateMediaRequest:
     flashcard_id: str
     old_media_id: Optional[str]
     meaning_id: str
+    pos: PartOfSpeech
+    word: str
+    meaning: str
+    example: str
+    explanation: str
     generation_type: str
     template_id: Optional[str]
     user_prompt: str
+    other_settings: list[str]
     allow_generating_person: bool
     input_media_urls: Optional[List[str]]
 

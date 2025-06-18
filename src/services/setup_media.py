@@ -6,13 +6,20 @@ from fastapi import HTTPException
 from src.models.types import CreateMediaRequest
 from src.services.firebase.schemas.comparison_schema import ComparisonSchema
 from src.services.firebase.schemas.media_schema import MediaSchema
+from src.services.firebase.unit.cloud_storage_image import create_image_url_from_image
 from src.services.firebase.unit.firestore_comparison import create_comparison_doc
 from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_comparison_id,
 )
-from src.services.firebase.unit.firestore_media import create_media_doc
-from src.services.generate_and_store_image import generate_and_store_image
+from src.services.firebase.unit.firestore_media import (
+    create_media_doc,
+    update_media_doc_on_media_urls,
+)
+from src.services.google_ai.generate_modified_other_settings import (
+    generate_modified_other_settings,
+)
 from src.services.google_ai.generate_prompt_for_imagen import generate_prompt_for_imagen
+from src.services.google_ai.unit.request_imagen import request_imagen_text_to_image
 
 
 async def setup_media(
@@ -35,17 +42,50 @@ async def setup_media(
     """
     try:
         now = datetime.now()
-        generated_prompt, prompt_token_count, candidates_token_count, total_token_count = await generate_prompt_for_imagen(create_media_request)
+        # 「その他」の設定部分をプロンプトの形に成形（ない場合も対応済）
+        (
+            modified_other_settings,
+            prompt_token_count_o,
+            candidates_token_count_o,
+            total_token_count_o,
+        ) = generate_modified_other_settings(
+            other_settings=create_media_request.other_settings
+        )
+        joined_user_prompt = create_media_request.user_prompt.join(
+            "\n".join(modified_other_settings)
+        )
+        print(joined_user_prompt)
+        # 画像生成用のプロンプトを生成
+        (
+            generated_prompt,
+            prompt_token_count_p,
+            candidates_token_count_p,
+            total_token_count_p,
+        ) = await generate_prompt_for_imagen(_content=joined_user_prompt)
         if not generated_prompt:
-            raise HTTPException(status_code=500, detail="プロンプトの生成に失敗しました。")
-        image_url = ""
-        if create_media_request.generation_type == "text-to-image":
-            success, error, image_url = await generate_and_store_image(
-                _prompt=generated_prompt,
-                _person_generation="ALLOW_ADULT" if create_media_request.allow_generating_person else "DONT_ALLOW"
+            raise HTTPException(
+                status_code=500, detail="プロンプトの生成に失敗しました。"
             )
-            if not success:
-                raise HTTPException(status_code=500, detail=error)
+        replaced_prompt = (
+            generated_prompt.replace("{word}", create_media_request.word)
+            .replace("{pos}", create_media_request.pos)
+            .replace("{meaning}", create_media_request.meaning)
+            .replace("{example}", create_media_request.example)
+            .replace("{explanation}", create_media_request.explanation)
+        )
+        print(f"\n生成&置換完了後のプロンプト: {replaced_prompt}")
+        generated_images = []
+        if create_media_request.generation_type == "text-to-image":
+            generated_images = request_imagen_text_to_image(
+                _prompt=replaced_prompt,
+                _number_of_images=1,
+                _aspect_ratio="1:1",  # アスペクト比を1:1に設定
+                _person_generation="ALLOW_ADULT"
+                if create_media_request.allow_generating_person
+                else "DONT_ALLOW",  # 人物生成を許可しない
+            )
+            if not generated_images:
+                raise ValueError("No images generated")
         elif create_media_request.generation_type == "text-to-video":
             ## TODO: 動画生成の実装
             raise NotImplementedError("動画生成はまだ実装されていません。")
@@ -56,19 +96,35 @@ async def setup_media(
             media_instance=MediaSchema(
                 flashcard_id=create_media_request.flashcard_id,
                 meaning_id=create_media_request.meaning_id,
-                media_urls=[image_url],
+                media_urls=[],
                 generation_type="text-to-image",
                 template_id=create_media_request.template_id,
                 user_prompt=create_media_request.user_prompt,
                 generated_prompt=generated_prompt,
                 input_media_urls=create_media_request.input_media_urls,
-                prompt_token_count=prompt_token_count,
-                candidates_token_count=candidates_token_count,
-                total_token_count=total_token_count,
+                prompt_token_count=prompt_token_count_o + prompt_token_count_p,
+                candidates_token_count=candidates_token_count_o
+                + candidates_token_count_p,
+                total_token_count=total_token_count_o + total_token_count_p,
                 created_by=create_media_request.flashcard_id,
                 created_at=now,
-                updated_at=now
+                updated_at=now,
             )
+        )
+        if not success:
+            raise HTTPException(status_code=500, detail=error)
+        # 生成された画像をFirestorageに保存して、URLを取得
+        image_url_list = []
+        for image in generated_images:
+            success, error, image_url = await create_image_url_from_image(
+                image,
+                f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.png",
+            )
+            if not success:
+                raise ValueError("画像のURL取得に失敗しました", error)
+            image_url_list.append(image_url)
+        success, error = await update_media_doc_on_media_urls(
+            media_id=media_id, media_urls=image_url_list
         )
         if not success:
             raise HTTPException(status_code=500, detail=error)
@@ -85,8 +141,7 @@ async def setup_media(
         if not success:
             raise HTTPException(status_code=500, detail=error)
         success, error = await update_flashcard_doc_on_comparison_id(
-            flashcard_id=create_media_request.flashcard_id,
-            comparison_id=comparison_id
+            flashcard_id=create_media_request.flashcard_id, comparison_id=comparison_id
         )
         if not success:
             raise HTTPException(status_code=500, detail=error)

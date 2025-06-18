@@ -30,7 +30,7 @@ def generate_translation(_content: str) -> list[MeaningSchema]:
                 raise ValueError("Item is not of type TranslationByGemini")
             meaning = MeaningSchema(
                 pos=PartOfSpeech(item.pos) if item.pos else None,
-               translation=item.definition_jpn,
+                translation=item.definition_jpn,
                 pronunciation=item.pronunciation,
                 example_eng=item.example_eng,
                 example_jpn=item.example_jpn,
