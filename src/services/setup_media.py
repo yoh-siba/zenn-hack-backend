@@ -43,41 +43,50 @@ async def setup_media(
     try:
         now = datetime.now()
         # 「その他」の設定部分をプロンプトの形に成形（ない場合も対応済）
-        (
-            modified_other_settings,
-            prompt_token_count_o,
-            candidates_token_count_o,
-            total_token_count_o,
-        ) = generate_modified_other_settings(
+        modified_other_settings_result = generate_modified_other_settings(
             other_settings=create_media_request.other_settings
         )
+
+        modified_other_settings = (
+            modified_other_settings_result.generated_other_settings
+        )
+        prompt_token_count_o = modified_other_settings_result.prompt_token_count
+        candidates_token_count_o = modified_other_settings_result.candidates_token_count
+        total_token_count_o = modified_other_settings_result.total_token_count
+
         joined_user_prompt = create_media_request.user_prompt.join(
             "\n".join(modified_other_settings)
         )
-        print(joined_user_prompt)
+        replaced_prompt = (
+            joined_user_prompt.replace("{word}", create_media_request.word)
+            .replace("{pos}", str(create_media_request.pos))
+            .replace("{meaning}", create_media_request.meaning)
+            .replace("{example}", create_media_request.example)
+            .replace("{explanation}", create_media_request.explanation)
+            .replace("{modified_other_settings}", modified_other_settings)
+        )
+        print(f"\n結合・置換されたプロンプト: {replaced_prompt}")
         # 画像生成用のプロンプトを生成
+        result = generate_prompt_for_imagen(_content=replaced_prompt)
         (
             generated_prompt,
             prompt_token_count_p,
             candidates_token_count_p,
             total_token_count_p,
-        ) = await generate_prompt_for_imagen(_content=joined_user_prompt)
+        ) = (
+            result.generated_prompt,
+            result.prompt_token_count,
+            result.candidates_token_count,
+            result.total_token_count,
+        )
         if not generated_prompt:
             raise HTTPException(
                 status_code=500, detail="プロンプトの生成に失敗しました。"
             )
-        replaced_prompt = (
-            generated_prompt.replace("{word}", create_media_request.word)
-            .replace("{pos}", create_media_request.pos)
-            .replace("{meaning}", create_media_request.meaning)
-            .replace("{example}", create_media_request.example)
-            .replace("{explanation}", create_media_request.explanation)
-        )
-        print(f"\n生成&置換完了後のプロンプト: {replaced_prompt}")
         generated_images = []
         if create_media_request.generation_type == "text-to-image":
             generated_images = request_imagen_text_to_image(
-                _prompt=replaced_prompt,
+                _prompt=generated_prompt,
                 _number_of_images=1,
                 _aspect_ratio="1:1",  # アスペクト比を1:1に設定
                 _person_generation="ALLOW_ADULT"

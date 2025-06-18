@@ -299,10 +299,11 @@ async def setup_media_endpoint(
             "meaning": "猫",
             "example": "猫がマットの上に座っていました。",
             "explanation": "しばしば犬と対比される小型の哺乳類で、一般的にペットとして飼われる。",
+            "coreMeaning": None,
             "generationType": "text-to-image",
             "templateId": "template_001",
             "userPrompt": "あなたは画像生成AIでイラストを生成するための～",
-            "otherSetting": "猫の種類は三毛猫にしてください。",
+            "otherSettings": ["猫の種類は三毛猫にしてください。"],
             "allowGeneratingPerson": True,
             "inputMediaUrls": [
                 "https://example.com/input1.jpg",

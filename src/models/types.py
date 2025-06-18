@@ -132,6 +132,7 @@ class CreateMediaRequest:
     meaning: str
     example: str
     explanation: str
+    core_meaning: Optional[str]
     generation_type: str
     template_id: Optional[str]
     user_prompt: str
