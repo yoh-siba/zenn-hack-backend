@@ -272,6 +272,23 @@ class FlashcardResponseModel(BaseModel):
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class TemplatesResponse:
+    template_id: str
+    generation_type: str
+    target: str
+    pre_text: str
+
+
+@dataclass
+class TemplatesResponseModel:
+    templateId: str
+    generationType: str
+    target: str
+    preText: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class CreateTemplateResponse:
     template_id: str
 

@@ -11,6 +11,7 @@ from src.models.types import (
     GetNotComparedMediaResponse,
     MeaningResponseModel,
     SetUpUserRequest,
+    TemplatesResponseModel,
     UpdateFlagRequest,
     UpdateMemoRequest,
     UpdateUserRequest,
@@ -28,6 +29,7 @@ from src.services.firebase.unit.firestore_flashcard import (
 from src.services.firebase.unit.firestore_meaning import read_meaning_docs
 from src.services.firebase.unit.firestore_prompt_template import (
     create_prompt_template_doc,
+    read_prompt_template_docs,
 )
 from src.services.firebase.unit.firestore_user import (
     delete_user_doc,
@@ -357,7 +359,7 @@ class CompareMediasResponseModel(BaseModel):
     description="メディアの比較結果送信用エンドポイント",
     response_model=CompareMediasResponseModel,
 )
-async def compare_medias_endpoint(
+async def update_comparison_endpoint(
     _request: dict = Body(
         ...,
         example={
@@ -420,11 +422,27 @@ async def get_meanings_endpoint(wordId: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class GetTemplateResponseModel(BaseModel):
+    message: str
+    templates: list[TemplatesResponseModel]
+
+
 # プロンプトのテンプレート全取得API
-@app.get("/template/")
+@app.get(
+    "/template",
+    description="ユーザのフラッシュカード一覧取得用エンドポイント",
+    response_model=GetTemplateResponseModel,
+)
 async def get_template_endpoint():
     try:
-        raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+        template_list, error = await read_prompt_template_docs()
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        return {
+            "message": "User templates retrieved successfully",
+            "templates": [template_list.to_dict() for template_list in template_list],
+        }
+
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:

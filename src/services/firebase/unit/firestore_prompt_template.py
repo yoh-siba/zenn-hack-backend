@@ -1,6 +1,7 @@
 from typing import Optional, Tuple
 
 from src.config.settings import db
+from src.models.types import TemplatesResponse
 from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
 
 
@@ -51,21 +52,13 @@ async def read_prompt_template_doc(
         return None, error_message
 
 
-async def read_prompt_template_docs(
-    template_ids: list[str],
-) -> Tuple[list[PromptTemplateSchema], Optional[str]]:
+async def read_prompt_template_docs() -> Tuple[list[TemplatesResponse], Optional[str]]:
     try:
-        if not template_ids:
-            return [], "プロンプトテンプレートIDが指定されていません"
-
-        docs = (
-            await db.collection("prompt_templates")
-            .where("__name__", "in", template_ids)
-            .get()
-        )
-        templates = []
-        for doc in docs:
-            templates.append(PromptTemplateSchema.from_dict(doc.to_dict()))
+        docs = db.collection("prompt_templates").get()
+        templates = [
+            TemplatesResponse.from_dict({**doc.to_dict(), "template_id": doc.id})
+            for doc in docs
+        ]
         return templates, None
     except Exception as e:
         error_message = (
