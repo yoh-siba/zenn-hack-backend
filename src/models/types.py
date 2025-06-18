@@ -153,6 +153,15 @@ class CreateTemplateRequest:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class UpdateTemplateRequest:
+    template_id: str
+    generation_type: str
+    target: str
+    pre_text: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class UpdateUsingMeaningsRequest:
     flashcard_id: str
     using_meaning_id_list: List[str]

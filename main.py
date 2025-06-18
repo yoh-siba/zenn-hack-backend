@@ -14,6 +14,7 @@ from src.models.types import (
     TemplatesResponseModel,
     UpdateFlagRequest,
     UpdateMemoRequest,
+    UpdateTemplateRequest,
     UpdateUserRequest,
     UpdateUsingMeaningsRequest,
     UserResponse,
@@ -30,6 +31,7 @@ from src.services.firebase.unit.firestore_meaning import read_meaning_docs
 from src.services.firebase.unit.firestore_prompt_template import (
     create_prompt_template_doc,
     read_prompt_template_docs,
+    update_prompt_template_doc,
 )
 from src.services.firebase.unit.firestore_user import (
     delete_user_doc,
@@ -465,7 +467,7 @@ async def create_template_endpoint(
         ...,
         example={
             "generationType": "text-to-image",
-            "target": "cat",
+            "target": "例文",
             "preText": "Generate an image of a cat",
         },
     ),
@@ -497,12 +499,47 @@ async def create_template_endpoint(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class UpdateTemplateResponseModel(BaseModel):
+    message: str
+
+
 # プロンプトのテンプレート更新API
-@app.put("/template/update")
-async def update_template_endpoint(_request: dict = Body(...)):
+@app.put(
+    "/template/update",
+    description="プロンプトのテンプレート更新用エンドポイント",
+    response_model=UpdateTemplateResponseModel,
+)
+async def update_template_endpoint(
+    _request: dict = Body(
+        ...,
+        example={
+            "templateId": "12345",
+            "generationType": "text-to-image",
+            "target": "例文",
+            "preText": "Generate an image of a cat",
+        },
+    ),
+):
     try:
-        # update_template_request = UpdateTemplateRequest.from_dict(_request)
-        raise HTTPException(status_code=500, detail="このAPIはまだ実装されていません。")
+        update_template_request = UpdateTemplateRequest.from_dict(_request)
+        now = datetime.now()
+        template_instance = PromptTemplateSchema(
+            generation_type=update_template_request.generation_type,
+            target=update_template_request.target,
+            pre_text=update_template_request.pre_text,
+            created_at=now.isoformat(),
+            updated_at=now.isoformat(),
+        )
+        success, error = await update_prompt_template_doc(
+            template_id=update_template_request.template_id,
+            template_instance=template_instance,
+        )
+        if error:
+            raise HTTPException(status_code=500, detail=error)
+        if success:
+            return {
+                "message": "Template updated successfully",
+            }
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
