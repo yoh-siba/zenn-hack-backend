@@ -155,8 +155,8 @@ async def setup_media(
         )
         if not success:
             raise HTTPException(status_code=500, detail=error)
-        return True, None, media_id
+        return True, None, media_id, comparison_id
     except Exception as e:
         error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
-        return False, error_message, None
+        return False, error_message, None, None
