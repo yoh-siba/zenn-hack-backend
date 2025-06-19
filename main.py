@@ -8,8 +8,8 @@ from src.models.types import (
     CreateMediaRequest,
     CreateTemplateRequest,
     FlashcardResponseModel,
-    GetNotComparedMediaResponse,
     MeaningResponseModel,
+    NotComparedMediaResponseModel,
     SetUpUserRequest,
     TemplatesResponseModel,
     UpdateFlagRequest,
@@ -332,7 +332,7 @@ async def setup_media_endpoint(
 
 class GetNoComparedMediasResponseModel(BaseModel):
     message: str
-    medias: list[GetNotComparedMediaResponse]
+    medias: list[NotComparedMediaResponseModel]
 
 
 @app.post(
@@ -340,7 +340,7 @@ class GetNoComparedMediasResponseModel(BaseModel):
     description="未比較のメディア一括取得用エンドポイント",
     response_model=GetNoComparedMediasResponseModel,
 )
-async def compare_medias_endpoint(userId: str):
+async def get_comparison_endpoint(userId: str):
     try:
         user_id = userId
         success, error, media_list = await get_not_compared_media_list(user_id=user_id)
@@ -349,7 +349,7 @@ async def compare_medias_endpoint(userId: str):
         if success:
             return {
                 "message": "Not compared medias retrieved successfully",
-                "medias": media_list,
+                "medias": [media.to_dict() for media in media_list],
             }
 
     except ValidationError as ve:

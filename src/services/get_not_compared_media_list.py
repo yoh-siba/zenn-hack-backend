@@ -55,7 +55,7 @@ async def get_not_compared_media_list(
             media_response = GetNotComparedMediaResponse(
                 flashcard_id=flashcard.flashcard_id,
                 comparison_id=flashcard.comparison_id,
-                new_media_url=new_media.media_urls,
+                new_media_urls=new_media.media_urls,
             )
             media_responses.append(media_response)
         return True, None, media_responses
