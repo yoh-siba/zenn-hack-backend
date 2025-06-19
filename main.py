@@ -362,7 +362,7 @@ class CompareMediasResponseModel(BaseModel):
     message: str
 
 
-@app.post(
+@app.put(
     "/comparison/update",
     description="メディアの比較結果送信用エンドポイント",
     response_model=CompareMediasResponseModel,
@@ -381,6 +381,7 @@ async def update_comparison_endpoint(
 ):
     try:
         compare_medias_request = CompareMediasRequest.from_dict(_request)
+        print(f"Received comparison request: {compare_medias_request}")
         success, error = await compare_medias(
             compare_medias_request=compare_medias_request
         )

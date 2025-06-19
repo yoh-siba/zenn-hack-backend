@@ -163,7 +163,7 @@ class CompareMediasRequest:
     comparison_id: str
     old_media_id: Optional[str]
     new_media_id: str
-    is_selected_new: str
+    is_selected_new: bool
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
