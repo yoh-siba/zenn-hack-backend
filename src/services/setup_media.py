@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 
 from fastapi import HTTPException
 
+from src.models.enums import part_of_speech_to_japanese
 from src.models.types import CreateMediaRequest
 from src.services.firebase.schemas.comparison_schema import ComparisonSchema
 from src.services.firebase.schemas.media_schema import MediaSchema
@@ -59,7 +60,7 @@ async def setup_media(
         )
         replaced_prompt = (
             joined_user_prompt.replace("{word}", create_media_request.word)
-            .replace("{pos}", str(create_media_request.pos))
+            .replace("{pos}", part_of_speech_to_japanese(create_media_request.pos))
             .replace("{meaning}", create_media_request.meaning)
             .replace("{example}", create_media_request.example)
             .replace("{explanation}", create_media_request.explanation)

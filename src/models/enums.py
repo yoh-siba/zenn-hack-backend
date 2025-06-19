@@ -24,3 +24,29 @@ PartOfSpeechField = config(
     encoder=lambda x: x.value,  # Convert Enum to its value (e.g., 'noun')
     decoder=PartOfSpeech,  # Convert value back to Enum
 )
+
+
+def part_of_speech_to_japanese(part_of_speech: PartOfSpeech) -> str:
+    """
+    Convert PartOfSpeech enum to its Japanese equivalent.
+
+    Args:
+        part_of_speech (PartOfSpeech): The part of speech enum value.
+
+    Returns:
+        str: The Japanese equivalent of the part of speech.
+    """
+    translations = {
+        PartOfSpeech.NOUN: "名詞",
+        PartOfSpeech.PRONOUN: "代名詞",
+        PartOfSpeech.INTRANSITIVEVERB: "自動詞",
+        PartOfSpeech.TRANSITIVEVERB: "他動詞",
+        PartOfSpeech.ADJECTIVE: "形容詞",
+        PartOfSpeech.ADVERB: "副詞",
+        PartOfSpeech.AUXILIARYVERB: "助動詞",
+        PartOfSpeech.ARTICLE: "冠詞",
+        PartOfSpeech.INTERJECTION: "感嘆詞",
+        PartOfSpeech.CONJUNCTION: "接続詞",
+        PartOfSpeech.IDIOM: "熟語",
+    }
+    return translations.get(part_of_speech, "不明")
