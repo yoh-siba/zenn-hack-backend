@@ -332,7 +332,7 @@ async def setup_media_endpoint(
 
 class GetNoComparedMediasResponseModel(BaseModel):
     message: str
-    medias: list[NotComparedMediaResponseModel]
+    comparisons: list[NotComparedMediaResponseModel]
 
 
 @app.post(
@@ -349,7 +349,7 @@ async def get_comparison_endpoint(userId: str):
         if success:
             return {
                 "message": "Not compared medias retrieved successfully",
-                "medias": [media.to_dict() for media in media_list],
+                "comparisons": [media.to_dict() for media in media_list],
             }
 
     except ValidationError as ve:
