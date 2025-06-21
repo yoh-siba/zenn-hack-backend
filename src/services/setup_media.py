@@ -65,7 +65,7 @@ async def setup_media(
             joined_user_prompt.replace("{word}", create_media_request.word)
             .replace("{pos}", part_of_speech_to_japanese(create_media_request.pos))
             .replace("{meaning}", create_media_request.meaning)
-            .replace("{example}", create_media_request.example)
+            .replace("{example}", create_media_request.example_jpn)
             .replace("{explanation}", create_media_request.explanation)
             .replace("{modified_other_settings}", modified_other_settings)
         )

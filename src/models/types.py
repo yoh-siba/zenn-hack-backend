@@ -130,7 +130,7 @@ class CreateMediaRequest:
     pos: PartOfSpeech
     word: str
     meaning: str
-    example: str
+    example_jpn: str
     explanation: str
     core_meaning: Optional[str]
     generation_type: str

@@ -298,7 +298,7 @@ async def setup_media_endpoint(
             "pos": "noun",
             "word": "cat",
             "meaning": "猫",
-            "example": "猫がマットの上に座っていました。",
+            "exampleJpn": "猫がマットの上に座っていました。",
             "explanation": "しばしば犬と対比される小型の哺乳類で、一般的にペットとして飼われる。",
             "coreMeaning": None,
             "generationType": "text-to-image",
