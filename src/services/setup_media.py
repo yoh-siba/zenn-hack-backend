@@ -28,7 +28,7 @@ from src.services.google_ai.unit.request_veo_text_to_video import (
 
 async def setup_media(
     create_media_request: CreateMediaRequest,
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> Tuple[bool, Optional[str], Optional[str], Optional[str], Optional[str]]:
     """画像（動画）部分を更新する関数
     使用するAIに応じて、何を生成するかが変わる
     mediaを作成（flashcardのobjectを利用）
@@ -43,6 +43,8 @@ async def setup_media(
             - 成功/失敗を示すブール値
             - エラーメッセージ（成功時はNone）
             - 作成された単語のID（失敗時はNone）
+            - 作成されたComparisonのID（失敗時はNone）
+            - 作成されたメディアのURLリスト（失敗時はNone）
     """
     try:
         now = datetime.now()
@@ -175,8 +177,8 @@ async def setup_media(
         )
         if not success:
             raise HTTPException(status_code=500, detail=error)
-        return True, None, media_id, comparison_id
+        return True, None, media_id, comparison_id, media_url_list
     except Exception as e:
         error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
-        return False, error_message, None, None
+        return False, error_message, None, None, None

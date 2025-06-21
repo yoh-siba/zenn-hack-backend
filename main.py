@@ -280,7 +280,8 @@ async def update_using_meaning_id_list_endpoint(
 class CreateMediaResponseModel(BaseModel):
     message: str
     comparisonId: str
-    mediaId: str
+    newMediaId: str
+    newMediaUrls: list[str]
 
 
 @app.post(
@@ -312,7 +313,7 @@ async def setup_media_endpoint(
 ):
     try:
         create_media_request = CreateMediaRequest.from_dict(_request)
-        success, error, media_id, comparison_id = await setup_media(
+        success, error, media_id, comparison_id, media_url_list = await setup_media(
             create_media_request=create_media_request
         )
         if error:
@@ -321,7 +322,8 @@ async def setup_media_endpoint(
             return {
                 "message": "Flashcard comparison ID updated successfully",
                 "comparisonId": comparison_id,
-                "mediaId": media_id,
+                "newMediaId": media_id,
+                "newMediaUrls": media_url_list,
             }
 
     except ValidationError as ve:
