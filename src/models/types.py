@@ -146,6 +146,7 @@ class CreateMediaRequest:
 class GetNotComparedMediaResponse:
     comparison_id: str
     flashcard_id: str
+    new_media_id: str
     new_media_urls: list[str]
 
 
@@ -153,6 +154,7 @@ class GetNotComparedMediaResponse:
 class NotComparedMediaResponseModel:
     comparisonId: str
     flashcardId: str
+    newMediaId: str
     newMediaUrls: list[str]
 
 
