@@ -58,7 +58,9 @@ def request_imagen_text_to_image(
         return images
     except Exception as e:
         print(f"エラーの詳細: {str(e)}")
-        raise Exception(f"画像生成中にエラーが発生しました: {str(e)}")
+        raise Exception(
+            f"画像生成中にエラーが発生しました: {str(e)}\nプロンプト: {_prompt}"
+        )
 
 
 if __name__ == "__main__":
