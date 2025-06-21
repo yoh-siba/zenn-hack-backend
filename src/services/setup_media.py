@@ -21,6 +21,9 @@ from src.services.google_ai.generate_modified_other_settings import (
 )
 from src.services.google_ai.generate_prompt_for_imagen import generate_prompt_for_imagen
 from src.services.google_ai.unit.request_imagen import request_imagen_text_to_image
+from src.services.google_ai.unit.request_veo_text_to_video import (
+    request_text_to_video,
+)
 
 
 async def setup_media(
@@ -84,9 +87,9 @@ async def setup_media(
             raise HTTPException(
                 status_code=500, detail="プロンプトの生成に失敗しました。"
             )
-        generated_images = []
+        generated_medias = []
         if create_media_request.generation_type == "text-to-image":
-            generated_images = request_imagen_text_to_image(
+            generated_medias = request_imagen_text_to_image(
                 _prompt=generated_prompt,
                 _number_of_images=1,
                 _aspect_ratio="1:1",  # アスペクト比を1:1に設定
@@ -94,14 +97,31 @@ async def setup_media(
                 if create_media_request.allow_generating_person
                 else "DONT_ALLOW",  # 人物生成を許可しない
             )
-            if not generated_images:
+            if not generated_medias:
                 raise ValueError("No images generated")
         elif create_media_request.generation_type == "text-to-video":
-            ## TODO: 動画生成の実装
-            raise NotImplementedError("動画生成はまだ実装されていません。")
-        elif create_media_request.generation_type == "image-to-image":
-            ## TODO: 画像から画像生成の実装
-            raise NotImplementedError("画像から画像生成はまだ実装されていません。")
+            generated_medias = request_text_to_video(
+                _prompt=generated_prompt,
+                _person_generation="ALLOW_ADULT"
+                if create_media_request.allow_generating_person
+                else "DONT_ALLOW",
+            )
+            if not generated_medias:
+                raise ValueError("No videos generated")
+
+            # 動画を保存する処理を追加
+            video_url_list = []
+            for n, video in enumerate(generated_medias):
+                file_path = f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/video{n}.mp4"
+                success, error, video_url = await create_image_url_from_image(
+                    video, file_path
+                )
+                if not success:
+                    raise ValueError("動画のURL取得に失敗しました", error)
+                video_url_list.append(video_url)
+        elif create_media_request.generation_type == "text-to-image":
+            ## TODO: テキストから画像生成の実装
+            raise NotImplementedError("テキストから画像生成はまだ実装されていません。")
         success, error, media_id = await create_media_doc(
             media_instance=MediaSchema(
                 flashcard_id=create_media_request.flashcard_id,
@@ -124,17 +144,17 @@ async def setup_media(
         if not success:
             raise HTTPException(status_code=500, detail=error)
         # 生成された画像をFirestorageに保存して、URLを取得
-        image_url_list = []
-        for image in generated_images:
-            success, error, image_url = await create_image_url_from_image(
-                image,
+        media_url_list = []
+        for media in generated_medias:
+            success, error, media_url = await create_image_url_from_image(
+                media,
                 f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.png",
             )
             if not success:
                 raise ValueError("画像のURL取得に失敗しました", error)
-            image_url_list.append(image_url)
+            media_url_list.append(media_url)
         success, error = await update_media_doc_on_media_urls(
-            media_id=media_id, media_urls=image_url_list
+            media_id=media_id, media_urls=media_url_list
         )
         if not success:
             raise HTTPException(status_code=500, detail=error)
