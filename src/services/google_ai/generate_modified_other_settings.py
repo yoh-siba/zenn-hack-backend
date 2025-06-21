@@ -28,7 +28,9 @@ def generate_modified_other_settings(
 
             ### 修正したい文章
         """
-        if len(other_settings) == 0:
+        if (other_settings is None) or (
+            len(other_settings) == 0
+        ):  # 「その他」の設定がない場合
             result = ModifiedOtherSettingsByGemini(
                 generated_other_settings="",
                 prompt_token_count=0,

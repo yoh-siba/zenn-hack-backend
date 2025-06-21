@@ -134,9 +134,9 @@ class CreateMediaRequest:
     explanation: str
     core_meaning: Optional[str]
     generation_type: str
-    template_id: Optional[str]
+    template_id: str
     user_prompt: str
-    other_settings: list[str]
+    other_settings: Optional[list[str]]
     allow_generating_person: bool
     input_media_urls: Optional[List[str]]
 

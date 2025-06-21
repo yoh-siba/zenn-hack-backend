@@ -300,15 +300,13 @@ async def setup_media_endpoint(
             "meaning": "猫",
             "exampleJpn": "猫がマットの上に座っていました。",
             "explanation": "しばしば犬と対比される小型の哺乳類で、一般的にペットとして飼われる。",
-            "coreMeaning": None,
+            "coreMeaning": "無ければNullで",
             "generationType": "text-to-image",
             "templateId": "template_001",
             "userPrompt": "あなたは画像生成AIでイラストを生成するための～",
-            "otherSettings": ["猫の種類は三毛猫にしてください。"],
+            "otherSettings": ["猫の種類は三毛猫にしてください。", "無ければNullでで"],
             "allowGeneratingPerson": True,
-            "inputMediaUrls": [
-                "https://example.com/input1.jpg",
-            ],
+            "inputMediaUrls": ["http://example.com/image1.jpg", "無ければNullで"],
         },
     ),
 ):
