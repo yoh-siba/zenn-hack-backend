@@ -298,7 +298,7 @@ async def setup_media_endpoint(
             "meaningId": "54321",
             "pos": "noun",
             "word": "cat",
-            "meaning": "猫",
+            "translation": "猫",
             "exampleJpn": "猫がマットの上に座っていました。",
             "explanation": "しばしば犬と対比される小型の哺乳類で、一般的にペットとして飼われる。",
             "coreMeaning": "無ければNullで",

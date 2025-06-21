@@ -129,7 +129,7 @@ class CreateMediaRequest:
     meaning_id: str
     pos: PartOfSpeech
     word: str
-    meaning: str
+    translation: str
     example_jpn: str
     explanation: str
     core_meaning: Optional[str]
