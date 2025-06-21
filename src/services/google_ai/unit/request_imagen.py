@@ -46,10 +46,9 @@ def request_imagen_text_to_image(
             raise Exception(
                 f"APIの応答にgenerated_imagesが含まれていません。応答内容: {response}"
             )
-
         if not response.generated_images:
             raise Exception(
-                "生成された画像がありません。プロンプトの内容を確認してください。"
+                "生成された画像がありません。プロンプトの内容を確認してください。\nプロンプト: {_prompt}\n応答内容: {response}",
             )
 
         images = []
