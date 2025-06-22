@@ -7,7 +7,10 @@ from src.models.enums import part_of_speech_to_japanese
 from src.models.types import CreateMediaRequest
 from src.services.firebase.schemas.comparison_schema import ComparisonSchema
 from src.services.firebase.schemas.media_schema import MediaSchema
-from src.services.firebase.unit.cloud_storage_image import create_image_url_from_image
+from src.services.firebase.unit.cloud_storage_image import (
+    create_image_url_from_image,
+    create_video_url_from_video,
+)
 from src.services.firebase.unit.firestore_comparison import create_comparison_doc
 from src.services.firebase.unit.firestore_flashcard import (
     update_flashcard_doc_on_comparison_id,
@@ -24,6 +27,7 @@ from src.services.google_ai.unit.request_imagen import request_imagen_text_to_im
 from src.services.google_ai.unit.request_veo_text_to_video import (
     request_text_to_video,
 )
+from src.services.video.reduce_fps import reduce_fps_to_10
 
 
 async def setup_media(
@@ -70,8 +74,7 @@ async def setup_media(
             .replace("{example_jpn}", create_media_request.example_jpn)
             .replace("{explanation}", create_media_request.explanation)
             .replace("{modified_other_settings}", modified_other_settings)
-        )
-        # 画像生成用のプロンプトを生成
+        )  # 画像生成用のプロンプトを生成
         result = generate_prompt_for_imagen(_content=replaced_prompt)
         (
             generated_prompt,
@@ -84,10 +87,12 @@ async def setup_media(
             result.candidates_token_count,
             result.total_token_count,
         )
+
         if not generated_prompt:
             raise HTTPException(
                 status_code=500, detail="プロンプトの生成に失敗しました。"
             )
+
         generated_medias = []
         if create_media_request.generation_type == "text-to-image":
             generated_medias = request_imagen_text_to_image(
@@ -101,23 +106,34 @@ async def setup_media(
             if not generated_medias:
                 raise ValueError("No images generated")
         elif create_media_request.generation_type == "text-to-video":
-            generated_medias = request_text_to_video(
+            generated_video = request_text_to_video(
                 _prompt=generated_prompt,
                 _person_generation="ALLOW_ADULT"
                 if create_media_request.allow_generating_person
                 else "DONT_ALLOW",
             )
-            if not generated_medias:
+            if not generated_video:
                 raise ValueError("No videos generated")
-        elif create_media_request.generation_type == "text-to-image":
-            ## TODO: テキストから画像生成の実装
-            raise NotImplementedError("テキストから画像生成はまだ実装されていません。")
+
+            # 生成された動画のフレームレートを10fpsに変更
+            try:
+                processed_video = reduce_fps_to_10(generated_video)
+                generated_medias = [processed_video]
+            except Exception as e:
+                print(f"フレームレート変換エラー: {str(e)}")
+                # エラー時は元の動画を使用
+                generated_medias = [generated_video]
+        else:
+            raise NotImplementedError(
+                f"生成タイプ '{create_media_request.generation_type}' はサポートされていません。"
+            )
+
         success, error, media_id = await create_media_doc(
             media_instance=MediaSchema(
                 flashcard_id=create_media_request.flashcard_id,
                 meaning_id=create_media_request.meaning_id,
                 media_urls=[],
-                generation_type="text-to-image",
+                generation_type=create_media_request.generation_type,
                 template_id=create_media_request.template_id,
                 user_prompt=create_media_request.user_prompt,
                 generated_prompt=generated_prompt,
@@ -132,16 +148,27 @@ async def setup_media(
             )
         )
         if not success:
-            raise HTTPException(status_code=500, detail=error)
-        # 生成された画像をFirestorageに保存して、URLを取得
+            raise HTTPException(
+                status_code=500, detail=error
+            )  # 生成されたメディアをFirestorageに保存して、URLを取得
         media_url_list = []
         for media in generated_medias:
-            success, error, media_url = await create_image_url_from_image(
-                media,
-                f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.png",
-            )
-            if not success:
-                raise ValueError("画像のURL取得に失敗しました", error)
+            if create_media_request.generation_type == "text-to-video":
+                # 動画の場合
+                success, error, media_url = await create_video_url_from_video(
+                    media,
+                    f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.mp4",
+                )
+                if not success:
+                    raise ValueError("動画のURL取得に失敗しました", error)
+            else:
+                # 画像の場合
+                success, error, media_url = await create_image_url_from_image(
+                    media,
+                    f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.png",
+                )
+                if not success:
+                    raise ValueError("画像のURL取得に失敗しました", error)
             media_url_list.append(media_url)
         success, error = await update_media_doc_on_media_urls(
             media_id=media_id, media_urls=media_url_list
