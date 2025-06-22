@@ -71,7 +71,6 @@ async def setup_media(
             .replace("{explanation}", create_media_request.explanation)
             .replace("{modified_other_settings}", modified_other_settings)
         )
-        print(f"\n結合・置換されたプロンプト: {replaced_prompt}")
         # 画像生成用のプロンプトを生成
         result = generate_prompt_for_imagen(_content=replaced_prompt)
         (
