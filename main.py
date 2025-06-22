@@ -337,7 +337,7 @@ class GetNoComparedMediasResponseModel(BaseModel):
     comparisons: list[NotComparedMediaResponseModel]
 
 
-@app.post(
+@app.get(
     "/comparison/{userId}",
     description="未比較のメディア一括取得用エンドポイント",
     response_model=GetNoComparedMediasResponseModel,
