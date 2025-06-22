@@ -109,17 +109,6 @@ async def setup_media(
             )
             if not generated_medias:
                 raise ValueError("No videos generated")
-
-            # 動画を保存する処理を追加
-            video_url_list = []
-            for n, video in enumerate(generated_medias):
-                file_path = f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/video{n}.mp4"
-                success, error, video_url = await create_image_url_from_image(
-                    video, file_path
-                )
-                if not success:
-                    raise ValueError("動画のURL取得に失敗しました", error)
-                video_url_list.append(video_url)
         elif create_media_request.generation_type == "text-to-image":
             ## TODO: テキストから画像生成の実装
             raise NotImplementedError("テキストから画像生成はまだ実装されていません。")
