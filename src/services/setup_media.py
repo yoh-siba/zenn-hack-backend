@@ -113,12 +113,12 @@ async def setup_media(
                 else "DONT_ALLOW",
             )
             if not generated_video:
-                raise ValueError("No videos generated")
-
-            # 生成された動画のフレームレートを10fpsに変更
+                raise ValueError(
+                    "No videos generated"
+                )  # 生成された動画のフレームレートを10fpsに変更
             try:
-                processed_video = reduce_fps_to_10(generated_video)
-                generated_medias = [processed_video]
+                processed_video_bytes = reduce_fps_to_10(generated_video)
+                generated_medias = [processed_video_bytes]
             except Exception as e:
                 print(f"フレームレート変換エラー: {str(e)}")
                 # エラー時は元の動画を使用
