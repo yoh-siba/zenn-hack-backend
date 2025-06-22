@@ -61,7 +61,7 @@ async def setup_media(
         total_token_count_o = modified_other_settings_result.total_token_count
 
         joined_user_prompt = "\n".join(
-            [create_media_request.user_prompt, "\n".join(modified_other_settings)]
+            [create_media_request.user_prompt, modified_other_settings]
         )
         replaced_prompt = (
             joined_user_prompt.replace("{word}", create_media_request.word)
