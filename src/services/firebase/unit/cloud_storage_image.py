@@ -59,6 +59,7 @@ async def create_video_url_from_video(
             # video_bytesがある場合はそれを使用、ない場合はgenai_clientでダウンロード
             if _video.video_bytes:
                 video_data = _video.video_bytes
+                
             elif _video.uri:
                 # genai_clientを使用して認証されたダウンロードを実行
                 print(f"Downloading video from: {_video.uri}")
@@ -83,9 +84,6 @@ async def create_video_url_from_video(
 
     except Exception as e:
         error_message = f"動画のデータ送信中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message, None
-        print(f"\n{error_message}")
         return False, error_message, None
 
 

@@ -24,7 +24,8 @@ from src.services.google_ai.generate_modified_other_settings import (
 )
 from src.services.google_ai.generate_prompt_for_imagen import generate_prompt_for_imagen
 from src.services.google_ai.unit.request_imagen import request_imagen_text_to_image
-from src.services.google_ai.unit.request_veo_text_to_video import (
+from src.services.google_ai.unit.request_veo import (
+    request_image_to_video,
     request_text_to_video,
 )
 from src.services.video.reduce_fps import reduce_fps_to_10
@@ -105,12 +106,25 @@ async def setup_media(
             )
             if not generated_medias:
                 raise ValueError("No images generated")
-        elif create_media_request.generation_type == "text-to-video":
-            generated_video = request_text_to_video(
-                _prompt=generated_prompt,
-                _person_generation="ALLOW_ADULT"
-                if create_media_request.allow_generating_person
-                else "DONT_ALLOW",
+        elif (
+            create_media_request.generation_type == "text-to-video"
+            or create_media_request.generation_type == "image-to-video"
+        ):
+            generated_video = (
+                request_text_to_video(
+                    _prompt=generated_prompt,
+                    _person_generation="ALLOW_ADULT"
+                    if create_media_request.allow_generating_person
+                    else "DONT_ALLOW",
+                )
+                if create_media_request.generation_type == "text-to-video"
+                else request_image_to_video(
+                    _prompt=generated_prompt,
+                    _image_url=create_media_request.input_media_urls[0],
+                    _person_generation="ALLOW_ADULT"
+                    if create_media_request.allow_generating_person
+                    else "DONT_ALLOW",
+                )
             )
             if not generated_video:
                 raise ValueError(
@@ -153,7 +167,10 @@ async def setup_media(
             )  # 生成されたメディアをFirestorageに保存して、URLを取得
         media_url_list = []
         for media in generated_medias:
-            if create_media_request.generation_type == "text-to-video":
+            if (
+                create_media_request.generation_type == "text-to-video"
+                or create_media_request.generation_type == "image-to-video"
+            ):
                 # 動画の場合
                 success, error, media_url = await create_video_url_from_video(
                     media,
