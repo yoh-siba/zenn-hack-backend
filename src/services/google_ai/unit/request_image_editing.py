@@ -25,15 +25,6 @@ def request_gemini_image_to_image(
             config=types.GenerateContentConfig(response_modalities=["TEXT", "IMAGE"]),
         )
 
-        # レスポンスの詳細情報を確認（バイナリデータを除く）
-        # print("=== レスポンス詳細情報 ===")
-        # if hasattr(response, "usage_metadata"):
-        #     print(f"使用量メタデータ: {response.usage_metadata}")
-        # if hasattr(response, "prompt_feedback"):
-        #     print(f"プロンプトフィードバック: {response.prompt_feedback}")
-        # if hasattr(response, "finish_reason"):
-        #     print(f"完了理由: {response.finish_reason}")
-
         if response is None:
             raise Exception(
                 "APIからの応答がNoneです。認証情報やAPIの設定を確認してください。"
@@ -42,20 +33,9 @@ def request_gemini_image_to_image(
             raise Exception("APIの応答にcandidatesが含まれていません。")
 
         images = []
-        # print(f"Candidates数: {len(response.candidates)}")
-
-        # # candidatesの詳細情報を確認
-        # for i, candidate in enumerate(response.candidates):
-        #     print(f"Candidate {i}:")
-        #     if hasattr(candidate, "finish_reason"):
-        #         print(f"  - finish_reason: {candidate.finish_reason}")
-        #     if hasattr(candidate, "safety_ratings") and candidate.safety_ratings:
-        #         print(f"  - safety_ratings: {candidate.safety_ratings}")
 
         for candidate in response.candidates:
             if hasattr(candidate, "content") and hasattr(candidate.content, "parts"):
-                # print(f"Parts数: {len(candidate.content.parts)}")
-
                 has_text_description = False
                 for i, part in enumerate(candidate.content.parts):
                     print(
@@ -63,33 +43,12 @@ def request_gemini_image_to_image(
                     )
                     if part.text is not None:
                         has_text_description = True
-                        # print(f"  生成されたテキスト: {part.text}")
                     elif part.inline_data is not None:
                         try:
-                            # バイナリデータの基本情報のみ表示
-                            # data_size = (
-                            #     len(part.inline_data.data)
-                            #     if part.inline_data.data
-                            #     else 0
-                            # )
-                            # mime_type = getattr(
-                            #     part.inline_data, "mime_type", "unknown"
-                            # )
-                            # print(
-                            #     f"  画像データ - サイズ: {data_size} bytes, MIME type: {mime_type}"
-                            # )
-
                             image = Image.open(BytesIO(part.inline_data.data))
                             # テキスト説明がある場合のみ、その後の画像を生成画像として扱う
                             if has_text_description:
                                 images.append(image)
-                                # print(
-                                #     f"  生成画像を読み込みました。サイズ: {image.size}"
-                                # )
-                            # else:
-                            #     print(
-                            #         f"  元画像と思われる画像をスキップしました。サイズ: {image.size}"
-                            #     )
                         except Exception as img_error:
                             print(f"  画像の読み込みエラー: {img_error}")
 
