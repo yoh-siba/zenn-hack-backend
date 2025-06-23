@@ -7,6 +7,7 @@ from google import genai
 
 # 定数
 GOOGLE_GEMINI_MODEL = "gemini-2.0-flash"
+GOOGLE_GEMINI_IMAGE_EDITING_MODEL = "gemini-2.0-flash-preview-image-generation"
 GOOGLE_IMAGEN_MODEL = "imagen-3.0-generate-002"
 GOOGLE_VEO_MODEL = "veo-2.0-generate-001"
 

@@ -1,7 +1,10 @@
 from datetime import datetime
+from io import BytesIO
 from typing import Optional, Tuple
 
+import requests
 from fastapi import HTTPException
+from PIL import Image
 
 from src.models.enums import part_of_speech_to_japanese
 from src.models.types import CreateMediaRequest
@@ -23,6 +26,9 @@ from src.services.google_ai.generate_modified_other_settings import (
     generate_modified_other_settings,
 )
 from src.services.google_ai.generate_prompt_for_imagen import generate_prompt_for_imagen
+from src.services.google_ai.unit.request_image_editing import (
+    request_gemini_image_to_image,
+)
 from src.services.google_ai.unit.request_imagen import request_imagen_text_to_image
 from src.services.google_ai.unit.request_veo import (
     request_image_to_video,
@@ -104,6 +110,22 @@ async def setup_media(
                 if create_media_request.allow_generating_person
                 else "DONT_ALLOW",  # 人物生成を許可しない
             )
+            if not generated_medias:
+                raise ValueError("No images generated")
+        elif create_media_request.generation_type == "image-to-image":
+            # 入力画像を取得
+            if not create_media_request.input_media_urls:
+                raise ValueError("image-to-image requires input_media_urls")
+
+            response = requests.get(create_media_request.input_media_urls[0])
+            input_image = Image.open(BytesIO(response.content))
+
+            # 画像編集を実行
+            generated_image = request_gemini_image_to_image(
+                _prompt=generated_prompt,
+                _image=input_image,
+            )
+            generated_medias = [generated_image]
             if not generated_medias:
                 raise ValueError("No images generated")
         elif (
