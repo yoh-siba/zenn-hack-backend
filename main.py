@@ -38,6 +38,7 @@ from src.services.firebase.unit.firestore_user import (
     delete_user_doc,
     read_user_doc,
     update_user_doc,
+    update_user_doc_add_using_flashcard,
 )
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
@@ -167,9 +168,11 @@ async def add_using_flashcard_endpoint(
 ):
     try:
         user = UpdateUserRequest.from_dict(_user)
-        success, error = await update_user_doc(user_id=user.user_id, user_instance=user)
+        success, error = await update_user_doc_add_using_flashcard(
+            user_id=user.user_id, flashcard_id=user.flashcard_id
+        )
         if success:
-            return {"message": "User update successful", "userId": user.user_id}
+            return {"message": "User update successful"}
         else:
             raise HTTPException(status_code=500, detail=error)
     except ValidationError as ve:

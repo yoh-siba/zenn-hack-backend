@@ -81,3 +81,26 @@ async def delete_user_doc(user_id: str) -> Tuple[bool, Optional[str]]:
         error_message = "ユーザーデータの削除中にエラーが発生しました"
         print(f"\n{error_message}: {str(e)}")
         return False, error_message
+
+
+async def update_user_doc_add_using_flashcard(
+    user_id: str, flashcard_id: str
+) -> Tuple[bool, Optional[str]]:
+    try:
+        doc_ref = db.collection("users").document(user_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return False, "指定されたユーザーは存在しません"
+
+        user_data = doc.to_dict()
+        flashcard_ids = user_data.get("flashcard_id_list", [])
+        if flashcard_id not in flashcard_ids:
+            flashcard_ids.append(flashcard_id)
+            user_data["flashcard_id_list"] = flashcard_ids
+            doc_ref.update(user_data)
+
+        return True, None
+    except Exception as e:
+        error_message = f"ユーザーデータの更新中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message

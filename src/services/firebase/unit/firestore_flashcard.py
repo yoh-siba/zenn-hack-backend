@@ -148,6 +148,28 @@ async def update_flashcard_doc_on_comparison_id_and_current_media(
         return False, error_message
 
 
+async def copy_flashcard_doc(
+    flashcard_id: str,
+) -> Tuple[bool, Optional[str], Optional[str]]:
+    try:
+        if not flashcard_id:
+            return False, "フラッシュカードIDが指定されていません", None
+
+        doc_ref = db.collection("flashcards").document(flashcard_id)
+        doc = doc_ref.get()
+        if doc.exists:
+            flashcard_instance = doc.to_dict()
+            new_doc = db.collection("flashcards").add(flashcard_instance)
+            return True, None, new_doc[1].id
+        else:
+            return False, f"フラッシュカードID {flashcard_id} が見つかりません", None
+
+    except Exception as e:
+        error_message = f"フラッシュカードのコピー中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return False, error_message, None
+
+
 async def copy_flashcard_docs(
     flashcard_ids: list[str],
 ) -> Tuple[bool, Optional[str], list[str]]:
