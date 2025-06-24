@@ -4,6 +4,7 @@ from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel, ValidationError
 
 from src.models.types import (
+    AddUsingFlashcardRequest,
     CompareMediasRequest,
     CreateMediaRequest,
     CreateTemplateRequest,
@@ -167,7 +168,7 @@ async def add_using_flashcard_endpoint(
     ),
 ):
     try:
-        user = UpdateUserRequest.from_dict(_user)
+        user = AddUsingFlashcardRequest.from_dict(_user)
         success, error = await update_user_doc_add_using_flashcard(
             user_id=user.user_id, flashcard_id=user.flashcard_id
         )

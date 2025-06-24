@@ -109,6 +109,13 @@ class UpdateUserRequest:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class AddUsingFlashcardRequest:
+    user_id: str
+    flashcard_id: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class UpdateFlagRequest:
     flashcard_id: str
     check_flag: bool

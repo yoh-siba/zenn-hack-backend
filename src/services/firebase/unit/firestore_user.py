@@ -93,10 +93,10 @@ async def update_user_doc_add_using_flashcard(
             return False, "指定されたユーザーは存在しません"
 
         user_data = doc.to_dict()
-        flashcard_ids = user_data.get("flashcard_id_list", [])
+        flashcard_ids = user_data.get("flashcardIdList", [])
         if flashcard_id not in flashcard_ids:
             flashcard_ids.append(flashcard_id)
-            user_data["flashcard_id_list"] = flashcard_ids
+            user_data["flashcardIdList"] = flashcard_ids
             doc_ref.update(user_data)
 
         return True, None
