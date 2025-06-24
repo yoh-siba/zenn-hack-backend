@@ -150,8 +150,10 @@ async def update_flashcard_doc_on_comparison_id_and_current_media(
 
 async def copy_flashcard_doc(
     flashcard_id: str,
+    user_id: str,
 ) -> Tuple[bool, Optional[str], Optional[str]]:
     try:
+        now = datetime.now()
         if not flashcard_id:
             return False, "フラッシュカードIDが指定されていません", None
 
@@ -159,6 +161,9 @@ async def copy_flashcard_doc(
         doc = doc_ref.get()
         if doc.exists:
             flashcard_instance = doc.to_dict()
+            flashcard_instance["createdAt"] = now
+            flashcard_instance["updatedAt"] = now
+            flashcard_instance["createdBy"] = user_id
             new_doc = db.collection("flashcards").add(flashcard_instance)
             return True, None, new_doc[1].id
         else:
@@ -171,18 +176,21 @@ async def copy_flashcard_doc(
 
 
 async def copy_flashcard_docs(
-    flashcard_ids: list[str],
+    flashcard_ids: list[str], user_id: str
 ) -> Tuple[bool, Optional[str], list[str]]:
     try:
+        now = datetime.now()
         if not flashcard_ids:
             return False, "フラッシュカードIDが指定されていません", []
-
         new_flashcard_ids = []
         for flashcard_id in flashcard_ids:
             doc_ref = db.collection("flashcards").document(flashcard_id)
             doc = doc_ref.get()
             if doc.exists:
                 flashcard_instance = doc.to_dict()
+                flashcard_instance["createdAt"] = now
+                flashcard_instance["updatedAt"] = now
+                flashcard_instance["createdBy"] = user_id
                 new_doc = db.collection("flashcards").add(flashcard_instance)
                 new_flashcard_ids.append(new_doc[1].id)
             else:
@@ -199,7 +207,12 @@ async def read_flashcard_by_word_id(
     word_id: str,
 ) -> Tuple[Optional[FlashcardSchemaWithId], Optional[str]]:
     try:
-        docs = db.collection("flashcards").where("wordId", "==", word_id).get()
+        docs = (
+            db.collection("flashcards")
+            .where("wordId", "==", word_id)
+            .where("createdBy", "==", "default")
+            .get()
+        )
         if not docs:
             return None, "指定された単語IDのフラッシュカードが見つかりません"
 

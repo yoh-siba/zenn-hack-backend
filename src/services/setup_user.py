@@ -33,7 +33,7 @@ async def setup_user(
             "y5HMvmu2xt6FpnmAI4dl",
         ]
         success, error_message, new_flashcard_ids = await copy_flashcard_docs(
-            flashcard_ids=default_flashcard_ids
+            flashcard_ids=default_flashcard_ids, user_id=_user.user_id
         )
         user_instance = UserSchema(
             email=_user.email,
