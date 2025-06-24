@@ -330,3 +330,22 @@ class CreateTemplateResponse:
 @dataclass
 class CreateTemplateResponseModel:
     templateId: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class WordForExtensionResponse:
+    message: str
+    flashcard_id: str
+    word: WordResponse
+    meanings: List[MeaningResponse]
+    media: MediaResponse
+
+
+@dataclass
+class WordForExtensionResponseModel(BaseModel):
+    message: str
+    flashcardId: str
+    word: WordResponseModel
+    meanings: List[MeaningResponseModel]
+    media: MediaResponseModel

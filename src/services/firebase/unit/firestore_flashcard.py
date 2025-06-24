@@ -171,3 +171,20 @@ async def copy_flashcard_docs(
         error_message = f"フラッシュカードのコピー中にエラーが発生しました: {str(e)}"
         print(f"\n{error_message}")
         return False, error_message, []
+
+
+async def read_flashcard_by_word_id(
+    word_id: str,
+) -> Tuple[Optional[FlashcardSchemaWithId], Optional[str]]:
+    try:
+        docs = db.collection("flashcards").where("wordId", "==", word_id).get()
+        if not docs:
+            return None, "指定された単語IDのフラッシュカードが見つかりません"
+
+        flashcard_instance = docs[0].to_dict()
+        flashcard_instance["flashcard_id"] = docs[0].id
+        return FlashcardSchemaWithId.from_dict(flashcard_instance), None
+    except Exception as e:
+        error_message = f"フラッシュカードの読み込み中にエラーが発生しました: {str(e)}"
+        print(f"\n{error_message}")
+        return None, error_message

@@ -19,6 +19,7 @@ from src.models.types import (
     UpdateUsingMeaningsRequest,
     UserResponse,
     UserResponseModel,
+    WordForExtensionResponseModel,
 )
 from src.services.compare_medias import compare_medias
 from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
@@ -41,6 +42,7 @@ from src.services.firebase.unit.firestore_user import (
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
 from src.services.get_not_compared_media_list import get_not_compared_media_list
+from src.services.get_word_for_extension import get_word_for_extension
 from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 
@@ -129,6 +131,37 @@ async def update_user_endpoint(
             "userId": "12345",
             "email": "yamada@yamada.com",
             "userName": "山田",
+        },
+    ),
+):
+    try:
+        user = UpdateUserRequest.from_dict(_user)
+        success, error = await update_user_doc(user_id=user.user_id, user_instance=user)
+        if success:
+            return {"message": "User update successful", "userId": user.user_id}
+        else:
+            raise HTTPException(status_code=500, detail=error)
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class AddUsingFlashcardResponseModel(BaseModel):
+    message: str
+
+
+@app.put(
+    "/user/add/using_flashcard",
+    description="ユーザが使用するフラッシュカードの追加用エンドポイント",
+    response_model=AddUsingFlashcardResponseModel,
+)
+async def add_using_flashcard_endpoint(
+    _user: dict = Body(
+        ...,
+        example={
+            "userId": "12345",
+            "flashcardId": "67890",
         },
     ),
 ):
@@ -549,6 +582,25 @@ async def update_template_endpoint(
             return {
                 "message": "Template updated successfully",
             }
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get(
+    "/word/{word}",
+    description="単語の詳細情報取得用エンドポイント",
+    response_model=WordForExtensionResponseModel,
+)
+async def get_word_for_extension_endpoint(word: str):
+    try:
+        success, error, word_response = await get_word_for_extension(word)
+        if not success:
+            raise HTTPException(status_code=500, detail=error)
+        if not word_response:
+            raise HTTPException(status_code=404, detail="Word not found")
+        return word_response.to_dict()
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
