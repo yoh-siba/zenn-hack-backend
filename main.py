@@ -73,7 +73,7 @@ async def get_user_endpoint(userId: str):
             raise HTTPException(status_code=500, detail=error)
         if not user_instance:
             raise HTTPException(
-                status_code=500, detail="指定されたユーザーは存在しません"
+                status_code=404, detail="指定されたユーザーは存在しません"
             )
         user_response = user_instance.to_dict()
         user_response["user_id"] = userId
@@ -221,7 +221,10 @@ async def get_flashcards_endpoint(userId: str):
         user_id = userId
         success, error, flashcard_responses = await get_flashcard_list(user_id)
         if not success:
-            raise HTTPException(status_code=500, detail=error)
+            if error == "ユーザーが見つかりません":
+                raise HTTPException(status_code=404, detail=error)
+            else:
+                raise HTTPException(status_code=500, detail=error)
         return {
             "message": "Flashcards retrieved successfully",
             "flashcards": [flashcard.to_dict() for flashcard in flashcard_responses],
@@ -279,7 +282,7 @@ async def update_flashcard_memo_endpoint(
         if success:
             return {"message": "Flashcard memo update successful"}
         else:
-            raise HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=500, detail="フラッシュカードの更新に失敗しました")
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -307,7 +310,7 @@ async def update_using_meaning_id_list_endpoint(
         if success:
             return {"message": "Using meaning ID list updated successfully"}
         else:
-            raise HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=500, detail="意味IDリストの更新に失敗しました")
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -362,6 +365,8 @@ async def setup_media_endpoint(
                 "newMediaId": media_id,
                 "newMediaUrls": media_url_list,
             }
+        else:
+            raise HTTPException(status_code=500, detail="メディアの作成に失敗しました")
 
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
@@ -390,6 +395,8 @@ async def get_comparison_endpoint(userId: str):
                 "message": "Not compared medias retrieved successfully",
                 "comparisons": [media.to_dict() for media in media_list],
             }
+        else:
+            raise HTTPException(status_code=500, detail="未比較メディアの取得に失敗しました")
 
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
@@ -428,6 +435,8 @@ async def update_comparison_endpoint(
             raise HTTPException(status_code=500, detail=error)
         if success:
             return {"message": "Flashcard comparison ID updated successfully"}
+        else:
+            raise HTTPException(status_code=500, detail="比較結果の更新に失敗しました")
 
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
@@ -538,6 +547,8 @@ async def create_template_endpoint(
                 "message": "Template created successfully",
                 "templateId": template_id,
             }
+        else:
+            raise HTTPException(status_code=500, detail="テンプレートの作成に失敗しました")
 
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
@@ -586,6 +597,8 @@ async def update_template_endpoint(
             return {
                 "message": "Template updated successfully",
             }
+        else:
+            raise HTTPException(status_code=500, detail="テンプレートの更新に失敗しました")
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:

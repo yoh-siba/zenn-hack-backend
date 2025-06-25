@@ -1,7 +1,5 @@
 from typing import Optional, Tuple
 
-from fastapi import HTTPException
-
 from src.models.types import FlashcardResponse, WordResponse
 from src.services.firebase.unit.firestore_flashcard import (
     read_flashcard_docs,
@@ -29,32 +27,30 @@ async def get_flashcard_list(
     try:
         user_instance, error = await read_user_doc(user_id)
         if error:
-            raise HTTPException(status_code=500, detail=error)
+            return False, error, None
         if not user_instance:
-            raise HTTPException(status_code=404, detail="ユーザーが見つかりません")
+            return False, "ユーザーが見つかりません", None
         # 登録単語が0の場合はフロント側で処理（エラーではない）
         if len(user_instance.flashcard_id_list) == 0:
-            return []
+            return True, None, []
         flashcards, error = await read_flashcard_docs(user_instance.flashcard_id_list)
         if error:
-            raise HTTPException(status_code=500, detail=error)
+            return False, error, None
         if not flashcards:
-            raise HTTPException(
-                status_code=404, detail="このユーザーのフラッシュカードが見つかりません"
-            )
+            return False, "このユーザーのフラッシュカードが見つかりません", None
         flashcard_responses = []
         for flashcard in flashcards:
             word, error = await read_word_doc(flashcard.word_id)
             if error:
-                raise HTTPException(status_code=500, detail=error)
+                return False, error, None
             word_response = word.to_dict()
             word_response["wordId"] = flashcard.word_id
             meanings, error = await read_meaning_docs(flashcard.using_meaning_id_list)
             if error:
-                raise HTTPException(status_code=500, detail=error)
+                return False, error, None
             media, error = await read_media_doc(flashcard.current_media_id)
             if error:
-                raise HTTPException(status_code=500, detail=error)
+                return False, error, None
             flashcard = FlashcardResponse(
                 flashcard_id=flashcard.flashcard_id,
                 word=WordResponse.from_dict(word_response),
