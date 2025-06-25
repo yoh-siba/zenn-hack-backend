@@ -154,7 +154,7 @@ class AddUsingFlashcardResponseModel(BaseModel):
 
 
 @app.put(
-    "/user/add/using_flashcard",
+    "/user/add/usingFlashcard",
     description="ユーザが使用するフラッシュカードの追加用エンドポイント",
     response_model=AddUsingFlashcardResponseModel,
 )
