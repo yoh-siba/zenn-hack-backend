@@ -1,5 +1,4 @@
-from typing import Optional, Tuple
-
+from src.models.exceptions import ServiceException
 from src.models.types import SetUpUserRequest
 from src.services.firebase.unit.firestore_flashcard import copy_flashcard_doc
 from src.services.firebase.unit.firestore_user import (
@@ -10,33 +9,30 @@ from src.services.firebase.unit.firestore_user import (
 async def add_using_flashcard(
     _user_id: str,
     _flashcard_id: str,
-) -> Tuple[bool, Optional[str]]:
+) -> None:
     """
-    DBにUserObjectをセットアップする関数
-    Args:
-        _user (UserSchema): 設定したいユーザー
+    ユーザーにフラッシュカードを追加する関数
 
-    Returns:
-        Tuple[bool, Optional[str]]:
-            - 成功/失敗を示すブール値
-            - エラーメッセージ（成功時はNone）
-            - 作成されたユーザーのID（失敗時はNone）
+    Args:
+        _user_id (str): ユーザーID
+        _flashcard_id (str): 追加するフラッシュカードID
+
+    Raises:
+        ServiceException: フラッシュカードの追加に失敗した場合
     """
     try:
-        success, error_message, new_flashcard_id = await copy_flashcard_doc(
-            flashcard_id=_flashcard_id
+        new_flashcard_id = await copy_flashcard_doc(
+            flashcard_id=_flashcard_id, user_id=_user_id
         )
-        success, error_message = await update_user_doc_add_using_flashcard(
+        await update_user_doc_add_using_flashcard(
             user_id=_user_id, flashcard_id=new_flashcard_id
         )
-        if not success:
-            print(f"\nユーザーのセットアップに失敗しました: {error_message}")
-            return False, error_message
-        return True, None
+    except ServiceException:
+        raise  # 再発生
     except Exception as e:
-        error_message = f"ユーザーのセットアップ中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message
+        raise ServiceException(
+            f"フラッシュカードの追加中にエラーが発生しました: {str(e)}", "general"
+        )
 
 
 if __name__ == "__main__":
@@ -52,15 +48,13 @@ if __name__ == "__main__":
         ]
         for test_user in test_user_list:
             print(f"\nユーザー '{test_user.email}' のセットアップ")
-            success, error, user_id = await add_using_flashcard(test_user)
-            if success:
-                print(
-                    f"ユーザー '{test_user.email}' のセットアップに成功しました。生成されたユーザーID: {user_id}"
-                )
-            else:
-                print(
-                    f"ユーザー '{test_user.email}' のセットアップに失敗しました。エラー: {error}"
-                )
+            try:
+                await add_using_flashcard(test_user)
+                print(f"ユーザー '{test_user.email}' のセットアップに成功しました。")
+            except ServiceException as se:
+                print(f"ユーザー '{test_user.email}' のセットアップに失敗しました。エラー: {se.message}")
+            except Exception as e:
+                print(f"予期せぬエラーが発生しました: {str(e)}")
 
     # 非同期関数を実行
     asyncio.run(main())

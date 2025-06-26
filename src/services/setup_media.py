@@ -1,13 +1,13 @@
 from datetime import datetime
 from io import BytesIO
-from typing import Optional, Tuple
+from typing import Tuple
 
 import requests
-from fastapi import HTTPException
 from PIL import Image
 
 from src.models.enums import part_of_speech_to_japanese
-from src.models.types import CreateMediaRequest
+from src.models.exceptions import ServiceException
+from src.models.types import CreateMediaRequest, SetupMediaResponse
 from src.services.firebase.schemas.comparison_schema import ComparisonSchema
 from src.services.firebase.schemas.media_schema import MediaSchema
 from src.services.firebase.unit.cloud_storage_image import (
@@ -39,7 +39,7 @@ from src.services.video.reduce_fps import reduce_fps_to_10
 
 async def setup_media(
     create_media_request: CreateMediaRequest,
-) -> Tuple[bool, Optional[str], Optional[str], Optional[str], Optional[str]]:
+) -> SetupMediaResponse:
     """画像（動画）部分を更新する関数
     使用するAIに応じて、何を生成するかが変わる
     mediaを作成（flashcardのobjectを利用）
@@ -47,15 +47,13 @@ async def setup_media(
     FlashcardのComparisonIdを設定
 
     Args:
-        word (str): セットアップする単語
+        create_media_request (CreateMediaRequest): メディア作成リクエスト
 
     Returns:
-        Tuple[bool, Optional[str], Optional[str]]:
-            - 成功/失敗を示すブール値
-            - エラーメッセージ（成功時はNone）
-            - 作成された単語のID（失敗時はNone）
-            - 作成されたComparisonのID（失敗時はNone）
-            - 作成されたメディアのURLリスト（失敗時はNone）
+        SetupMediaResponse: メディアID、比較ID、メディアURLリストを含むレスポンス
+
+    Raises:
+        ServiceException: メディア作成に失敗した場合
     """
     try:
         now = datetime.now()
@@ -96,9 +94,7 @@ async def setup_media(
         )
 
         if not generated_prompt:
-            raise HTTPException(
-                status_code=500, detail="プロンプトの生成に失敗しました。"
-            )
+            raise ServiceException("プロンプトの生成に失敗しました", "external_api")
 
         generated_medias = []
         if create_media_request.generation_type == "text-to-image":
@@ -156,7 +152,6 @@ async def setup_media(
                 processed_video_bytes = reduce_fps_to_10(generated_video)
                 generated_medias = [processed_video_bytes]
             except Exception as e:
-                print(f"フレームレート変換エラー: {str(e)}")
                 # エラー時は元の動画を使用
                 generated_medias = [generated_video]
         else:
@@ -164,7 +159,7 @@ async def setup_media(
                 f"生成タイプ '{create_media_request.generation_type}' はサポートされていません。"
             )
 
-        success, error, media_id = await create_media_doc(
+        media_id = await create_media_doc(
             media_instance=MediaSchema(
                 flashcard_id=create_media_request.flashcard_id,
                 meaning_id=create_media_request.meaning_id,
@@ -182,11 +177,7 @@ async def setup_media(
                 created_at=now,
                 updated_at=now,
             )
-        )
-        if not success:
-            raise HTTPException(
-                status_code=500, detail=error
-            )  # 生成されたメディアをFirestorageに保存して、URLを取得
+        )  # 生成されたメディアをFirestorageに保存して、URLを取得
         media_url_list = []
         for media in generated_medias:
             if (
@@ -194,27 +185,21 @@ async def setup_media(
                 or create_media_request.generation_type == "image-to-video"
             ):
                 # 動画の場合
-                success, error, media_url = await create_video_url_from_video(
+                media_url = await create_video_url_from_video(
                     media,
                     f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.mp4",
                 )
-                if not success:
-                    raise ValueError("動画のURL取得に失敗しました", error)
             else:
                 # 画像の場合
-                success, error, media_url = await create_image_url_from_image(
+                media_url = await create_image_url_from_image(
                     media,
                     f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.png",
                 )
-                if not success:
-                    raise ValueError("画像のURL取得に失敗しました", error)
             media_url_list.append(media_url)
-        success, error = await update_media_doc_on_media_urls(
+        await update_media_doc_on_media_urls(
             media_id=media_id, media_urls=media_url_list
         )
-        if not success:
-            raise HTTPException(status_code=500, detail=error)
-        success, error, comparison_id = await create_comparison_doc(
+        comparison_id = await create_comparison_doc(
             comparison_instance=ComparisonSchema(
                 flashcard_id=create_media_request.flashcard_id,
                 old_media_id=create_media_request.old_media_id,
@@ -224,15 +209,17 @@ async def setup_media(
                 updated_at=now,
             )
         )
-        if not success:
-            raise HTTPException(status_code=500, detail=error)
-        success, error = await update_flashcard_doc_on_comparison_id(
+        await update_flashcard_doc_on_comparison_id(
             flashcard_id=create_media_request.flashcard_id, comparison_id=comparison_id
         )
-        if not success:
-            raise HTTPException(status_code=500, detail=error)
-        return True, None, media_id, comparison_id, media_url_list
+        return SetupMediaResponse(
+            comparison_id=comparison_id,
+            media_id=media_id,
+            media_urls=media_url_list
+        )
+    except ServiceException:
+        raise  # 再発生
     except Exception as e:
-        error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message, None, None, None
+        raise ServiceException(
+            f"メディア作成中にエラーが発生しました: {str(e)}", "general"
+        )

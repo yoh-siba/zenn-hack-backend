@@ -1,5 +1,6 @@
-from typing import Optional, Tuple
+from typing import Tuple
 
+from src.models.exceptions.service_exception import ServiceException
 from src.services.firebase.schemas.meaning_schema import MeaningSchema
 from src.services.firebase.schemas.word_schema import WordSchema
 from src.services.firebase.unit.firestore_meaning import create_meaning_doc
@@ -9,7 +10,7 @@ from src.services.firebase.unit.firestore_word import create_word_doc, update_wo
 async def create_word_and_meaning(
     word_instance: WordSchema,
     meanings_instance: list[MeaningSchema],
-) -> Tuple[bool, Optional[str], Optional[str], Optional[str]]:
+) -> Tuple[str, list[str]]:
     """単語とその意味をFirestoreに作成する関数
     Args:
         word_instance (WordSchema): 作成する単語のインスタンス
@@ -17,38 +18,30 @@ async def create_word_and_meaning(
         meanings_instance (list[MeaningSchema]): 作成する意味のインスタンスのリスト
 
     Returns:
-        Tuple[bool, Optional[str], Optional[str]]:
-            - 成功/失敗を示すブール値
-            - エラーメッセージ（成功時はNone）
-            - 作成された単語のID（失敗時はNone）
-            - 作成された意味のIDリスト（失敗時はNone）
+        Tuple[str, list[str]]: 作成された単語のIDと意味のIDリスト
+
+    Raises:
+        ServiceException: 単語または意味の作成に失敗した場合
     """
     try:
         # 単語をwordsコレクションに追加
-        success, error, word_id = await create_word_doc(word_instance)
-        if not success:
-            print(f"\n単語の作成に失敗しました: {error}")
-            return False, error, None, None
+        word_id = await create_word_doc(word_instance)
 
         # 意味をmeaningsコレクションに追加し、IDを収集
-        print(f"\n単語 '{word_instance.word}' の意味を作成中...")
         meaning_id_list = []
         for meaning in meanings_instance:
             meaning.word_id = word_id
-            success, error, meaning_id = await create_meaning_doc(meaning)
-            if not success:
-                print(f"\n意味の作成に失敗しました: {error}")
-                return False, error, None, None
+            meaning_id = await create_meaning_doc(meaning)
             meaning_id_list.append(meaning_id)
 
         # 単語ドキュメントを更新してmeaning_id_listを設定
         word_instance.meaning_id_list = meaning_id_list
-        success, error = await update_word_doc(word_id, word_instance)
-        if not success:
-            print(f"\n単語の更新に失敗しました: {error}")
-            return False, error, None, None
-        return True, None, word_id, meaning_id_list
+        await update_word_doc(word_id, word_instance)
+
+        return word_id, meaning_id_list
+    except ServiceException:
+        raise
     except Exception as e:
-        error_message = f"単語の作成中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message, None
+        raise ServiceException(
+            f"単語と意味の作成中に予期せぬエラーが発生しました: {str(e)}", "general"
+        )
