@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 
+from src.models.exceptions.service_exception import ServiceException
 from src.models.types import FlashcardResponse, WordResponse
 from src.services.firebase.unit.firestore_flashcard import (
     read_flashcard_docs,
@@ -12,45 +13,39 @@ from src.services.firebase.unit.firestore_word import read_word_doc
 
 async def get_flashcard_list(
     user_id: str,
-) -> Tuple[bool, Optional[str], Optional[FlashcardResponse]]:
+) -> list[FlashcardResponse]:
     """Flashcardを取得する関数
 
     Args:
         user_id (str): ユーザーのID
 
     Returns:
-        Tuple[bool, Optional[str], Optional[FlashcardResponse]]:
-            - 成功/失敗を示すブール値
-            - エラーメッセージ（成功時はNone）
-            - 取得したFlashcardのリスト（失敗時はNone）
+        list[FlashcardResponse]: 取得したFlashcardのリスト
+        
+    Raises:
+        ServiceException: フラッシュカード取得に失敗した場合
     """
     try:
-        user_instance, error = await read_user_doc(user_id)
-        if error:
-            return False, error, None
+        user_instance = await read_user_doc(user_id)
         if not user_instance:
-            return False, "ユーザーが見つかりません", None
+            raise ServiceException("ユーザーが見つかりません", "not_found")
         # 登録単語が0の場合はフロント側で処理（エラーではない）
         if len(user_instance.flashcard_id_list) == 0:
-            return True, None, []
-        flashcards, error = await read_flashcard_docs(user_instance.flashcard_id_list)
-        if error:
-            return False, error, None
+            return []
+        flashcards = await read_flashcard_docs(user_instance.flashcard_id_list)
         if not flashcards:
-            return False, "このユーザーのフラッシュカードが見つかりません", None
+            raise ServiceException("このユーザーのフラッシュカードが見つかりません", "not_found")
         flashcard_responses = []
         for flashcard in flashcards:
-            word, error = await read_word_doc(flashcard.word_id)
-            if error:
-                return False, error, None
+            word = await read_word_doc(flashcard.word_id)
+            if not word:
+                raise ServiceException(f"単語ID {flashcard.word_id} が見つかりません", "not_found")
             word_response = word.to_dict()
             word_response["wordId"] = flashcard.word_id
-            meanings, error = await read_meaning_docs(flashcard.using_meaning_id_list)
-            if error:
-                return False, error, None
-            media, error = await read_media_doc(flashcard.current_media_id)
-            if error:
-                return False, error, None
+            meanings = await read_meaning_docs(flashcard.using_meaning_id_list)
+            media = await read_media_doc(flashcard.current_media_id)
+            if not media:
+                raise ServiceException(f"メディアID {flashcard.current_media_id} が見つかりません", "not_found")
             flashcard = FlashcardResponse(
                 flashcard_id=flashcard.flashcard_id,
                 word=WordResponse.from_dict(word_response),
@@ -61,8 +56,10 @@ async def get_flashcard_list(
                 check_flag=flashcard.check_flag,
             )
             flashcard_responses.append(flashcard)
-        return True, None, flashcard_responses
+        return flashcard_responses
+    except ServiceException:
+        raise
     except Exception as e:
-        error_message = f"単語のセットアップ中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message, None
+        raise ServiceException(
+            f"フラッシュカード一覧の取得中に予期せぬエラーが発生しました: {str(e)}", "general"
+        )

@@ -356,3 +356,11 @@ class WordForExtensionResponseModel(BaseModel):
     word: WordResponseModel
     meanings: List[MeaningResponseModel]
     media: MediaResponseModel
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class SetupMediaResponse:
+    comparison_id: str
+    media_id: str
+    media_urls: List[str]

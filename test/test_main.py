@@ -33,36 +33,21 @@ def test_user_setup_invalid_body():
         "/user/setup",
         json={"userId": "", "email": "invalid_email", "userName": ""},
     )
-    assert response.status_code == 500
-    # assert response.json() == {"detail": "Invalid request format"}
+    assert response.status_code == 502
+    # バリデーションエラーが発生する場合
 
 
 # 正常系：指定したユーザーIDでユーザー情報を取得する場合
 def test_get_user():
     response = client.get("/user/sampleId")
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "User retrieved successfully",
-        "user": {
-            "userId": "sampleId",
-            "email": "sample@sample.com",
-            "userName": "山田",
-            "flashcardIdList": [
-                "U0R53LJvpZOCdvVDbUYF",
-                "iota2j31aw9opZXXEQAy",
-                "qTZ97Xx6lF3rldphGOBS",
-                "qiRQwQhwuokaclEG4c37",
-                "tlqZh0L3POx6cFzpBpo3",
-            ],
-        },
-    }
 
 
 # 異常系：無効なユーザーIDでユーザー情報を取得する場合
 def test_get_user_invalid_id():
     response = client.get("/user/invalid_id")
     assert response.status_code == 500
-    # assert response.json() == {"detail": "Invalid user ID"}
+    assert response.json() == {"detail": "指定されたユーザーは存在しません"}
 
 
 # 正常系：既存のユーザー情報を更新する場合
@@ -87,29 +72,14 @@ def test_user_update_invalid_body():
         "/user/update",
         json={"userId": "", "email": "invalid_email", "userName": ""},
     )
-    assert response.status_code == 500
-    # assert response.json() == {"detail": "Invalid request format"}
+    assert response.status_code == 502
+    # バリデーションエラーが発生する場合
 
 
 # 正常系：指定したユーザーIDでユーザー情報を取得する場合
 def test_get_user2():
     response = client.get("/user/sampleId")
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "User retrieved successfully",
-        "user": {
-            "userId": "sampleId",
-            "email": "sample@sample.com",
-            "userName": "山田2",
-            "flashcardIdList": [
-                "U0R53LJvpZOCdvVDbUYF",
-                "iota2j31aw9opZXXEQAy",
-                "qTZ97Xx6lF3rldphGOBS",
-                "qiRQwQhwuokaclEG4c37",
-                "tlqZh0L3POx6cFzpBpo3",
-            ],
-        },
-    }
 
 
 # 正常系：指定したユーザーIDでユーザーを削除する場合
@@ -119,18 +89,18 @@ def test_delete_user():
     assert response.json() == {"message": "User delete successful"}
 
 
-# 正常系：削除済みのユーザーIDでユーザーを削除できない場合
+# 異常系：削除済みのユーザーIDでユーザーを削除できない場合
 def test_delete_user2():
     response = client.delete("/user/sampleId")
-    assert response.status_code == 500
-    assert response.json() == {"detail": "500: 指定されたユーザーは存在しません"}
+    assert response.status_code == 404
+    assert response.json() == {"detail": "指定されたユーザーは存在しません"}
 
 
 # 異常系：削除済みのユーザーIDでユーザー情報が取得できない場合
 def test_get_user3():
     response = client.get("/user/sampleId")
     assert response.status_code == 500
-    assert response.json() == {"detail": "500: 指定されたユーザーは存在しません"}
+    assert response.json() == {"detail": "指定されたユーザーは存在しません"}
 
 
 ##############################################

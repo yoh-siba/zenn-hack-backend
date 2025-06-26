@@ -1,57 +1,57 @@
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 
 from src.config.settings import db
+from src.models.exceptions import ServiceException
 from src.services.firebase.schemas.comparison_schema import ComparisonSchema
 
 
 async def create_comparison_doc(
     comparison_instance: ComparisonSchema,
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> str:
     try:
         doc_ref = db.collection("comparisons")
         new_doc = doc_ref.add(comparison_instance.to_dict())
-        return True, None, new_doc[1].id
+        return new_doc[1].id
     except Exception as e:
-        error_message = f"比較データの作成中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message, None
+        raise ServiceException(
+            f"比較データの作成中にエラーが発生しました: {str(e)}", "external_api"
+        )
 
 
 async def update_comparison_doc(
     comparison_id: str, comparison_instance: ComparisonSchema
-) -> Tuple[bool, Optional[str]]:
+) -> None:
     try:
         doc_ref = db.collection("comparisons").document(comparison_id)
         doc_ref.update(comparison_instance.to_dict())
-        return True, None
     except Exception as e:
-        error_message = f"比較データの更新中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message
+        raise ServiceException(
+            f"比較データの更新中にエラーが発生しました: {str(e)}", "external_api"
+        )
 
 
 async def read_comparison_doc(
     comparison_id: str,
-) -> Tuple[Optional[ComparisonSchema], Optional[str]]:
+) -> Optional[ComparisonSchema]:
     try:
         doc_ref = db.collection("comparisons").document(comparison_id)
         doc = doc_ref.get()
         if doc.exists:
-            return ComparisonSchema.from_dict(doc.to_dict()), None
-        return None, "指定された比較データが見つかりません"
+            return ComparisonSchema.from_dict(doc.to_dict())
+        return None
     except Exception as e:
-        error_message = f"比較データの読み込み中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return None, error_message
+        raise ServiceException(
+            f"比較データの読み込み中にエラーが発生しました: {str(e)}", "external_api"
+        )
 
 
 async def read_comparison_docs(
     comparison_ids: list[str],
-) -> Tuple[list[ComparisonSchema], Optional[str]]:
+) -> list[ComparisonSchema]:
     try:
         if not comparison_ids:
-            return [], "比較データIDが指定されていません"
+            raise ServiceException("比較データIDが指定されていません", "validation")
 
         docs = (
             await db.collection("comparisons")
@@ -61,21 +61,24 @@ async def read_comparison_docs(
         comparisons = []
         for doc in docs:
             comparisons.append(ComparisonSchema.from_dict(doc.to_dict()))
-        return comparisons, None
+        return comparisons
+    except ServiceException:
+        raise  # 再発生
     except Exception as e:
-        error_message = f"比較データの一括読み込み中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return [], error_message
+        raise ServiceException(
+            f"比較データの一括読み込み中にエラーが発生しました: {str(e)}",
+            "external_api",
+        )
+
 
 async def update_comparison_doc_on_is_selected_new(
     comparison_id: str, is_selected_new: str
-) -> Tuple[bool, Optional[str]]:
+) -> None:
     try:
         now = datetime.now()
         doc_ref = db.collection("comparisons").document(comparison_id)
         doc_ref.update({"isSelectedNew": is_selected_new, "updatedAt": now})
-        return True, None
     except Exception as e:
-        error_message = f"比較データの更新中にエラーが発生しました: {str(e)}"
-        print(f"\n{error_message}")
-        return False, error_message
+        raise ServiceException(
+            f"比較データの更新中にエラーが発生しました: {str(e)}", "external_api"
+        )

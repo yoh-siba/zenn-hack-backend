@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel, ValidationError
 
+from src.models.exceptions import ServiceException
 from src.models.types import (
     AddUsingFlashcardRequest,
     CompareMediasRequest,
@@ -22,6 +23,7 @@ from src.models.types import (
     UserResponseModel,
     WordForExtensionResponseModel,
 )
+from src.services.add_using_flashcard import add_using_flashcard
 from src.services.compare_medias import compare_medias
 from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
 from src.services.firebase.unit.firestore_flashcard import (
@@ -39,7 +41,6 @@ from src.services.firebase.unit.firestore_user import (
     delete_user_doc,
     read_user_doc,
     update_user_doc,
-    update_user_doc_add_using_flashcard,
 )
 from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
@@ -49,6 +50,16 @@ from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 
 app = FastAPI()
+
+# エラータイプとHTTPステータスコードのマッピング
+ERROR_TYPE_TO_HTTP_STATUS = {
+    "not_found": 404,
+    "validation": 400,
+    "permission": 403,
+    "conflict": 409,
+    "external_api": 502,
+    "general": 500,
+}
 
 
 @app.get("/")
@@ -68,9 +79,7 @@ class GetUserResponseModel(BaseModel):
 )
 async def get_user_endpoint(userId: str):
     try:
-        user_instance, error = await read_user_doc(userId)
-        if error:
-            raise HTTPException(status_code=500, detail=error)
+        user_instance = await read_user_doc(userId)
         if not user_instance:
             raise HTTPException(
                 status_code=404, detail="指定されたユーザーは存在しません"
@@ -81,6 +90,9 @@ async def get_user_endpoint(userId: str):
             "message": "User retrieved successfully",
             "user": UserResponse.from_dict(user_response).to_dict(),
         }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -106,11 +118,11 @@ async def setup_user_endpoint(
 ):
     try:
         user = SetUpUserRequest.from_dict(_user)
-        success, error = await setup_user(user)
-        if success:
-            return {"message": "User setup successful"}
-        else:
-            raise HTTPException(status_code=500, detail=error)
+        await setup_user(user)
+        return {"message": "User setup successful"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -138,11 +150,11 @@ async def update_user_endpoint(
 ):
     try:
         user = UpdateUserRequest.from_dict(_user)
-        success, error = await update_user_doc(user_id=user.user_id, user_instance=user)
-        if success:
-            return {"message": "User update successful", "userId": user.user_id}
-        else:
-            raise HTTPException(status_code=500, detail=error)
+        await update_user_doc(user_id=user.user_id, user_instance=user)
+        return {"message": "User update successful", "userId": user.user_id}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -169,13 +181,11 @@ async def add_using_flashcard_endpoint(
 ):
     try:
         user = AddUsingFlashcardRequest.from_dict(_user)
-        success, error = await update_user_doc_add_using_flashcard(
-            user_id=user.user_id, flashcard_id=user.flashcard_id
-        )
-        if success:
-            return {"message": "User update successful"}
-        else:
-            raise HTTPException(status_code=500, detail=error)
+        await add_using_flashcard(user.user_id, user.flashcard_id)
+        return {"message": "User update successful"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -194,12 +204,12 @@ class DeleteUserResponseModel(BaseModel):
 async def delete_user_endpoint(userId: str):
     try:
         user_id = userId
-        success, error = await delete_user_doc(user_id=user_id)
-        if success:
-            # TODO: ユーザーの使用したFlashcardを削除する処理を実装
-            return {"message": "User delete successful"}
-        else:
-            raise HTTPException(status_code=500, detail=error)
+        await delete_user_doc(user_id=user_id)
+        # TODO: ユーザーの使用したFlashcardを削除する処理を実装
+        return {"message": "User delete successful"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -219,16 +229,14 @@ class GetFlashcardsResponseModel(BaseModel):
 async def get_flashcards_endpoint(userId: str):
     try:
         user_id = userId
-        success, error, flashcard_responses = await get_flashcard_list(user_id)
-        if not success:
-            if error == "ユーザーが見つかりません":
-                raise HTTPException(status_code=404, detail=error)
-            else:
-                raise HTTPException(status_code=500, detail=error)
+        flashcard_responses = await get_flashcard_list(user_id)
         return {
             "message": "Flashcards retrieved successfully",
             "flashcards": [flashcard.to_dict() for flashcard in flashcard_responses],
         }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -248,14 +256,14 @@ async def update_check_flag_endpoint(
     try:
         # リクエストボディの型を確認
         update_flag_request = UpdateFlagRequest.from_dict(_request)
-        success, error = await update_flashcard_doc_on_check_flag(
+        await update_flashcard_doc_on_check_flag(
             flashcard_id=update_flag_request.flashcard_id,
             check_flag=update_flag_request.check_flag,
         )
-        if success:
-            return {"message": "Check flag updated successfully"}
-        else:
-            raise HTTPException(status_code=400, detail=error)
+        return {"message": "Check flag updated successfully"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -274,15 +282,13 @@ async def update_flashcard_memo_endpoint(
 ):
     try:
         update_memo_request = UpdateMemoRequest.from_dict(_request)
-        success, error = await update_flashcard_doc_on_memo(
+        await update_flashcard_doc_on_memo(
             flashcard_id=update_memo_request.flashcard_id, memo=update_memo_request.memo
         )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {"message": "Flashcard memo update successful"}
-        else:
-            raise HTTPException(status_code=500, detail="フラッシュカードの更新に失敗しました")
+        return {"message": "Flashcard memo update successful"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -301,16 +307,14 @@ async def update_using_meaning_id_list_endpoint(
 ):
     try:
         create_meaning_request = UpdateUsingMeaningsRequest.from_dict(_request)
-        success, error = await update_flashcard_doc_on_using_meaning_id_list(
+        await update_flashcard_doc_on_using_meaning_id_list(
             flashcard_id=create_meaning_request.flashcard_id,
             using_meaning_id_list=create_meaning_request.using_meaning_id_list,
         )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {"message": "Using meaning ID list updated successfully"}
-        else:
-            raise HTTPException(status_code=500, detail="意味IDリストの更新に失敗しました")
+        return {"message": "Using meaning ID list updated successfully"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -353,21 +357,16 @@ async def setup_media_endpoint(
 ):
     try:
         create_media_request = CreateMediaRequest.from_dict(_request)
-        success, error, media_id, comparison_id, media_url_list = await setup_media(
-            create_media_request=create_media_request
-        )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {
-                "message": "Flashcard comparison ID updated successfully",
-                "comparisonId": comparison_id,
-                "newMediaId": media_id,
-                "newMediaUrls": media_url_list,
-            }
-        else:
-            raise HTTPException(status_code=500, detail="メディアの作成に失敗しました")
-
+        setup_result = await setup_media(create_media_request=create_media_request)
+        return {
+            "message": "Flashcard comparison ID updated successfully",
+            "comparisonId": setup_result.comparison_id,
+            "newMediaId": setup_result.media_id,
+            "newMediaUrls": setup_result.media_urls,
+        }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -387,17 +386,14 @@ class GetNoComparedMediasResponseModel(BaseModel):
 async def get_comparison_endpoint(userId: str):
     try:
         user_id = userId
-        success, error, media_list = await get_not_compared_media_list(user_id=user_id)
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {
-                "message": "Not compared medias retrieved successfully",
-                "comparisons": [media.to_dict() for media in media_list],
-            }
-        else:
-            raise HTTPException(status_code=500, detail="未比較メディアの取得に失敗しました")
-
+        media_list = await get_not_compared_media_list(user_id=user_id)
+        return {
+            "message": "Not compared medias retrieved successfully",
+            "comparisons": [media.to_dict() for media in media_list],
+        }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -428,16 +424,11 @@ async def update_comparison_endpoint(
     try:
         compare_medias_request = CompareMediasRequest.from_dict(_request)
         print(f"Received comparison request: {compare_medias_request}")
-        success, error = await compare_medias(
-            compare_medias_request=compare_medias_request
-        )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {"message": "Flashcard comparison ID updated successfully"}
-        else:
-            raise HTTPException(status_code=500, detail="比較結果の更新に失敗しました")
-
+        await compare_medias(compare_medias_request=compare_medias_request)
+        return {"message": "Flashcard comparison ID updated successfully"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -457,24 +448,25 @@ class GetAllMeaningsResponseModel(BaseModel):
 async def get_meanings_endpoint(wordId: str):
     try:
         word_id = wordId
-        word_instance, error = await read_word_doc(word_id=word_id)
-        if error:
-            raise HTTPException(status_code=500, detail=error)
+        word_instance = await read_word_doc(word_id=word_id)
+        if not word_instance:
+            raise HTTPException(
+                status_code=404, detail="指定された単語が見つかりません"
+            )
         if len(word_instance.meaning_id_list) == 0:
             raise HTTPException(
                 status_code=404, detail="この単語には意味が登録されていません。"
             )
-        meanings, error = await read_meaning_docs(
-            meaning_ids=word_instance.meaning_id_list
-        )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
+        meanings = await read_meaning_docs(meaning_ids=word_instance.meaning_id_list)
         if not meanings:
             raise HTTPException(status_code=404, detail="意味が見つかりません")
         return {
             "message": "Meanings retrieved successfully",
             "meanings": [meaning.to_dict() for meaning in meanings],
         }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -492,14 +484,14 @@ class GetTemplateResponseModel(BaseModel):
 )
 async def get_template_endpoint():
     try:
-        template_list, error = await read_prompt_template_docs()
-        if error:
-            raise HTTPException(status_code=500, detail=error)
+        template_list = await read_prompt_template_docs()
         return {
             "message": "User templates retrieved successfully",
-            "templates": [template_list.to_dict() for template_list in template_list],
+            "templates": [template.to_dict() for template in template_list],
         }
-
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -537,19 +529,16 @@ async def create_template_endpoint(
             created_at=now.isoformat(),
             updated_at=now.isoformat(),
         )
-        success, error, template_id = await create_prompt_template_doc(
+        template_id = await create_prompt_template_doc(
             template_instance=template_instance
         )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {
-                "message": "Template created successfully",
-                "templateId": template_id,
-            }
-        else:
-            raise HTTPException(status_code=500, detail="テンプレートの作成に失敗しました")
-
+        return {
+            "message": "Template created successfully",
+            "templateId": template_id,
+        }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -587,18 +576,16 @@ async def update_template_endpoint(
             created_at=now.isoformat(),
             updated_at=now.isoformat(),
         )
-        success, error = await update_prompt_template_doc(
+        await update_prompt_template_doc(
             template_id=update_template_request.template_id,
             template_instance=template_instance,
         )
-        if error:
-            raise HTTPException(status_code=500, detail=error)
-        if success:
-            return {
-                "message": "Template updated successfully",
-            }
-        else:
-            raise HTTPException(status_code=500, detail="テンプレートの更新に失敗しました")
+        return {
+            "message": "Template updated successfully",
+        }
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
@@ -612,12 +599,11 @@ async def update_template_endpoint(
 )
 async def get_word_for_extension_endpoint(word: str):
     try:
-        success, error, word_response = await get_word_for_extension(word)
-        if not success:
-            raise HTTPException(status_code=500, detail=error)
-        if not word_response:
-            raise HTTPException(status_code=404, detail="Word not found")
+        word_response = await get_word_for_extension(word)
         return word_response.to_dict()
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
     except ValidationError as ve:
         raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
     except Exception as e:
