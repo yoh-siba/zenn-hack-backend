@@ -179,7 +179,7 @@ class CompareMediasRequest:
 @dataclass
 class CreateTemplateRequest:
     generation_type: str
-    target: str
+    target: Optional[str]
     pre_text: str
 
 
