@@ -25,7 +25,16 @@ async def update_prompt_template_doc(
 ) -> None:
     try:
         doc_ref = db.collection("prompt_templates").document(template_id)
-        doc_ref.update(template_instance.to_dict())
+        existing_doc = doc_ref.get()
+        if existing_doc.exists:
+            updated_data = template_instance.to_dict()
+            updated_data.pop("createdAt", None)  # createdAtを削除
+            doc_ref.update(updated_data)
+        else:
+            raise ServiceException(
+                "指定されたプロンプトテンプレートが存在しません。",
+                "not_found",
+            )
     except Exception as e:
         raise ServiceException(
             f"プロンプトテンプレートの更新中にエラーが発生しました: {str(e)}",
