@@ -35,8 +35,9 @@ def request_gemini_text(_contents: str) -> None:
         _contents (str): コンテンツ
     """
     try:
-        model = genai_client.GenerativeModel(GOOGLE_GEMINI_MODEL)
-        response = model.generate_content(_contents)
+        response = genai_client.models.generate_content(
+            model=GOOGLE_GEMINI_MODEL, contents=_contents
+        )
         print(response.text)
     except Exception as e:
         print(f"エラーが発生しました: {e}")
