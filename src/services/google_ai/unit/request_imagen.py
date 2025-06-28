@@ -11,7 +11,7 @@ def request_imagen_text_to_image(
     _prompt: str,
     _number_of_images: int,
     _aspect_ratio: str,
-    _person_generation: Literal["DONT_ALLOW", "ALLOW_ADULT"],
+    _person_generation: Literal["DONT_ALLOW", "ALLOW_ALL"],
 ) -> list[Image.Image]:
     """
     args:

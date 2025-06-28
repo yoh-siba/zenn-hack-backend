@@ -127,7 +127,7 @@ async def setup_default_flashcard(
             generated_prompt.generated_prompt,
             _number_of_images=1,
             _aspect_ratio="1:1",  # アスペクト比を1:1に設定
-            _person_generation="ALLOW_ADULT",  # 人物生成を許可しない
+            _person_generation="ALLOW_ALL",  # 人物生成を許可しない
         )
 
         image_url_list = []
@@ -194,9 +194,7 @@ async def setup_default_flashcard(
             updated_at=word_instance.updated_at,
         )
 
-        await update_media_doc(
-            media_id=media_id, media_instance=media_instance
-        )
+        await update_media_doc(media_id=media_id, media_instance=media_instance)
 
         return flashcard_id
 

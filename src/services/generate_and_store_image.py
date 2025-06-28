@@ -7,7 +7,7 @@ from src.services.google_ai.unit.request_imagen import request_imagen_text_to_im
 
 async def generate_and_store_image(
     _prompt: str,
-    _person_generation: Literal["DONT_ALLOW", "ALLOW_ADULT"],
+    _person_generation: Literal["DONT_ALLOW", "ALLOW_ALL"],
     _word: str,
     _pos: str,
     _meaning: str,
@@ -17,7 +17,7 @@ async def generate_and_store_image(
 
     Args:
         _prompt (str): 画像生成用のプロンプト
-        _person_generation (Literal["DONT_ALLOW", "ALLOW_ADULT"]): 人物生成の許可設定
+        _person_generation (Literal["DONT_ALLOW", "ALLOW_ALL"]): 人物生成の許可設定
         _word (str): 単語
         _pos (str): 品詞
         _meaning (str): 意味
@@ -77,7 +77,9 @@ if __name__ == "__main__":
                 f"単語 '{test_word}' のセットアップに成功しました。生成されたflascard_id: {flascard_id}"
             )
         except ServiceException as se:
-            print(f"単語 '{test_word}' のセットアップに失敗しました。エラー: {se.message}")
+            print(
+                f"単語 '{test_word}' のセットアップに失敗しました。エラー: {se.message}"
+            )
         except Exception as e:
             print(f"予期せぬエラーが発生しました: {str(e)}")
 

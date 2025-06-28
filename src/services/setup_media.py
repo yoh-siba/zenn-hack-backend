@@ -1,6 +1,5 @@
 from datetime import datetime
 from io import BytesIO
-from typing import Tuple
 
 import requests
 from PIL import Image
@@ -102,7 +101,7 @@ async def setup_media(
                 _prompt=generated_prompt,
                 _number_of_images=1,
                 _aspect_ratio="1:1",  # アスペクト比を1:1に設定
-                _person_generation="ALLOW_ADULT"
+                _person_generation="ALLOW_ALL"
                 if create_media_request.allow_generating_person
                 else "DONT_ALLOW",  # 人物生成を許可しない
             )
@@ -131,7 +130,7 @@ async def setup_media(
             generated_video = (
                 request_text_to_video(
                     _prompt=generated_prompt,
-                    _person_generation="ALLOW_ADULT"
+                    _person_generation="ALLOW_ALL"
                     if create_media_request.allow_generating_person
                     else "DONT_ALLOW",
                 )
@@ -139,7 +138,7 @@ async def setup_media(
                 else request_image_to_video(
                     _prompt=generated_prompt,
                     _image_url=create_media_request.input_media_urls[0],
-                    _person_generation="ALLOW_ADULT"
+                    _person_generation="ALLOW_ALL"
                     if create_media_request.allow_generating_person
                     else "DONT_ALLOW",
                 )
@@ -151,7 +150,7 @@ async def setup_media(
             try:
                 processed_video_bytes = reduce_fps_to_10(generated_video)
                 generated_medias = [processed_video_bytes]
-            except Exception as e:
+            except Exception:
                 # エラー時は元の動画を使用
                 generated_medias = [generated_video]
         else:
@@ -213,9 +212,7 @@ async def setup_media(
             flashcard_id=create_media_request.flashcard_id, comparison_id=comparison_id
         )
         return SetupMediaResponse(
-            comparison_id=comparison_id,
-            media_id=media_id,
-            media_urls=media_url_list
+            comparison_id=comparison_id, media_id=media_id, media_urls=media_url_list
         )
     except ServiceException:
         raise  # 再発生

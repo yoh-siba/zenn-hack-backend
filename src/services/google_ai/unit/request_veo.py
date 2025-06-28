@@ -11,7 +11,7 @@ from src.config.settings import GOOGLE_VEO_MODEL, genai_client
 
 def request_text_to_video(
     _prompt: str,
-    _person_generation: Literal["DONT_ALLOW", "ALLOW_ADULT"],
+    _person_generation: Literal["DONT_ALLOW", "ALLOW_ALL"],
 ) -> types.Video:
     """
     args:
@@ -54,7 +54,7 @@ def request_text_to_video(
 def request_image_to_video(
     _prompt: str,
     _image_url: str,
-    _person_generation: Literal["DONT_ALLOW", "ALLOW_ADULT"],
+    _person_generation: Literal["DONT_ALLOW", "ALLOW_ALL"],
 ) -> types.Video:
     """
     args:
