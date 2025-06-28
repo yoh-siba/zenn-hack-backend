@@ -133,7 +133,7 @@ class UpdateMemoRequest:
 class CreateMediaRequest:
     flashcard_id: str
     old_media_id: Optional[str]
-    meaning_id: str
+    meaning_id: Optional[str]
     pos: PartOfSpeech
     word: str
     translation: str
@@ -259,7 +259,7 @@ class MeaningResponse:
 @dataclass
 class MediaResponse:
     media_id: str
-    meaning_id: str
+    meaning_id: Optional[str]
     media_urls: List[str]
 
 
@@ -296,7 +296,7 @@ class MeaningResponseModel(BaseModel):
 @dataclass
 class MediaResponseModel(BaseModel):
     mediaId: str
-    meaningId: str
+    meaningId: Optional[str]
     mediaUrls: List[str]
 
 
