@@ -201,6 +201,12 @@ class UpdateUsingMeaningsRequest:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class CreateDefaultFlashcardRequest:
+    word: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class ApplyAddMeaningRequest:
     word_id: str
     translation: str

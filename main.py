@@ -7,6 +7,7 @@ from src.models.exceptions import ServiceException
 from src.models.types import (
     AddUsingFlashcardRequest,
     CompareMediasRequest,
+    CreateDefaultFlashcardRequest,
     CreateMediaRequest,
     CreateTemplateRequest,
     FlashcardResponseModel,
@@ -46,6 +47,7 @@ from src.services.firebase.unit.firestore_word import read_word_doc
 from src.services.get_flashcard_list import get_flashcard_list
 from src.services.get_not_compared_media_list import get_not_compared_media_list
 from src.services.get_word_for_extension import get_word_for_extension
+from src.services.setup_default_flashcard import setup_default_flashcard
 from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 
@@ -312,6 +314,36 @@ async def update_using_meaning_id_list_endpoint(
             using_meaning_id_list=create_meaning_request.using_meaning_id_list,
         )
         return {"message": "Using meaning ID list updated successfully"}
+    except ServiceException as se:
+        status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
+        raise HTTPException(status_code=status_code, detail=se.message)
+    except ValidationError as ve:
+        raise HTTPException(status_code=422, detail=f"Invalid request format: {ve}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class CreateDefaultFlashcardResponseModel(BaseModel):
+    message: str
+
+
+@app.post(
+    "/flashcard/create",
+    description="デフォルトフラッシュカード作成用エンドポイント",
+    response_model=CreateDefaultFlashcardResponseModel,
+)
+async def create_default_flashcard_endpoint(
+    _request: dict = Body(
+        ...,
+        example={
+            "word": "example",
+        },
+    ),
+):
+    try:
+        create_flashcard_request = CreateDefaultFlashcardRequest.from_dict(_request)
+        await setup_default_flashcard(create_flashcard_request.word)
+        return {"message": "Default flashcard created successfully"}
     except ServiceException as se:
         status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
         raise HTTPException(status_code=status_code, detail=se.message)
