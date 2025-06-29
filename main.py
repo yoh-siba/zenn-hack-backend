@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import Body, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 
 from src.models.exceptions import ServiceException
@@ -53,6 +54,15 @@ from src.services.setup_user import setup_user
 
 app = FastAPI()
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://zenn-hack-backend.web.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # エラータイプとHTTPステータスコードのマッピング
 ERROR_TYPE_TO_HTTP_STATUS = {
     "not_found": 404,
@@ -62,7 +72,6 @@ ERROR_TYPE_TO_HTTP_STATUS = {
     "external_api": 502,
     "general": 500,
 }
-
 
 @app.get("/")
 async def root(description: str = "サーバーの稼働確認用エンドポイント"):
