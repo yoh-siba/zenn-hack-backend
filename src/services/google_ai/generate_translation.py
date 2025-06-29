@@ -42,7 +42,8 @@ def generate_translation(_content: str) -> list[MeaningSchema]:
         result.sort(key=lambda x: x.rank)
         return result
     except Exception as e:
-        print(e)
+        print(f"翻訳生成エラー: {e}")
+        print(f"エラータイプ: {type(e).__name__}")
         raise ValueError("翻訳の生成に失敗しました") from e
 
 

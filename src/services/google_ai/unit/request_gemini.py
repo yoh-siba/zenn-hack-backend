@@ -25,7 +25,8 @@ def request_gemini_json(
         )
         return response.parsed, token_info
     except Exception as e:
-        print(e)
+        print(f"Gemini API リクエストエラー: {e}")
+        print(f"エラータイプ: {type(e).__name__}")
         return None, None
 
 

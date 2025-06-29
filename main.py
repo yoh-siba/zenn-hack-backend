@@ -73,6 +73,7 @@ ERROR_TYPE_TO_HTTP_STATUS = {
     "general": 500,
 }
 
+
 @app.get("/")
 async def root(description: str = "サーバーの稼働確認用エンドポイント"):
     return {"message": "Hello World"}
@@ -334,6 +335,7 @@ async def update_using_meaning_id_list_endpoint(
 
 class CreateDefaultFlashcardResponseModel(BaseModel):
     message: str
+    flashcardId: str
 
 
 @app.post(
@@ -351,8 +353,14 @@ async def create_default_flashcard_endpoint(
 ):
     try:
         create_flashcard_request = CreateDefaultFlashcardRequest.from_dict(_request)
-        await setup_default_flashcard(create_flashcard_request.word)
-        return {"message": "Default flashcard created successfully"}
+        print(
+            f"Received request to create default flashcard for word: {create_flashcard_request.word}"
+        )
+        flashcard_id = await setup_default_flashcard(create_flashcard_request.word)
+        return {
+            "message": "Default flashcard created successfully",
+            "flashcardId": flashcard_id,
+        }
     except ServiceException as se:
         status_code = ERROR_TYPE_TO_HTTP_STATUS.get(se.error_type, 500)
         raise HTTPException(status_code=status_code, detail=se.message)

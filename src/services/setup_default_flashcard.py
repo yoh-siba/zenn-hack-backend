@@ -38,8 +38,16 @@ async def setup_default_flashcard(
         is_exist = await read_word_id_by_word(word)
         if is_exist:
             raise ServiceException(f"単語 '{word}' は既に存在します", "conflict")
+
         # WordsAPIから単語情報を取得
-        words_api_response: WordsAPIResponse = await request_words_api(word)
+        try:
+            words_api_response: WordsAPIResponse = await request_words_api(word)
+        except Exception:
+            raise ServiceException(
+                f"意味の取得に失敗しました。入力された英単語には対応できません。単語: '{word}'",
+                "external_api",
+            )
+        print(f"WordsAPI response for word '{word}': {words_api_response}")
 
         # MeaningSchema用のコンテンツを作成
         content = f"""
@@ -70,7 +78,7 @@ async def setup_default_flashcard(
         meanings_instance = generate_translation(content)
         if meanings_instance is None:
             raise ValueError("MeaningsSchema is None")
-
+        print(f"Generated meanings for word '{word}': {meanings_instance}")
         content = f"""
         英単語「{word}」について、解説文とコアミーニングを生成してください。
         explanationには、以下に示すような解説文を生成してください。
@@ -78,7 +86,7 @@ async def setup_default_flashcard(
     
 
         ### 解説文の説明
-        以下のいずれかで50字程度の文章にして。
+        以下の優先順位で50字程度の文章にして。
         1. 単語の覚え方（例：swimは「スイスイ泳ぐ」と覚えよう）
         2. その単語がよく使われるシチュエーション、類義語などの豆知識
         3. 単語の語源や由来
@@ -95,7 +103,7 @@ async def setup_default_flashcard(
         word_instance = generate_explanation_and_core_meaning(word, content)
         if word_instance is None:
             raise ValueError("WordSchema is None")
-
+        print(f"Generated word instance for '{word}': {word_instance}")
         # WordとMeaningをFirestoreに保存
 
         word_id, meaning_id_list = await create_word_and_meaning(
@@ -211,9 +219,55 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
-        # テスト用の単語
-        # test_word_list = ["account", "apple", "challenge", "issue", "sound"]
-        test_word_list = ["write"]
+        # 学習用の単語（30単語）
+        # test_word_list = [
+        #     # 基本単語
+        #     "apple",
+        #     "book",
+        #     "cat",
+        #     "dog",
+        #     "house",
+        #     "water",
+        #     "food",
+        #     "time",
+        #     "work",
+        #     "family",
+        #     # 中級単語
+        #     "challenge",
+        #     "opportunity",
+        #     "environment",
+        #     "communication",
+        #     "education",
+        #     "experience",
+        #     "knowledge",
+        #     "research",
+        #     "decision",
+        #     "solution",
+        #     # 上級単語
+        #     "achievement",
+        #     "responsibility",
+        #     "investigation",
+        #     "development",
+        #     "collaboration",
+        #     "perspective",
+        #     "innovation",
+        #     "sustainable",
+        #     "significant",
+        #     "magnificent",
+        #     # 動詞
+        #     "create",
+        #     "analyze",
+        #     "improve",
+        #     "establish",
+        #     "examine",
+        #     # 形容詞
+        #     "incredible",
+        #     "essential",
+        #     "effective",
+        #     "comprehensive",
+        #     "extraordinary",
+        # ]
+        test_word_list = ["candidate"]
         for test_word in test_word_list:
             try:
                 flashcard_id = await setup_default_flashcard(test_word)

@@ -31,7 +31,7 @@ def generate_explanation_and_core_meaning(_word: str, _content: str) -> WordSche
         return result
     except Exception as e:
         print(e)
-        raise ValueError("翻訳の生成に失敗しました") from e
+        raise ValueError("解説の生成に失敗しました") from e
 
 
 if __name__ == "__main__":
