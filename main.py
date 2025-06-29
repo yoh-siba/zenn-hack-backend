@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import Body, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
 
 from src.models.types import (
@@ -45,6 +46,15 @@ from src.services.setup_media import setup_media
 from src.services.setup_user import setup_user
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://zenn-hack-backend.web.app"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
