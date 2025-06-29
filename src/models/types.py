@@ -109,6 +109,13 @@ class UpdateUserRequest:
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
+class AddUsingFlashcardRequest:
+    user_id: str
+    flashcard_id: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
 class UpdateFlagRequest:
     flashcard_id: str
     check_flag: bool
@@ -126,7 +133,7 @@ class UpdateMemoRequest:
 class CreateMediaRequest:
     flashcard_id: str
     old_media_id: Optional[str]
-    meaning_id: str
+    meaning_id: Optional[str]
     pos: PartOfSpeech
     word: str
     translation: str
@@ -172,7 +179,7 @@ class CompareMediasRequest:
 @dataclass
 class CreateTemplateRequest:
     generation_type: str
-    target: str
+    target: Optional[str]
     pre_text: str
 
 
@@ -252,7 +259,7 @@ class MeaningResponse:
 @dataclass
 class MediaResponse:
     media_id: str
-    meaning_id: str
+    meaning_id: Optional[str]
     media_urls: List[str]
 
 
@@ -289,7 +296,7 @@ class MeaningResponseModel(BaseModel):
 @dataclass
 class MediaResponseModel(BaseModel):
     mediaId: str
-    meaningId: str
+    meaningId: Optional[str]
     mediaUrls: List[str]
 
 
@@ -317,7 +324,7 @@ class TemplatesResponse:
 class TemplatesResponseModel:
     templateId: str
     generationType: str
-    target: str
+    target: Optional[str]
     preText: str
 
 
@@ -330,3 +337,30 @@ class CreateTemplateResponse:
 @dataclass
 class CreateTemplateResponseModel:
     templateId: str
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class WordForExtensionResponse:
+    message: str
+    flashcard_id: str
+    word: WordResponse
+    meanings: List[MeaningResponse]
+    media: MediaResponse
+
+
+@dataclass
+class WordForExtensionResponseModel(BaseModel):
+    message: str
+    flashcardId: str
+    word: WordResponseModel
+    meanings: List[MeaningResponseModel]
+    media: MediaResponseModel
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class SetupMediaResponse:
+    comparison_id: str
+    media_id: str
+    media_urls: List[str]

@@ -9,7 +9,7 @@ from dataclasses_json import LetterCase, dataclass_json
 @dataclass
 class MediaSchema:
     flashcard_id: str
-    meaning_id: str
+    meaning_id: Optional[str]
     media_urls: List[str]
     generation_type: str
     template_id: Optional[str]

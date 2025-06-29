@@ -1,68 +1,73 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 from src.config.settings import db
+from src.models.exceptions import ServiceException
 from src.models.types import TemplatesResponse
 from src.services.firebase.schemas.prompt_template_schema import PromptTemplateSchema
 
 
 async def create_prompt_template_doc(
     template_instance: PromptTemplateSchema,
-) -> Tuple[bool, Optional[str], Optional[str]]:
+) -> str:
     try:
         doc_ref = db.collection("prompt_templates")
         new_doc = doc_ref.add(template_instance.to_dict())
-        return True, None, new_doc[1].id
+        return new_doc[1].id
     except Exception as e:
-        error_message = (
-            f"プロンプトテンプレートの作成中にエラーが発生しました: {str(e)}"
+        raise ServiceException(
+            f"プロンプトテンプレートの作成中にエラーが発生しました: {str(e)}",
+            "external_api",
         )
-        print(f"\n{error_message}")
-        return False, error_message, None
 
 
 async def update_prompt_template_doc(
     template_id: str, template_instance: PromptTemplateSchema
-) -> Tuple[bool, Optional[str]]:
+) -> None:
     try:
         doc_ref = db.collection("prompt_templates").document(template_id)
-        doc_ref.update(template_instance.to_dict())
-        return True, None
+        existing_doc = doc_ref.get()
+        if existing_doc.exists:
+            updated_data = template_instance.to_dict()
+            updated_data.pop("createdAt", None)  # createdAtを削除
+            doc_ref.update(updated_data)
+        else:
+            raise ServiceException(
+                "指定されたプロンプトテンプレートが存在しません。",
+                "not_found",
+            )
     except Exception as e:
-        error_message = (
-            f"プロンプトテンプレートの更新中にエラーが発生しました: {str(e)}"
+        raise ServiceException(
+            f"プロンプトテンプレートの更新中にエラーが発生しました: {str(e)}",
+            "external_api",
         )
-        print(f"\n{error_message}")
-        return False, error_message
 
 
 async def read_prompt_template_doc(
     template_id: str,
-) -> Tuple[Optional[PromptTemplateSchema], Optional[str]]:
+) -> Optional[PromptTemplateSchema]:
     try:
         doc_ref = db.collection("prompt_templates").document(template_id)
         doc = doc_ref.get()
         if doc.exists:
-            return PromptTemplateSchema.from_dict(doc.to_dict()), None
-        return None, "指定されたプロンプトテンプレートが見つかりません"
+            return PromptTemplateSchema.from_dict(doc.to_dict())
+        return None
     except Exception as e:
-        error_message = (
-            f"プロンプトテンプレートの読み込み中にエラーが発生しました: {str(e)}"
+        raise ServiceException(
+            f"プロンプトテンプレートの読み込み中にエラーが発生しました: {str(e)}",
+            "external_api",
         )
-        print(f"\n{error_message}")
-        return None, error_message
 
 
-async def read_prompt_template_docs() -> Tuple[list[TemplatesResponse], Optional[str]]:
+async def read_prompt_template_docs() -> list[TemplatesResponse]:
     try:
         docs = db.collection("prompt_templates").get()
         templates = [
             TemplatesResponse.from_dict({**doc.to_dict(), "template_id": doc.id})
             for doc in docs
         ]
-        return templates, None
+        return templates
     except Exception as e:
-        error_message = (
-            f"プロンプトテンプレートの一括読み込み中にエラーが発生しました: {str(e)}"
+        raise ServiceException(
+            f"プロンプトテンプレートの一括読み込み中にエラーが発生しました: {str(e)}",
+            "external_api",
         )
-        print(f"\n{error_message}")
-        return [], error_message
