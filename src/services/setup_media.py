@@ -186,13 +186,13 @@ async def setup_media(
                 # 動画の場合
                 media_url = await create_video_url_from_video(
                     media,
-                    f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.mp4",
+                    f"{create_media_request.word}/{create_media_request.flashcard_id}/{media_id}.mp4",
                 )
             else:
                 # 画像の場合
                 media_url = await create_image_url_from_image(
                     media,
-                    f"{create_media_request.word}/{create_media_request.meaning_id}/{create_media_request.flashcard_id}/{media_id}.png",
+                    f"{create_media_request.word}/{create_media_request.flashcard_id}/{media_id}.png",
                 )
             media_url_list.append(media_url)
         await update_media_doc_on_media_urls(
